@@ -1,0 +1,371 @@
+@import "tailwindcss";
+
+/* ── Dark-only colour palette (CSS variables) ──────────────────── */
+:root {
+  --bg: #0b0f1a;
+  --surface: #141929;
+  --surface-plus: #1e2540;
+  --gold: #c9a84c;
+  --gold-muted: #a0813a;
+  --green: #2a6049;
+  --text: #ddd6c8;
+  --muted: #7a7d8a;
+  --border: #252b3e;
+}
+
+/* ── @theme — bridges CSS vars + adds semantic tokens ──────────── */
+@theme inline {
+  /* Colour tokens */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-plus: var(--surface-plus);
+  --color-gold: var(--gold);
+  --color-gold-muted: var(--gold-muted);
+  --color-green: var(--green);
+  --color-harf-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+
+  /* Font families */
+  --font-amiri: "Amiri", serif;
+  --font-rubik: "Rubik", sans-serif;
+
+  /* ── Fluid typography (clamp-based — eliminates breakpoint jumps) */
+  --text-fluid-xs: clamp(0.64rem, 0.58rem + 0.3vw, 0.75rem);
+  --text-fluid-sm: clamp(0.8rem, 0.74rem + 0.3vw, 0.875rem);
+  --text-fluid-base: clamp(1rem, 0.94rem + 0.3vw, 1.0625rem);
+  --text-fluid-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+  --text-fluid-xl: clamp(1.25rem, 1rem + 1.25vw, 1.75rem);
+  --text-fluid-2xl: clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem);
+  --text-fluid-3xl: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+
+  /* ── Custom breakpoints */
+  --breakpoint-xs: 475px;
+  /* large phones */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* ── Z-index scale */
+  --z-base: 0;
+  --z-above: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 400;
+  --z-toast: 600;
+  --z-nav: 50;
+
+  /* ── Motion tokens */
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-in-out-smooth: cubic-bezier(0.42, 0, 0.58, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ── Custom animations (Tailwind v4 @theme registration) */
+  --animate-fade-in: fade-in 0.35s ease-out both;
+  --animate-slide-up: slide-up 0.3s var(--ease-out-expo) both;
+  --animate-slide-down: slide-down 0.25s ease-out both;
+  --animate-card-reveal: card-reveal 0.3s var(--ease-out-expo) both;
+  --animate-pulsing-gold: pulsing-gold 2s infinite;
+}
+
+/* ── Fluid typography utilities ────────────────────────────────── */
+@utility text-fluid-xs {
+  font-size: var(--text-fluid-xs);
+}
+
+@utility text-fluid-sm {
+  font-size: var(--text-fluid-sm);
+}
+
+@utility text-fluid-base {
+  font-size: var(--text-fluid-base);
+}
+
+@utility text-fluid-lg {
+  font-size: var(--text-fluid-lg);
+}
+
+@utility text-fluid-xl {
+  font-size: var(--text-fluid-xl);
+}
+
+@utility text-fluid-2xl {
+  font-size: var(--text-fluid-2xl);
+}
+
+@utility text-fluid-3xl {
+  font-size: var(--text-fluid-3xl);
+}
+
+/* ── Keyframes ─────────────────────────────────────────────────── */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card content reveal: fade + subtle scale (Disney anticipation principle) */
+@keyframes card-reveal {
+  from {
+    opacity: 0;
+    transform: scaleY(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+/* Landing page: حرف wordmark entrance — weight drops in with slow-out */
+@keyframes harf-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Typewriter cursor blink — gold, calm rhythm */
+@keyframes cursor-blink {
+
+  0%,
+  45% {
+    opacity: 1;
+  }
+
+  55%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulsing-gold {
+  0% {
+    box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.4);
+    transform: scale(1);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(201, 168, 76, 0);
+    transform: scale(1.02);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(201, 168, 76, 0);
+    transform: scale(1);
+  }
+}
+
+/* ── Base reset ─────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  /* Improve font rendering */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Rubik", sans-serif;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* Prevent horizontal overflow on mobile */
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Utilities ──────────────────────────────────────────────────── */
+
+.font-amiri {
+  font-family: "Amiri", serif;
+}
+
+/* Landing wordmark + glow */
+.harf-wordmark {
+  font-family: "Amiri", serif;
+  font-size: clamp(2.8rem, 6vw, 4.2rem);
+  line-height: 1;
+  color: #C41E3A;
+  user-select: none;
+  animation: harf-appear 1.0s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+.harf-glow {
+  position: relative;
+  display: inline-block;
+  text-shadow: 0 0 20px rgba(196, 30, 58, 0.4), 0 0 40px rgba(255, 255, 255, 0.1);
+}
+
+.harf-glow::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -20% -10%;
+  background: radial-gradient(circle, rgba(196, 30, 58, 0.15) 0%, rgba(196, 30, 58, 0) 70%);
+  filter: blur(15px);
+  opacity: 0.8;
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.1);
+  }
+}
+
+.cursor-blink {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--gold);
+  animation: cursor-blink 0.75s ease-in-out infinite;
+}
+
+/* Tabular numbers for stats and coverage percentages */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* RTL Arabic text — use CSS logical properties for i18n */
+[dir="rtl"],
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Inline-flipped icons in RTL (use logical margin-inline-start instead of margin-left) */
+[dir="rtl"] .icon-flip-rtl {
+  transform: scaleX(-1);
+}
+
+/* content-visibility: defer off-screen word cards (300+ items) */
+.word-card-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 180px;
+  /* estimated card height */
+}
+
+/* Gold gradient text */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #c9a84c, #e8c96a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card base — explicit size prevents CLS from border-box reflow */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  contain: layout style;
+  /* CLS: isolate layout recalc */
+}
+
+/* Mastery dot — fixed size to prevent CLS */
+.mastery-dot {
+  width: 10px;
+  height: 10px;
+  min-width: 10px;
+  /* prevent shrink in flex */
+  border-radius: 50%;
+}
+
+/* Global focus-visible ring for keyboard nav */
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}

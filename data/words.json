@@ -1,0 +1,3075 @@
+[
+  {
+    "id": "a-l-h",
+    "root": "أ ل ه",
+    "arabic": "اللَّه",
+    "transliteration": "Allāh",
+    "meanings": [
+      "God",
+      "Allah",
+      "The Deity"
+    ],
+    "frequency": 2851,
+    "tier": 1,
+    "example_verse": "1:1",
+    "derivatives": [
+      {
+        "form": "إِلَٰه",
+        "meaning": "deity, god"
+      },
+      {
+        "form": "اللَّهُمَّ",
+        "meaning": "O Allah!"
+      },
+      {
+        "form": "إِلَٰهِيّ",
+        "meaning": "divine"
+      }
+    ],
+    "coverage_weight": 0.036821,
+    "corpus_root_bw": "Alh"
+  },
+  {
+    "id": "q-w-l",
+    "root": "ق و ل",
+    "arabic": "قَالَ",
+    "transliteration": "qāla",
+    "meanings": [
+      "to say",
+      "to speak",
+      "to utter"
+    ],
+    "frequency": 1722,
+    "tier": 1,
+    "example_verse": "2:11",
+    "derivatives": [
+      {
+        "form": "قَوْل",
+        "meaning": "speech, word"
+      },
+      {
+        "form": "قَائِل",
+        "meaning": "speaker"
+      },
+      {
+        "form": "مَقَال",
+        "meaning": "saying, speech"
+      },
+      {
+        "form": "أَقْوَال",
+        "meaning": "sayings (pl.)"
+      }
+    ],
+    "coverage_weight": 0.02224,
+    "corpus_root_bw": "qwl"
+  },
+  {
+    "id": "k-w-n",
+    "root": "ك و ن",
+    "arabic": "كَانَ",
+    "transliteration": "kāna",
+    "meanings": [
+      "to be",
+      "to exist",
+      "to happen"
+    ],
+    "frequency": 1390,
+    "tier": 1,
+    "example_verse": "2:117",
+    "derivatives": [
+      {
+        "form": "يَكُون",
+        "meaning": "he is/will be"
+      },
+      {
+        "form": "كُن",
+        "meaning": "Be! (imperative)"
+      },
+      {
+        "form": "كَوْن",
+        "meaning": "universe, being"
+      },
+      {
+        "form": "مَكَان",
+        "meaning": "place"
+      }
+    ],
+    "coverage_weight": 0.017952,
+    "corpus_root_bw": "kwn"
+  },
+  {
+    "id": "r-b-b",
+    "root": "ر ب ب",
+    "arabic": "رَبَّ",
+    "transliteration": "rabba",
+    "meanings": [
+      "Lord",
+      "master",
+      "to nurture"
+    ],
+    "frequency": 980,
+    "tier": 1,
+    "example_verse": "1:2",
+    "derivatives": [
+      {
+        "form": "رَبّ",
+        "meaning": "Lord"
+      },
+      {
+        "form": "رُبُوبِيَّة",
+        "meaning": "Lordship"
+      },
+      {
+        "form": "تَرْبِيَة",
+        "meaning": "upbringing, education"
+      },
+      {
+        "form": "مُرَبِّي",
+        "meaning": "educator"
+      }
+    ],
+    "coverage_weight": 0.012657,
+    "corpus_root_bw": "rbb"
+  },
+  {
+    "id": "a-m-n",
+    "root": "أ م ن",
+    "arabic": "آمَنَ",
+    "transliteration": "āmana",
+    "meanings": [
+      "to believe",
+      "to trust",
+      "security"
+    ],
+    "frequency": 879,
+    "tier": 1,
+    "example_verse": "2:3",
+    "derivatives": [
+      {
+        "form": "مُؤْمِن",
+        "meaning": "believer"
+      },
+      {
+        "form": "إِيمَان",
+        "meaning": "faith, belief"
+      },
+      {
+        "form": "أَمِين",
+        "meaning": "trustworthy"
+      },
+      {
+        "form": "أَمَان",
+        "meaning": "security, safety"
+      }
+    ],
+    "coverage_weight": 0.011352,
+    "corpus_root_bw": "Amn"
+  },
+  {
+    "id": "a-l-m",
+    "root": "ع ل م",
+    "arabic": "عَلِمَ",
+    "transliteration": "ʿalima",
+    "meanings": [
+      "to know",
+      "knowledge",
+      "to be aware"
+    ],
+    "frequency": 854,
+    "tier": 1,
+    "example_verse": "2:29",
+    "derivatives": [
+      {
+        "form": "عَالِم",
+        "meaning": "scholar, one who knows"
+      },
+      {
+        "form": "عِلْم",
+        "meaning": "knowledge, science"
+      },
+      {
+        "form": "مَعْلُوم",
+        "meaning": "known"
+      },
+      {
+        "form": "عَلَّمَ",
+        "meaning": "taught"
+      }
+    ],
+    "coverage_weight": 0.011029,
+    "corpus_root_bw": "Elm"
+  },
+  {
+    "id": "q-y-m",
+    "root": "ق ي م",
+    "arabic": "قَامَ",
+    "transliteration": "qāma",
+    "meanings": [
+      "to stand",
+      "to establish",
+      "upright"
+    ],
+    "frequency": 660,
+    "tier": 1,
+    "example_verse": "2:3",
+    "derivatives": [
+      {
+        "form": "قِيَامَة",
+        "meaning": "Resurrection"
+      },
+      {
+        "form": "قَيِّم",
+        "meaning": "upright, valuable"
+      },
+      {
+        "form": "إِقَامَة",
+        "meaning": "establishment"
+      },
+      {
+        "form": "مُسْتَقِيم",
+        "meaning": "straight, upright"
+      }
+    ],
+    "coverage_weight": 0.008524,
+    "corpus_root_bw": "qwm"
+  },
+  {
+    "id": "a-t-y",
+    "root": "أ ت ي",
+    "arabic": "أَتَى",
+    "transliteration": "atā",
+    "meanings": [
+      "to come",
+      "to bring",
+      "to arrive"
+    ],
+    "frequency": 549,
+    "tier": 1,
+    "example_verse": "2:87",
+    "derivatives": [
+      {
+        "form": "آتَى",
+        "meaning": "gave, brought"
+      },
+      {
+        "form": "مَجِيء",
+        "meaning": "coming, arrival"
+      },
+      {
+        "form": "إِتْيَان",
+        "meaning": "coming"
+      },
+      {
+        "form": "مُؤْتًى",
+        "meaning": "given"
+      }
+    ],
+    "coverage_weight": 0.00709,
+    "corpus_root_bw": "Aty"
+  },
+  {
+    "id": "a-m-n2",
+    "root": "أ م ن",
+    "arabic": "أَمَنَ",
+    "transliteration": "amana",
+    "meanings": [
+      "security",
+      "peace",
+      "safety"
+    ],
+    "frequency": 879,
+    "tier": 1,
+    "example_verse": "2:125",
+    "derivatives": [
+      {
+        "form": "أَمْن",
+        "meaning": "security"
+      },
+      {
+        "form": "أَمَان",
+        "meaning": "safety"
+      },
+      {
+        "form": "آمِن",
+        "meaning": "safe, secure"
+      },
+      {
+        "form": "أَمِين",
+        "meaning": "trustworthy, Amen"
+      }
+    ],
+    "coverage_weight": 0.011352,
+    "corpus_root_bw": "Amn"
+  },
+  {
+    "id": "a-r-d",
+    "root": "أ ر ض",
+    "arabic": "أَرْض",
+    "transliteration": "arḍ",
+    "meanings": [
+      "earth",
+      "land",
+      "ground"
+    ],
+    "frequency": 461,
+    "tier": 1,
+    "example_verse": "1:2",
+    "derivatives": [
+      {
+        "form": "أَرَاضِي",
+        "meaning": "lands (pl.)"
+      },
+      {
+        "form": "أَرْضِيّ",
+        "meaning": "earthly"
+      },
+      {
+        "form": "فِي الأَرْض",
+        "meaning": "on earth"
+      }
+    ],
+    "coverage_weight": 0.005954,
+    "corpus_root_bw": "ArD"
+  },
+  {
+    "id": "y-w-m",
+    "root": "ي و م",
+    "arabic": "يَوْم",
+    "transliteration": "yawm",
+    "meanings": [
+      "day",
+      "time",
+      "period"
+    ],
+    "frequency": 405,
+    "tier": 1,
+    "example_verse": "1:4",
+    "derivatives": [
+      {
+        "form": "أَيَّام",
+        "meaning": "days (pl.)"
+      },
+      {
+        "form": "يَوْمِيّ",
+        "meaning": "daily"
+      },
+      {
+        "form": "اليَوْم",
+        "meaning": "today"
+      },
+      {
+        "form": "يَوْمَئِذٍ",
+        "meaning": "on that day"
+      }
+    ],
+    "coverage_weight": 0.005231,
+    "corpus_root_bw": "ywm"
+  },
+  {
+    "id": "b-y-n",
+    "root": "ب ي ن",
+    "arabic": "بَيَّنَ",
+    "transliteration": "bayyana",
+    "meanings": [
+      "to clarify",
+      "between",
+      "clear"
+    ],
+    "frequency": 523,
+    "tier": 1,
+    "example_verse": "2:159",
+    "derivatives": [
+      {
+        "form": "بَيِّنَة",
+        "meaning": "clear proof"
+      },
+      {
+        "form": "بَيَان",
+        "meaning": "clarification"
+      },
+      {
+        "form": "مُبِين",
+        "meaning": "clear, evident"
+      },
+      {
+        "form": "بَيْن",
+        "meaning": "between"
+      }
+    ],
+    "coverage_weight": 0.006755,
+    "corpus_root_bw": "byn"
+  },
+  {
+    "id": "r-s-l",
+    "root": "ر س ل",
+    "arabic": "رَسَلَ",
+    "transliteration": "rasala",
+    "meanings": [
+      "messenger",
+      "to send",
+      "apostle"
+    ],
+    "frequency": 513,
+    "tier": 1,
+    "example_verse": "2:87",
+    "derivatives": [
+      {
+        "form": "رَسُول",
+        "meaning": "messenger, prophet"
+      },
+      {
+        "form": "رِسَالَة",
+        "meaning": "message, letter"
+      },
+      {
+        "form": "أَرْسَلَ",
+        "meaning": "sent"
+      },
+      {
+        "form": "مُرْسَل",
+        "meaning": "sent, messenger"
+      }
+    ],
+    "coverage_weight": 0.006625,
+    "corpus_root_bw": "rsl"
+  },
+  {
+    "id": "k-f-r",
+    "root": "ك ف ر",
+    "arabic": "كَفَرَ",
+    "transliteration": "kafara",
+    "meanings": [
+      "to disbelieve",
+      "to cover",
+      "ingratitude"
+    ],
+    "frequency": 525,
+    "tier": 1,
+    "example_verse": "2:6",
+    "derivatives": [
+      {
+        "form": "كَافِر",
+        "meaning": "disbeliever"
+      },
+      {
+        "form": "كُفْر",
+        "meaning": "disbelief"
+      },
+      {
+        "form": "كَفُور",
+        "meaning": "very ungrateful"
+      },
+      {
+        "form": "كَفَّارَة",
+        "meaning": "expiation"
+      }
+    ],
+    "coverage_weight": 0.00678,
+    "corpus_root_bw": "kfr"
+  },
+  {
+    "id": "n-f-s",
+    "root": "ن ف س",
+    "arabic": "نَفْس",
+    "transliteration": "nafs",
+    "meanings": [
+      "soul",
+      "self",
+      "person"
+    ],
+    "frequency": 298,
+    "tier": 2,
+    "example_verse": "2:48",
+    "derivatives": [
+      {
+        "form": "أَنْفُس",
+        "meaning": "souls, selves (pl.)"
+      },
+      {
+        "form": "نَفِيس",
+        "meaning": "precious"
+      },
+      {
+        "form": "تَنَفَّسَ",
+        "meaning": "breathed"
+      },
+      {
+        "form": "نَفَس",
+        "meaning": "breath"
+      }
+    ],
+    "coverage_weight": 0.003849,
+    "corpus_root_bw": "nfs"
+  },
+  {
+    "id": "x-l-q",
+    "root": "خ ل ق",
+    "arabic": "خَلَقَ",
+    "transliteration": "khalaqa",
+    "meanings": [
+      "to create",
+      "creation",
+      "nature"
+    ],
+    "frequency": 261,
+    "tier": 2,
+    "example_verse": "2:21",
+    "derivatives": [
+      {
+        "form": "خَالِق",
+        "meaning": "Creator"
+      },
+      {
+        "form": "خَلْق",
+        "meaning": "creation"
+      },
+      {
+        "form": "مَخْلُوق",
+        "meaning": "creature, created"
+      },
+      {
+        "form": "خُلُق",
+        "meaning": "character, morals"
+      }
+    ],
+    "coverage_weight": 0.003371,
+    "corpus_root_bw": "xlq"
+  },
+  {
+    "id": "a-x-r",
+    "root": "أ خ ر",
+    "arabic": "آخَرَ",
+    "transliteration": "ākhara",
+    "meanings": [
+      "other",
+      "last",
+      "the Hereafter"
+    ],
+    "frequency": 250,
+    "tier": 2,
+    "example_verse": "2:4",
+    "derivatives": [
+      {
+        "form": "آخِر",
+        "meaning": "last, final"
+      },
+      {
+        "form": "الآخِرَة",
+        "meaning": "the Hereafter"
+      },
+      {
+        "form": "أَخِير",
+        "meaning": "last"
+      },
+      {
+        "form": "تَأَخَّرَ",
+        "meaning": "delayed"
+      }
+    ],
+    "coverage_weight": 0.003229,
+    "corpus_root_bw": "Axr"
+  },
+  {
+    "id": "a-m-r",
+    "root": "أ م ر",
+    "arabic": "أَمَرَ",
+    "transliteration": "amara",
+    "meanings": [
+      "to command",
+      "affair",
+      "matter"
+    ],
+    "frequency": 248,
+    "tier": 2,
+    "example_verse": "2:67",
+    "derivatives": [
+      {
+        "form": "أَمْر",
+        "meaning": "command, matter"
+      },
+      {
+        "form": "أَمِير",
+        "meaning": "commander, prince"
+      },
+      {
+        "form": "مَأْمُور",
+        "meaning": "commanded"
+      },
+      {
+        "form": "أُمُور",
+        "meaning": "affairs (pl.)"
+      }
+    ],
+    "coverage_weight": 0.003203,
+    "corpus_root_bw": "Amr"
+  },
+  {
+    "id": "j-a-l",
+    "root": "ج ع ل",
+    "arabic": "جَعَلَ",
+    "transliteration": "jaʿala",
+    "meanings": [
+      "to make",
+      "to put",
+      "to appoint"
+    ],
+    "frequency": 346,
+    "tier": 1,
+    "example_verse": "2:22",
+    "derivatives": [
+      {
+        "form": "جَاعِل",
+        "meaning": "maker, appointer"
+      },
+      {
+        "form": "مَجْعُول",
+        "meaning": "made, appointed"
+      }
+    ],
+    "coverage_weight": 0.004469,
+    "corpus_root_bw": "jEl"
+  },
+  {
+    "id": "h-d-y",
+    "root": "ه د ي",
+    "arabic": "هَدَى",
+    "transliteration": "hadā",
+    "meanings": [
+      "to guide",
+      "guidance",
+      "gift"
+    ],
+    "frequency": 316,
+    "tier": 1,
+    "example_verse": "1:6",
+    "derivatives": [
+      {
+        "form": "هُدَى",
+        "meaning": "guidance"
+      },
+      {
+        "form": "هِدَايَة",
+        "meaning": "guidance"
+      },
+      {
+        "form": "مُهْتَدِي",
+        "meaning": "guided"
+      },
+      {
+        "form": "هَادِي",
+        "meaning": "guide"
+      }
+    ],
+    "coverage_weight": 0.004081,
+    "corpus_root_bw": "hdy"
+  },
+  {
+    "id": "r-h-m",
+    "root": "ر ح م",
+    "arabic": "رَحِمَ",
+    "transliteration": "raḥima",
+    "meanings": [
+      "to have mercy",
+      "compassion",
+      "womb"
+    ],
+    "frequency": 339,
+    "tier": 1,
+    "example_verse": "1:3",
+    "derivatives": [
+      {
+        "form": "الرَّحْمَٰن",
+        "meaning": "The Most Gracious"
+      },
+      {
+        "form": "الرَّحِيم",
+        "meaning": "The Most Merciful"
+      },
+      {
+        "form": "رَحْمَة",
+        "meaning": "mercy"
+      },
+      {
+        "form": "أَرْحَام",
+        "meaning": "wombs, relatives"
+      }
+    ],
+    "coverage_weight": 0.004378,
+    "corpus_root_bw": "rHm"
+  },
+  {
+    "id": "a-b-d",
+    "root": "ع ب د",
+    "arabic": "عَبَدَ",
+    "transliteration": "ʿabada",
+    "meanings": [
+      "to worship",
+      "servant",
+      "slave"
+    ],
+    "frequency": 275,
+    "tier": 2,
+    "example_verse": "1:5",
+    "derivatives": [
+      {
+        "form": "عَبْد",
+        "meaning": "servant, slave"
+      },
+      {
+        "form": "عِبَادَة",
+        "meaning": "worship"
+      },
+      {
+        "form": "عِبَاد",
+        "meaning": "servants (pl.)"
+      },
+      {
+        "form": "مَعْبُود",
+        "meaning": "worshipped one"
+      }
+    ],
+    "coverage_weight": 0.003552,
+    "corpus_root_bw": "Ebd"
+  },
+  {
+    "id": "z-l-m",
+    "root": "ظ ل م",
+    "arabic": "ظَلَمَ",
+    "transliteration": "ẓalama",
+    "meanings": [
+      "to wrong",
+      "darkness",
+      "injustice"
+    ],
+    "frequency": 315,
+    "tier": 1,
+    "example_verse": "2:35",
+    "derivatives": [
+      {
+        "form": "ظَالِم",
+        "meaning": "wrongdoer"
+      },
+      {
+        "form": "ظُلْم",
+        "meaning": "injustice, wrongdoing"
+      },
+      {
+        "form": "ظَلَام",
+        "meaning": "darkness"
+      },
+      {
+        "form": "مَظْلُوم",
+        "meaning": "wronged one"
+      }
+    ],
+    "coverage_weight": 0.004068,
+    "corpus_root_bw": "Zlm"
+  },
+  {
+    "id": "h-q-q",
+    "root": "ح ق ق",
+    "arabic": "حَقَّ",
+    "transliteration": "ḥaqqa",
+    "meanings": [
+      "truth",
+      "right",
+      "due"
+    ],
+    "frequency": 287,
+    "tier": 2,
+    "example_verse": "2:26",
+    "derivatives": [
+      {
+        "form": "حَقّ",
+        "meaning": "truth, right"
+      },
+      {
+        "form": "حَقِيقَة",
+        "meaning": "reality, truth"
+      },
+      {
+        "form": "مُحَقَّق",
+        "meaning": "verified, certain"
+      },
+      {
+        "form": "حَقِيق",
+        "meaning": "worthy, deserving"
+      }
+    ],
+    "coverage_weight": 0.003707,
+    "corpus_root_bw": "Hqq"
+  },
+  {
+    "id": "j-a-a",
+    "root": "ج أ أ",
+    "arabic": "جَاءَ",
+    "transliteration": "jāʾa",
+    "meanings": [
+      "to come",
+      "to arrive",
+      "to bring"
+    ],
+    "frequency": 278,
+    "tier": 2,
+    "example_verse": "2:87",
+    "derivatives": [
+      {
+        "form": "جَاءَ",
+        "meaning": "came"
+      },
+      {
+        "form": "مَجِيء",
+        "meaning": "coming"
+      },
+      {
+        "form": "جَيْء",
+        "meaning": "coming"
+      }
+    ],
+    "coverage_weight": 0.00359,
+    "corpus_root_bw": "jyA"
+  },
+  {
+    "id": "d-a-w",
+    "root": "د ع و",
+    "arabic": "دَعَا",
+    "transliteration": "daʿā",
+    "meanings": [
+      "to call",
+      "to pray",
+      "to invite"
+    ],
+    "frequency": 212,
+    "tier": 2,
+    "example_verse": "2:186",
+    "derivatives": [
+      {
+        "form": "دُعَاء",
+        "meaning": "supplication, prayer"
+      },
+      {
+        "form": "دَاعِي",
+        "meaning": "one who calls"
+      },
+      {
+        "form": "مَدْعُوّ",
+        "meaning": "called, invited"
+      },
+      {
+        "form": "دَعْوَة",
+        "meaning": "call, invitation"
+      }
+    ],
+    "coverage_weight": 0.002738,
+    "corpus_root_bw": "dEw"
+  },
+  {
+    "id": "h-k-m",
+    "root": "ح ك م",
+    "arabic": "حَكَمَ",
+    "transliteration": "ḥakama",
+    "meanings": [
+      "to judge",
+      "wisdom",
+      "rule"
+    ],
+    "frequency": 210,
+    "tier": 2,
+    "example_verse": "2:129",
+    "derivatives": [
+      {
+        "form": "حُكْم",
+        "meaning": "judgment, rule"
+      },
+      {
+        "form": "حَكِيم",
+        "meaning": "wise"
+      },
+      {
+        "form": "حَاكِم",
+        "meaning": "ruler, judge"
+      },
+      {
+        "form": "مَحْكَمَة",
+        "meaning": "court"
+      }
+    ],
+    "coverage_weight": 0.002712,
+    "corpus_root_bw": "Hkm"
+  },
+  {
+    "id": "h-w-l",
+    "root": "ح و ل",
+    "arabic": "حَالَ",
+    "transliteration": "ḥāla",
+    "meanings": [
+      "to change",
+      "around",
+      "state"
+    ],
+    "frequency": 25,
+    "tier": 3,
+    "example_verse": "2:217",
+    "derivatives": [
+      {
+        "form": "حَوْل",
+        "meaning": "around, year"
+      },
+      {
+        "form": "تَحَوَّل",
+        "meaning": "transformed"
+      },
+      {
+        "form": "أَحْوَال",
+        "meaning": "states, conditions"
+      },
+      {
+        "form": "مُحَاوَلَة",
+        "meaning": "attempt"
+      }
+    ],
+    "coverage_weight": 0.000323,
+    "corpus_root_bw": "Hwl"
+  },
+  {
+    "id": "w-l-y",
+    "root": "و ل ي",
+    "arabic": "وَلِيَ",
+    "transliteration": "waliya",
+    "meanings": [
+      "friend",
+      "guardian",
+      "to be near"
+    ],
+    "frequency": 232,
+    "tier": 2,
+    "example_verse": "2:107",
+    "derivatives": [
+      {
+        "form": "وَلِيّ",
+        "meaning": "guardian, friend"
+      },
+      {
+        "form": "وِلَايَة",
+        "meaning": "guardianship, state"
+      },
+      {
+        "form": "أَوْلِيَاء",
+        "meaning": "friends, guardians (pl.)"
+      },
+      {
+        "form": "مَوْلَى",
+        "meaning": "master, ally"
+      }
+    ],
+    "coverage_weight": 0.002996,
+    "corpus_root_bw": "wly"
+  },
+  {
+    "id": "k-dh-b",
+    "root": "ك ذ ب",
+    "arabic": "كَذَبَ",
+    "transliteration": "kadhaba",
+    "meanings": [
+      "to lie",
+      "falsehood",
+      "to deny"
+    ],
+    "frequency": 282,
+    "tier": 2,
+    "example_verse": "2:10",
+    "derivatives": [
+      {
+        "form": "كَاذِب",
+        "meaning": "liar"
+      },
+      {
+        "form": "كَذِب",
+        "meaning": "lie, falsehood"
+      },
+      {
+        "form": "مُكَذِّب",
+        "meaning": "denier"
+      },
+      {
+        "form": "تَكْذِيب",
+        "meaning": "denial, rejection"
+      }
+    ],
+    "coverage_weight": 0.003642,
+    "corpus_root_bw": "k*b"
+  },
+  {
+    "id": "r-a-y",
+    "root": "ر أ ي",
+    "arabic": "رَأَى",
+    "transliteration": "raʾā",
+    "meanings": [
+      "to see",
+      "to think",
+      "vision"
+    ],
+    "frequency": 328,
+    "tier": 1,
+    "example_verse": "2:55",
+    "derivatives": [
+      {
+        "form": "رُؤْيَة",
+        "meaning": "vision, sight"
+      },
+      {
+        "form": "رَأْي",
+        "meaning": "opinion, view"
+      },
+      {
+        "form": "مَرْئِيّ",
+        "meaning": "visible"
+      },
+      {
+        "form": "رُؤْيَا",
+        "meaning": "dream, vision"
+      }
+    ],
+    "coverage_weight": 0.004236,
+    "corpus_root_bw": "rAy"
+  },
+  {
+    "id": "g-f-r",
+    "root": "غ ف ر",
+    "arabic": "غَفَرَ",
+    "transliteration": "ghafara",
+    "meanings": [
+      "to forgive",
+      "forgiveness",
+      "to cover"
+    ],
+    "frequency": 234,
+    "tier": 2,
+    "example_verse": "2:52",
+    "derivatives": [
+      {
+        "form": "غَفُور",
+        "meaning": "Oft-Forgiving"
+      },
+      {
+        "form": "مَغْفِرَة",
+        "meaning": "forgiveness"
+      },
+      {
+        "form": "غُفْرَان",
+        "meaning": "forgiveness"
+      },
+      {
+        "form": "غَفَّار",
+        "meaning": "Forgiving (intensive)"
+      }
+    ],
+    "coverage_weight": 0.003022,
+    "corpus_root_bw": "gfr"
+  },
+  {
+    "id": "a-dh-b",
+    "root": "ع ذ ب",
+    "arabic": "عَذَّبَ",
+    "transliteration": "ʿadhdhaba",
+    "meanings": [
+      "punishment",
+      "torment",
+      "to punish"
+    ],
+    "frequency": 373,
+    "tier": 1,
+    "example_verse": "2:7",
+    "derivatives": [
+      {
+        "form": "عَذَاب",
+        "meaning": "punishment, torment"
+      },
+      {
+        "form": "مُعَذَّب",
+        "meaning": "punished, tormented"
+      },
+      {
+        "form": "عَذِيب",
+        "meaning": "painful"
+      }
+    ],
+    "coverage_weight": 0.004817,
+    "corpus_root_bw": "E*b"
+  },
+  {
+    "id": "s-m-a",
+    "root": "س م ع",
+    "arabic": "سَمِعَ",
+    "transliteration": "samiʿa",
+    "meanings": [
+      "to hear",
+      "hearing",
+      "to listen"
+    ],
+    "frequency": 185,
+    "tier": 2,
+    "example_verse": "2:7",
+    "derivatives": [
+      {
+        "form": "سَمِيع",
+        "meaning": "All-Hearing"
+      },
+      {
+        "form": "سَمَاع",
+        "meaning": "hearing"
+      },
+      {
+        "form": "سَمَّاع",
+        "meaning": "one who listens much"
+      },
+      {
+        "form": "مَسْمُوع",
+        "meaning": "heard"
+      }
+    ],
+    "coverage_weight": 0.002389,
+    "corpus_root_bw": "smE"
+  },
+  {
+    "id": "s-m-w",
+    "root": "س م و",
+    "arabic": "سَمَاء",
+    "transliteration": "samāʾ",
+    "meanings": [
+      "sky",
+      "heaven",
+      "rain"
+    ],
+    "frequency": 381,
+    "tier": 1,
+    "example_verse": "2:22",
+    "derivatives": [
+      {
+        "form": "سَمَاوَات",
+        "meaning": "heavens (pl.)"
+      },
+      {
+        "form": "سَمَاوِيّ",
+        "meaning": "heavenly"
+      },
+      {
+        "form": "أَسْمَى",
+        "meaning": "higher, loftier"
+      }
+    ],
+    "coverage_weight": 0.004921,
+    "corpus_root_bw": "smw"
+  },
+  {
+    "id": "dh-k-r",
+    "root": "ذ ك ر",
+    "arabic": "ذَكَرَ",
+    "transliteration": "dhakara",
+    "meanings": [
+      "to remember",
+      "to mention",
+      "male"
+    ],
+    "frequency": 292,
+    "tier": 2,
+    "example_verse": "2:40",
+    "derivatives": [
+      {
+        "form": "ذِكْر",
+        "meaning": "remembrance, mention"
+      },
+      {
+        "form": "ذَاكِر",
+        "meaning": "one who remembers"
+      },
+      {
+        "form": "تَذَكُّر",
+        "meaning": "remembrance, reminder"
+      },
+      {
+        "form": "مَذْكُور",
+        "meaning": "mentioned"
+      }
+    ],
+    "coverage_weight": 0.003771,
+    "corpus_root_bw": "*kr"
+  },
+  {
+    "id": "n-z-l",
+    "root": "ن ز ل",
+    "arabic": "نَزَلَ",
+    "transliteration": "nazala",
+    "meanings": [
+      "to descend",
+      "revelation",
+      "to send down"
+    ],
+    "frequency": 293,
+    "tier": 2,
+    "example_verse": "2:4",
+    "derivatives": [
+      {
+        "form": "نُزُول",
+        "meaning": "descent"
+      },
+      {
+        "form": "أَنْزَلَ",
+        "meaning": "sent down (revealed)"
+      },
+      {
+        "form": "مُنَزَّل",
+        "meaning": "revealed, sent down"
+      },
+      {
+        "form": "نَزِيل",
+        "meaning": "guest"
+      }
+    ],
+    "coverage_weight": 0.003784,
+    "corpus_root_bw": "nzl"
+  },
+  {
+    "id": "a-dh-n",
+    "root": "أ ذ ن",
+    "arabic": "أَذِنَ",
+    "transliteration": "adhina",
+    "meanings": [
+      "to permit",
+      "ear",
+      "to allow"
+    ],
+    "frequency": 102,
+    "tier": 2,
+    "example_verse": "2:275",
+    "derivatives": [
+      {
+        "form": "أُذُن",
+        "meaning": "ear"
+      },
+      {
+        "form": "إِذْن",
+        "meaning": "permission"
+      },
+      {
+        "form": "مَأْذُون",
+        "meaning": "permitted"
+      },
+      {
+        "form": "أَذَان",
+        "meaning": "call to prayer"
+      }
+    ],
+    "coverage_weight": 0.001317,
+    "corpus_root_bw": "A*n"
+  },
+  {
+    "id": "s-h-d",
+    "root": "ش ه د",
+    "arabic": "شَهِدَ",
+    "transliteration": "shahida",
+    "meanings": [
+      "to witness",
+      "testimony",
+      "martyr"
+    ],
+    "frequency": 160,
+    "tier": 2,
+    "example_verse": "2:133",
+    "derivatives": [
+      {
+        "form": "شَاهِد",
+        "meaning": "witness"
+      },
+      {
+        "form": "شَهَادَة",
+        "meaning": "testimony, martyrdom"
+      },
+      {
+        "form": "شَهِيد",
+        "meaning": "martyr, witness"
+      },
+      {
+        "form": "مَشْهَد",
+        "meaning": "scene, witnessed event"
+      }
+    ],
+    "coverage_weight": 0.002066,
+    "corpus_root_bw": "$hd"
+  },
+  {
+    "id": "s-b-r",
+    "root": "ص ب ر",
+    "arabic": "صَبَرَ",
+    "transliteration": "ṣabara",
+    "meanings": [
+      "to be patient",
+      "patience",
+      "to endure"
+    ],
+    "frequency": 103,
+    "tier": 2,
+    "example_verse": "2:45",
+    "derivatives": [
+      {
+        "form": "صَبْر",
+        "meaning": "patience"
+      },
+      {
+        "form": "صَابِر",
+        "meaning": "patient one"
+      },
+      {
+        "form": "صَبُور",
+        "meaning": "very patient"
+      },
+      {
+        "form": "اِصْطِبَار",
+        "meaning": "endurance"
+      }
+    ],
+    "coverage_weight": 0.00133,
+    "corpus_root_bw": "Sbr"
+  },
+  {
+    "id": "m-l-k",
+    "root": "م ل ك",
+    "arabic": "مَلَكَ",
+    "transliteration": "malaka",
+    "meanings": [
+      "to own",
+      "king",
+      "sovereignty"
+    ],
+    "frequency": 206,
+    "tier": 2,
+    "example_verse": "1:4",
+    "derivatives": [
+      {
+        "form": "مَلِك",
+        "meaning": "king"
+      },
+      {
+        "form": "مَلَك",
+        "meaning": "angel"
+      },
+      {
+        "form": "مُلْك",
+        "meaning": "sovereignty, kingdom"
+      },
+      {
+        "form": "مَمْلَكَة",
+        "meaning": "kingdom"
+      }
+    ],
+    "coverage_weight": 0.002661,
+    "corpus_root_bw": "mlk"
+  },
+  {
+    "id": "q-l-b",
+    "root": "ق ل ب",
+    "arabic": "قَلْب",
+    "transliteration": "qalb",
+    "meanings": [
+      "heart",
+      "to turn",
+      "core"
+    ],
+    "frequency": 168,
+    "tier": 2,
+    "example_verse": "2:10",
+    "derivatives": [
+      {
+        "form": "قُلُوب",
+        "meaning": "hearts (pl.)"
+      },
+      {
+        "form": "قَلَّبَ",
+        "meaning": "turned over"
+      },
+      {
+        "form": "مُتَقَلِّب",
+        "meaning": "changing, fluctuating"
+      },
+      {
+        "form": "إِنْقِلَاب",
+        "meaning": "revolution, reversal"
+      }
+    ],
+    "coverage_weight": 0.00217,
+    "corpus_root_bw": "qlb"
+  },
+  {
+    "id": "sh-r-k",
+    "root": "ش ر ك",
+    "arabic": "شَرَكَ",
+    "transliteration": "sharaka",
+    "meanings": [
+      "to associate",
+      "partner",
+      "polytheism"
+    ],
+    "frequency": 168,
+    "tier": 2,
+    "example_verse": "2:22",
+    "derivatives": [
+      {
+        "form": "شِرْك",
+        "meaning": "polytheism"
+      },
+      {
+        "form": "مُشْرِك",
+        "meaning": "polytheist"
+      },
+      {
+        "form": "شَرِيك",
+        "meaning": "partner"
+      },
+      {
+        "form": "شَرِكَة",
+        "meaning": "company, partnership"
+      }
+    ],
+    "coverage_weight": 0.00217,
+    "corpus_root_bw": "$rk"
+  },
+  {
+    "id": "h-y-y",
+    "root": "ح ي ي",
+    "arabic": "حَيَّ",
+    "transliteration": "ḥayiya",
+    "meanings": [
+      "to live",
+      "life",
+      "living"
+    ],
+    "frequency": 184,
+    "tier": 2,
+    "example_verse": "2:28",
+    "derivatives": [
+      {
+        "form": "حَيَاة",
+        "meaning": "life"
+      },
+      {
+        "form": "حَيّ",
+        "meaning": "alive, living"
+      },
+      {
+        "form": "أَحْيَا",
+        "meaning": "gave life to"
+      },
+      {
+        "form": "مُحْيِي",
+        "meaning": "Giver of Life"
+      }
+    ],
+    "coverage_weight": 0.002376,
+    "corpus_root_bw": "Hyy"
+  },
+  {
+    "id": "a-l-w",
+    "root": "ع ل و",
+    "arabic": "عَلَا",
+    "transliteration": "ʿalā",
+    "meanings": [
+      "to be high",
+      "above",
+      "exalted"
+    ],
+    "frequency": 70,
+    "tier": 3,
+    "example_verse": "2:255",
+    "derivatives": [
+      {
+        "form": "عَلِيّ",
+        "meaning": "high, exalted"
+      },
+      {
+        "form": "عُلُوّ",
+        "meaning": "highness"
+      },
+      {
+        "form": "أَعْلَى",
+        "meaning": "highest"
+      },
+      {
+        "form": "تَعَالَى",
+        "meaning": "exalted be He"
+      }
+    ],
+    "coverage_weight": 0.000904,
+    "corpus_root_bw": "Elw"
+  },
+  {
+    "id": "w-j-d",
+    "root": "و ج د",
+    "arabic": "وَجَدَ",
+    "transliteration": "wajada",
+    "meanings": [
+      "to find",
+      "existence",
+      "to feel"
+    ],
+    "frequency": 107,
+    "tier": 2,
+    "example_verse": "2:96",
+    "derivatives": [
+      {
+        "form": "وُجُود",
+        "meaning": "existence"
+      },
+      {
+        "form": "وَاجِد",
+        "meaning": "finder"
+      },
+      {
+        "form": "مَوْجُود",
+        "meaning": "existing, found"
+      },
+      {
+        "form": "وِجْدَان",
+        "meaning": "conscience"
+      }
+    ],
+    "coverage_weight": 0.001382,
+    "corpus_root_bw": "wjd"
+  },
+  {
+    "id": "n-a-m",
+    "root": "ن ع م",
+    "arabic": "نَعِمَ",
+    "transliteration": "naʿama",
+    "meanings": [
+      "to bless",
+      "blessing",
+      "grace"
+    ],
+    "frequency": 140,
+    "tier": 2,
+    "example_verse": "1:7",
+    "derivatives": [
+      {
+        "form": "نِعْمَة",
+        "meaning": "blessing, favor"
+      },
+      {
+        "form": "نَعِيم",
+        "meaning": "bliss, paradise"
+      },
+      {
+        "form": "مُنْعِم",
+        "meaning": "bestower of blessings"
+      },
+      {
+        "form": "نَعَم",
+        "meaning": "yes, indeed"
+      }
+    ],
+    "coverage_weight": 0.001808,
+    "corpus_root_bw": "nEm"
+  },
+  {
+    "id": "s-l-h",
+    "root": "ص ل ح",
+    "arabic": "صَلَحَ",
+    "transliteration": "ṣalaḥa",
+    "meanings": [
+      "to be righteous",
+      "reform",
+      "good deed"
+    ],
+    "frequency": 180,
+    "tier": 2,
+    "example_verse": "2:25",
+    "derivatives": [
+      {
+        "form": "صَالِح",
+        "meaning": "righteous, pious"
+      },
+      {
+        "form": "صَلَاح",
+        "meaning": "righteousness"
+      },
+      {
+        "form": "إِصْلَاح",
+        "meaning": "reform"
+      },
+      {
+        "form": "مُصْلِح",
+        "meaning": "reformer"
+      }
+    ],
+    "coverage_weight": 0.002325,
+    "corpus_root_bw": "SlH"
+  },
+  {
+    "id": "a-s-m",
+    "root": "ا س م",
+    "arabic": "اِسْم",
+    "transliteration": "ism",
+    "meanings": [
+      "name",
+      "noun"
+    ],
+    "frequency": 204,
+    "tier": 2,
+    "example_verse": "1:1",
+    "derivatives": [
+      {
+        "form": "أَسْمَاء",
+        "meaning": "names (pl.)"
+      },
+      {
+        "form": "مُسَمَّى",
+        "meaning": "named one"
+      },
+      {
+        "form": "تَسْمِيَة",
+        "meaning": "naming"
+      }
+    ],
+    "coverage_weight": 0.00263
+  },
+  {
+    "id": "m-w-t",
+    "root": "م و ت",
+    "arabic": "مَاتَ",
+    "transliteration": "māta",
+    "meanings": [
+      "to die",
+      "death",
+      "dead"
+    ],
+    "frequency": 165,
+    "tier": 2,
+    "example_verse": "2:28",
+    "derivatives": [
+      {
+        "form": "مَوْت",
+        "meaning": "death"
+      },
+      {
+        "form": "مَيِّت",
+        "meaning": "dead"
+      },
+      {
+        "form": "مُمِيت",
+        "meaning": "Causer of death"
+      },
+      {
+        "form": "أَمَاتَ",
+        "meaning": "caused to die"
+      }
+    ],
+    "coverage_weight": 0.002131,
+    "corpus_root_bw": "mwt"
+  },
+  {
+    "id": "n-b-a",
+    "root": "ن ب أ",
+    "arabic": "نَبَأَ",
+    "transliteration": "nabaʾa",
+    "meanings": [
+      "news",
+      "prophet",
+      "to inform"
+    ],
+    "frequency": 160,
+    "tier": 2,
+    "example_verse": "2:31",
+    "derivatives": [
+      {
+        "form": "نَبَأ",
+        "meaning": "news, important news"
+      },
+      {
+        "form": "نَبِيّ",
+        "meaning": "prophet"
+      },
+      {
+        "form": "نُبُوَّة",
+        "meaning": "prophethood"
+      },
+      {
+        "form": "أَنْبِيَاء",
+        "meaning": "prophets (pl.)"
+      }
+    ],
+    "coverage_weight": 0.002066,
+    "corpus_root_bw": "nbA"
+  },
+  {
+    "id": "l-q-y",
+    "root": "ل ق ي",
+    "arabic": "لَقِيَ",
+    "transliteration": "laqiya",
+    "meanings": [
+      "to meet",
+      "to find",
+      "encounter"
+    ],
+    "frequency": 146,
+    "tier": 2,
+    "example_verse": "2:46",
+    "derivatives": [
+      {
+        "form": "لِقَاء",
+        "meaning": "meeting, encounter"
+      },
+      {
+        "form": "مُلْتَقَى",
+        "meaning": "meeting place"
+      },
+      {
+        "form": "لَاقٍ",
+        "meaning": "one who meets"
+      }
+    ],
+    "coverage_weight": 0.001886,
+    "corpus_root_bw": "lqy"
+  },
+  {
+    "id": "f-t-h",
+    "root": "ف ت ح",
+    "arabic": "فَتَحَ",
+    "transliteration": "fataḥa",
+    "meanings": [
+      "to open",
+      "victory",
+      "to conquer"
+    ],
+    "frequency": 38,
+    "tier": 3,
+    "example_verse": "2:76",
+    "derivatives": [
+      {
+        "form": "فَتْح",
+        "meaning": "opening, victory"
+      },
+      {
+        "form": "فَاتِح",
+        "meaning": "opener, conqueror"
+      },
+      {
+        "form": "مِفْتَاح",
+        "meaning": "key"
+      },
+      {
+        "form": "فَتَّاح",
+        "meaning": "The Opener (Allah)"
+      }
+    ],
+    "coverage_weight": 0.000491,
+    "corpus_root_bw": "ftH"
+  },
+  {
+    "id": "h-m-d",
+    "root": "ح م د",
+    "arabic": "حَمِدَ",
+    "transliteration": "ḥamida",
+    "meanings": [
+      "to praise",
+      "thankfulness",
+      "Ahmad"
+    ],
+    "frequency": 63,
+    "tier": 3,
+    "example_verse": "1:2",
+    "derivatives": [
+      {
+        "form": "حَمْد",
+        "meaning": "praise, thanks"
+      },
+      {
+        "form": "حَمِيد",
+        "meaning": "Praiseworthy"
+      },
+      {
+        "form": "مَحْمُود",
+        "meaning": "praised"
+      },
+      {
+        "form": "أَحْمَد",
+        "meaning": "Most Praised (name)"
+      }
+    ],
+    "coverage_weight": 0.000814,
+    "corpus_root_bw": "Hmd"
+  },
+  {
+    "id": "r-z-q",
+    "root": "ر ز ق",
+    "arabic": "رَزَقَ",
+    "transliteration": "razaqa",
+    "meanings": [
+      "to provide",
+      "sustenance",
+      "provision"
+    ],
+    "frequency": 123,
+    "tier": 2,
+    "example_verse": "2:3",
+    "derivatives": [
+      {
+        "form": "رِزْق",
+        "meaning": "sustenance, provision"
+      },
+      {
+        "form": "رَازِق",
+        "meaning": "provider"
+      },
+      {
+        "form": "رَزَّاق",
+        "meaning": "All-Provider"
+      },
+      {
+        "form": "مَرْزُوق",
+        "meaning": "provided for"
+      }
+    ],
+    "coverage_weight": 0.001589,
+    "corpus_root_bw": "rzq"
+  },
+  {
+    "id": "t-w-b",
+    "root": "ت و ب",
+    "arabic": "تَابَ",
+    "transliteration": "tāba",
+    "meanings": [
+      "to repent",
+      "repentance",
+      "to return to God"
+    ],
+    "frequency": 87,
+    "tier": 3,
+    "example_verse": "2:37",
+    "derivatives": [
+      {
+        "form": "تَوْبَة",
+        "meaning": "repentance"
+      },
+      {
+        "form": "تَوَّاب",
+        "meaning": "Acceptor of repentance"
+      },
+      {
+        "form": "تَائِب",
+        "meaning": "repentant"
+      },
+      {
+        "form": "مَتَاب",
+        "meaning": "repentance, turning"
+      }
+    ],
+    "coverage_weight": 0.001124,
+    "corpus_root_bw": "twb"
+  },
+  {
+    "id": "q-r-b",
+    "root": "ق ر ب",
+    "arabic": "قَرُبَ",
+    "transliteration": "qaruba",
+    "meanings": [
+      "to be near",
+      "close",
+      "relatives"
+    ],
+    "frequency": 96,
+    "tier": 3,
+    "example_verse": "2:186",
+    "derivatives": [
+      {
+        "form": "قَرِيب",
+        "meaning": "near, close"
+      },
+      {
+        "form": "قُرْبَى",
+        "meaning": "nearness, relatives"
+      },
+      {
+        "form": "أَقَارِب",
+        "meaning": "relatives"
+      },
+      {
+        "form": "تَقَرَّبَ",
+        "meaning": "drew near"
+      }
+    ],
+    "coverage_weight": 0.00124,
+    "corpus_root_bw": "qrb"
+  },
+  {
+    "id": "a-z-z",
+    "root": "ع ز ز",
+    "arabic": "عَزَّ",
+    "transliteration": "ʿazza",
+    "meanings": [
+      "mighty",
+      "dear",
+      "to be powerful"
+    ],
+    "frequency": 119,
+    "tier": 2,
+    "example_verse": "2:129",
+    "derivatives": [
+      {
+        "form": "عَزِيز",
+        "meaning": "Mighty, Dear"
+      },
+      {
+        "form": "عِزَّة",
+        "meaning": "might, honor"
+      },
+      {
+        "form": "أَعَزَّ",
+        "meaning": "more dear, mightier"
+      },
+      {
+        "form": "مُعِزّ",
+        "meaning": "Giver of honor"
+      }
+    ],
+    "coverage_weight": 0.001537,
+    "corpus_root_bw": "Ezz"
+  },
+  {
+    "id": "j-n-n",
+    "root": "ج ن ن",
+    "arabic": "جَنَّة",
+    "transliteration": "janna",
+    "meanings": [
+      "garden",
+      "paradise",
+      "to cover"
+    ],
+    "frequency": 201,
+    "tier": 2,
+    "example_verse": "2:25",
+    "derivatives": [
+      {
+        "form": "جَنَّات",
+        "meaning": "gardens, paradises (pl.)"
+      },
+      {
+        "form": "جِنّ",
+        "meaning": "jinn"
+      },
+      {
+        "form": "جُنُون",
+        "meaning": "madness (covered mind)"
+      },
+      {
+        "form": "مَجْنُون",
+        "meaning": "mad, possessed"
+      }
+    ],
+    "coverage_weight": 0.002596,
+    "corpus_root_bw": "jnn"
+  },
+  {
+    "id": "s-b-h",
+    "root": "س ب ح",
+    "arabic": "سَبَّحَ",
+    "transliteration": "sabbaḥa",
+    "meanings": [
+      "to glorify",
+      "to swim",
+      "to travel fast"
+    ],
+    "frequency": 92,
+    "tier": 3,
+    "example_verse": "2:30",
+    "derivatives": [
+      {
+        "form": "تَسْبِيح",
+        "meaning": "glorification"
+      },
+      {
+        "form": "سُبْحَان",
+        "meaning": "Glory be to..."
+      },
+      {
+        "form": "مُسَبِّح",
+        "meaning": "one who glorifies"
+      },
+      {
+        "form": "سَبَّاح",
+        "meaning": "swimmer"
+      }
+    ],
+    "coverage_weight": 0.001188,
+    "corpus_root_bw": "sbH"
+  },
+  {
+    "id": "a-m-r2",
+    "root": "أ م ر",
+    "arabic": "أَمَرَ",
+    "transliteration": "amara",
+    "meanings": [
+      "to command",
+      "order",
+      "to enjoin"
+    ],
+    "frequency": 248,
+    "tier": 2,
+    "example_verse": "2:67",
+    "derivatives": [
+      {
+        "form": "أَمْر",
+        "meaning": "command, affair"
+      },
+      {
+        "form": "مَأْمُور",
+        "meaning": "commanded"
+      },
+      {
+        "form": "أُمُور",
+        "meaning": "matters, affairs"
+      },
+      {
+        "form": "إِمَارَة",
+        "meaning": "emirate, command"
+      }
+    ],
+    "coverage_weight": 0.003203,
+    "corpus_root_bw": "Amr"
+  },
+  {
+    "id": "a-x-w",
+    "root": "أ خ و",
+    "arabic": "أَخ",
+    "transliteration": "akh",
+    "meanings": [
+      "brother",
+      "similar",
+      "companion"
+    ],
+    "frequency": 96,
+    "tier": 3,
+    "example_verse": "2:178",
+    "derivatives": [
+      {
+        "form": "إِخْوَان",
+        "meaning": "brothers (pl.)"
+      },
+      {
+        "form": "أُخْت",
+        "meaning": "sister"
+      },
+      {
+        "form": "أُخُوَّة",
+        "meaning": "brotherhood"
+      },
+      {
+        "form": "إِخْوَة",
+        "meaning": "brothers (pl., closer)"
+      }
+    ],
+    "coverage_weight": 0.00124,
+    "corpus_root_bw": "Axw"
+  },
+  {
+    "id": "h-s-b",
+    "root": "ح س ب",
+    "arabic": "حَسِبَ",
+    "transliteration": "ḥasiba",
+    "meanings": [
+      "to reckon",
+      "to think",
+      "account"
+    ],
+    "frequency": 109,
+    "tier": 2,
+    "example_verse": "2:44",
+    "derivatives": [
+      {
+        "form": "حِسَاب",
+        "meaning": "account, reckoning"
+      },
+      {
+        "form": "حَسِيب",
+        "meaning": "Reckoner"
+      },
+      {
+        "form": "مُحَاسَبَة",
+        "meaning": "accountability"
+      },
+      {
+        "form": "اِحْتِسَاب",
+        "meaning": "seeking reward from God"
+      }
+    ],
+    "coverage_weight": 0.001408,
+    "corpus_root_bw": "Hsb"
+  },
+  {
+    "id": "s-d-q",
+    "root": "ص د ق",
+    "arabic": "صَدَقَ",
+    "transliteration": "ṣadaqa",
+    "meanings": [
+      "to be truthful",
+      "charity",
+      "sincerity"
+    ],
+    "frequency": 155,
+    "tier": 2,
+    "example_verse": "2:177",
+    "derivatives": [
+      {
+        "form": "صَدَقَة",
+        "meaning": "charity, almsgiving"
+      },
+      {
+        "form": "صَادِق",
+        "meaning": "truthful"
+      },
+      {
+        "form": "صِدْق",
+        "meaning": "truthfulness"
+      },
+      {
+        "form": "مُصَدِّق",
+        "meaning": "one who believes/confirms"
+      }
+    ],
+    "coverage_weight": 0.002002,
+    "corpus_root_bw": "Sdq"
+  },
+  {
+    "id": "k-t-b",
+    "root": "ك ت ب",
+    "arabic": "كَتَبَ",
+    "transliteration": "kataba",
+    "meanings": [
+      "to write",
+      "scripture",
+      "book"
+    ],
+    "frequency": 319,
+    "tier": 1,
+    "example_verse": "2:2",
+    "derivatives": [
+      {
+        "form": "كِتَاب",
+        "meaning": "book, scripture"
+      },
+      {
+        "form": "كَاتِب",
+        "meaning": "writer, scribe"
+      },
+      {
+        "form": "كِتَابَة",
+        "meaning": "writing"
+      },
+      {
+        "form": "مَكْتُوب",
+        "meaning": "written, letter"
+      }
+    ],
+    "coverage_weight": 0.00412,
+    "corpus_root_bw": "ktb"
+  },
+  {
+    "id": "f-l-h",
+    "root": "ف ل ح",
+    "arabic": "فَلَحَ",
+    "transliteration": "falaḥa",
+    "meanings": [
+      "to succeed",
+      "to prosper",
+      "salvation"
+    ],
+    "frequency": 40,
+    "tier": 3,
+    "example_verse": "2:5",
+    "derivatives": [
+      {
+        "form": "مُفْلِح",
+        "meaning": "successful one"
+      },
+      {
+        "form": "فَلَاح",
+        "meaning": "success, farmer"
+      },
+      {
+        "form": "أَفْلَحَ",
+        "meaning": "succeeded"
+      }
+    ],
+    "coverage_weight": 0.000517,
+    "corpus_root_bw": "flH"
+  },
+  {
+    "id": "b-a-th",
+    "root": "ب ع ث",
+    "arabic": "بَعَثَ",
+    "transliteration": "baʿatha",
+    "meanings": [
+      "to send",
+      "to resurrect",
+      "to raise"
+    ],
+    "frequency": 67,
+    "tier": 3,
+    "example_verse": "2:56",
+    "derivatives": [
+      {
+        "form": "بَعْث",
+        "meaning": "sending, resurrection"
+      },
+      {
+        "form": "مَبْعُوث",
+        "meaning": "sent, resurrected"
+      },
+      {
+        "form": "بَاعِث",
+        "meaning": "one who sends/raises"
+      },
+      {
+        "form": "اِنْبِعَاث",
+        "meaning": "arising, resurrection"
+      }
+    ],
+    "coverage_weight": 0.000865,
+    "corpus_root_bw": "bEv"
+  },
+  {
+    "id": "n-s-r",
+    "root": "ن ص ر",
+    "arabic": "نَصَرَ",
+    "transliteration": "naṣara",
+    "meanings": [
+      "to help",
+      "victory",
+      "support"
+    ],
+    "frequency": 158,
+    "tier": 2,
+    "example_verse": "2:107",
+    "derivatives": [
+      {
+        "form": "نَصْر",
+        "meaning": "victory, help"
+      },
+      {
+        "form": "نَاصِر",
+        "meaning": "helper, supporter"
+      },
+      {
+        "form": "نَصِير",
+        "meaning": "ally, helper"
+      },
+      {
+        "form": "اِنْتِصَار",
+        "meaning": "victory"
+      }
+    ],
+    "coverage_weight": 0.002041,
+    "corpus_root_bw": "nSr"
+  },
+  {
+    "id": "b-sh-r",
+    "root": "ب ش ر",
+    "arabic": "بَشَّرَ",
+    "transliteration": "bashshara",
+    "meanings": [
+      "glad tidings",
+      "human being",
+      "skin"
+    ],
+    "frequency": 123,
+    "tier": 2,
+    "example_verse": "2:25",
+    "derivatives": [
+      {
+        "form": "بُشْرَى",
+        "meaning": "glad tidings"
+      },
+      {
+        "form": "بَشِير",
+        "meaning": "bearer of glad tidings"
+      },
+      {
+        "form": "بَشَر",
+        "meaning": "human being"
+      },
+      {
+        "form": "مُبَشِّر",
+        "meaning": "one who gives glad tidings"
+      }
+    ],
+    "coverage_weight": 0.001589,
+    "corpus_root_bw": "b$r"
+  },
+  {
+    "id": "kh-w-f",
+    "root": "خ و ف",
+    "arabic": "خَافَ",
+    "transliteration": "khāfa",
+    "meanings": [
+      "to fear",
+      "fear",
+      "danger"
+    ],
+    "frequency": 124,
+    "tier": 2,
+    "example_verse": "2:38",
+    "derivatives": [
+      {
+        "form": "خَوْف",
+        "meaning": "fear"
+      },
+      {
+        "form": "خَائِف",
+        "meaning": "fearful"
+      },
+      {
+        "form": "مَخَافَة",
+        "meaning": "fear of"
+      },
+      {
+        "form": "مُخِيف",
+        "meaning": "frightening"
+      }
+    ],
+    "coverage_weight": 0.001601,
+    "corpus_root_bw": "xwf"
+  },
+  {
+    "id": "a-r-s-l",
+    "root": "أ ر س ل",
+    "arabic": "أَرْسَلَ",
+    "transliteration": "arsala",
+    "meanings": [
+      "to send",
+      "messenger",
+      "to dispatch"
+    ],
+    "frequency": 513,
+    "tier": 1,
+    "example_verse": "2:87",
+    "derivatives": [
+      {
+        "form": "رِسَالَة",
+        "meaning": "message"
+      },
+      {
+        "form": "مُرْسَل",
+        "meaning": "sent one, messenger"
+      },
+      {
+        "form": "إِرْسَال",
+        "meaning": "sending"
+      }
+    ],
+    "coverage_weight": 0.006625,
+    "corpus_root_bw": "rsl"
+  },
+  {
+    "id": "s-l-w",
+    "root": "ص ل و",
+    "arabic": "صَلَّى",
+    "transliteration": "ṣallā",
+    "meanings": [
+      "to pray",
+      "prayer",
+      "to bless"
+    ],
+    "frequency": 99,
+    "tier": 3,
+    "example_verse": "2:3",
+    "derivatives": [
+      {
+        "form": "صَلَاة",
+        "meaning": "prayer"
+      },
+      {
+        "form": "مُصَلِّي",
+        "meaning": "one who prays"
+      },
+      {
+        "form": "صَلَوَات",
+        "meaning": "prayers (pl.)"
+      },
+      {
+        "form": "مُصَلَّى",
+        "meaning": "prayer place"
+      }
+    ],
+    "coverage_weight": 0.001279,
+    "corpus_root_bw": "Slw"
+  },
+  {
+    "id": "h-r-m",
+    "root": "ح ر م",
+    "arabic": "حَرَّمَ",
+    "transliteration": "ḥarrama",
+    "meanings": [
+      "to forbid",
+      "sacred",
+      "Haram"
+    ],
+    "frequency": 83,
+    "tier": 3,
+    "example_verse": "2:85",
+    "derivatives": [
+      {
+        "form": "حَرَام",
+        "meaning": "forbidden, sacred"
+      },
+      {
+        "form": "حُرْمَة",
+        "meaning": "sanctity, inviolability"
+      },
+      {
+        "form": "مُحَرَّم",
+        "meaning": "forbidden"
+      },
+      {
+        "form": "الحَرَم",
+        "meaning": "the Sacred Precinct"
+      }
+    ],
+    "coverage_weight": 0.001072,
+    "corpus_root_bw": "Hrm"
+  },
+  {
+    "id": "a-q-l",
+    "root": "ع ق ل",
+    "arabic": "عَقَلَ",
+    "transliteration": "ʿaqala",
+    "meanings": [
+      "to reason",
+      "intellect",
+      "mind"
+    ],
+    "frequency": 49,
+    "tier": 3,
+    "example_verse": "2:44",
+    "derivatives": [
+      {
+        "form": "عَقْل",
+        "meaning": "reason, intellect"
+      },
+      {
+        "form": "عَاقِل",
+        "meaning": "rational, wise"
+      },
+      {
+        "form": "مَعْقُول",
+        "meaning": "reasonable"
+      },
+      {
+        "form": "عُقَلَاء",
+        "meaning": "wise people (pl.)"
+      }
+    ],
+    "coverage_weight": 0.000633,
+    "corpus_root_bw": "Eql"
+  },
+  {
+    "id": "n-w-r",
+    "root": "ن و ر",
+    "arabic": "نُور",
+    "transliteration": "nūr",
+    "meanings": [
+      "light",
+      "to illuminate"
+    ],
+    "frequency": 194,
+    "tier": 2,
+    "example_verse": "2:17",
+    "derivatives": [
+      {
+        "form": "أَنْوَار",
+        "meaning": "lights (pl.)"
+      },
+      {
+        "form": "مُنِير",
+        "meaning": "illuminating"
+      },
+      {
+        "form": "اِسْتَنَارَ",
+        "meaning": "became illuminated"
+      },
+      {
+        "form": "نُورَانِيّ",
+        "meaning": "luminous"
+      }
+    ],
+    "coverage_weight": 0.002506,
+    "corpus_root_bw": "nwr"
+  },
+  {
+    "id": "j-h-d",
+    "root": "ج ه د",
+    "arabic": "جَاهَدَ",
+    "transliteration": "jāhada",
+    "meanings": [
+      "to strive",
+      "struggle",
+      "effort"
+    ],
+    "frequency": 41,
+    "tier": 3,
+    "example_verse": "2:218",
+    "derivatives": [
+      {
+        "form": "جِهَاد",
+        "meaning": "struggle, striving"
+      },
+      {
+        "form": "مُجَاهِد",
+        "meaning": "one who strives"
+      },
+      {
+        "form": "جُهْد",
+        "meaning": "effort"
+      },
+      {
+        "form": "اِجْتِهَاد",
+        "meaning": "diligence, independent reasoning"
+      }
+    ],
+    "coverage_weight": 0.00053,
+    "corpus_root_bw": "jhd"
+  },
+  {
+    "id": "h-sh-r",
+    "root": "ح ش ر",
+    "arabic": "حَشَرَ",
+    "transliteration": "ḥashara",
+    "meanings": [
+      "to gather",
+      "resurrection",
+      "crowd"
+    ],
+    "frequency": 43,
+    "tier": 3,
+    "example_verse": "2:203",
+    "derivatives": [
+      {
+        "form": "حَشْر",
+        "meaning": "gathering, resurrection"
+      },
+      {
+        "form": "مَحْشَر",
+        "meaning": "place of gathering"
+      },
+      {
+        "form": "مَحْشُور",
+        "meaning": "gathered"
+      }
+    ],
+    "coverage_weight": 0.000555,
+    "corpus_root_bw": "H$r"
+  },
+  {
+    "id": "f-r-q",
+    "root": "ف ر ق",
+    "arabic": "فَرَّقَ",
+    "transliteration": "farraqa",
+    "meanings": [
+      "to separate",
+      "Quran",
+      "criterion"
+    ],
+    "frequency": 72,
+    "tier": 3,
+    "example_verse": "2:53",
+    "derivatives": [
+      {
+        "form": "فُرْقَان",
+        "meaning": "criterion, Quran"
+      },
+      {
+        "form": "فَرِيق",
+        "meaning": "group, party"
+      },
+      {
+        "form": "فِرَاق",
+        "meaning": "separation"
+      },
+      {
+        "form": "فَرَّقَ",
+        "meaning": "separated, divided"
+      }
+    ],
+    "coverage_weight": 0.00093,
+    "corpus_root_bw": "frq"
+  },
+  {
+    "id": "a-a-d",
+    "root": "ع و د",
+    "arabic": "عَادَ",
+    "transliteration": "ʿāda",
+    "meanings": [
+      "to return",
+      "habit",
+      "to repeat"
+    ],
+    "frequency": 63,
+    "tier": 3,
+    "example_verse": "2:275",
+    "derivatives": [
+      {
+        "form": "عَوْدَة",
+        "meaning": "return"
+      },
+      {
+        "form": "عَادَة",
+        "meaning": "habit, custom"
+      },
+      {
+        "form": "مُعَاوَدَة",
+        "meaning": "recurrence"
+      },
+      {
+        "form": "عَيْد",
+        "meaning": "festival (recurring)"
+      }
+    ],
+    "coverage_weight": 0.000814,
+    "corpus_root_bw": "Ewd"
+  },
+  {
+    "id": "f-s-d",
+    "root": "ف س د",
+    "arabic": "فَسَدَ",
+    "transliteration": "fasada",
+    "meanings": [
+      "to corrupt",
+      "corruption",
+      "to spoil"
+    ],
+    "frequency": 50,
+    "tier": 3,
+    "example_verse": "2:11",
+    "derivatives": [
+      {
+        "form": "فَسَاد",
+        "meaning": "corruption"
+      },
+      {
+        "form": "مُفْسِد",
+        "meaning": "corrupter"
+      },
+      {
+        "form": "فَاسِد",
+        "meaning": "corrupt, spoiled"
+      }
+    ],
+    "coverage_weight": 0.000646,
+    "corpus_root_bw": "fsd"
+  },
+  {
+    "id": "s-r-t",
+    "root": "ص ر ط",
+    "arabic": "صِرَاط",
+    "transliteration": "ṣirāṭ",
+    "meanings": [
+      "path",
+      "road",
+      "way"
+    ],
+    "frequency": 45,
+    "tier": 3,
+    "example_verse": "1:6",
+    "derivatives": [
+      {
+        "form": "صِرَاطٌ مُسْتَقِيم",
+        "meaning": "straight path"
+      },
+      {
+        "form": "صُرُط",
+        "meaning": "paths (pl.)"
+      }
+    ],
+    "coverage_weight": 0.000581,
+    "corpus_root_bw": "SrT"
+  },
+  {
+    "id": "b-d-a",
+    "root": "ب د أ",
+    "arabic": "بَدَأَ",
+    "transliteration": "badaʾa",
+    "meanings": [
+      "to begin",
+      "to originate",
+      "first"
+    ],
+    "frequency": 57,
+    "tier": 3,
+    "example_verse": "2:117",
+    "derivatives": [
+      {
+        "form": "بِدَايَة",
+        "meaning": "beginning"
+      },
+      {
+        "form": "بَدِيع",
+        "meaning": "unprecedented, originator"
+      },
+      {
+        "form": "مُبْدِع",
+        "meaning": "originator, creative"
+      },
+      {
+        "form": "اِبْتِدَاء",
+        "meaning": "commencement"
+      }
+    ],
+    "coverage_weight": 0.00074
+  },
+  {
+    "id": "n-h-y",
+    "root": "ن ه ي",
+    "arabic": "نَهَى",
+    "transliteration": "nahā",
+    "meanings": [
+      "to forbid",
+      "to restrain",
+      "intellect"
+    ],
+    "frequency": 56,
+    "tier": 3,
+    "example_verse": "2:275",
+    "derivatives": [
+      {
+        "form": "نَهْي",
+        "meaning": "prohibition"
+      },
+      {
+        "form": "نَاهٍ",
+        "meaning": "one who prohibits"
+      },
+      {
+        "form": "مَنْهِيّ",
+        "meaning": "prohibited"
+      }
+    ],
+    "coverage_weight": 0.000723,
+    "corpus_root_bw": "nhy"
+  },
+  {
+    "id": "q-s-m",
+    "root": "ق س م",
+    "arabic": "قَسَمَ",
+    "transliteration": "qasama",
+    "meanings": [
+      "to divide",
+      "to swear",
+      "oath"
+    ],
+    "frequency": 33,
+    "tier": 3,
+    "example_verse": "2:228",
+    "derivatives": [
+      {
+        "form": "قَسَم",
+        "meaning": "oath"
+      },
+      {
+        "form": "قِسْمَة",
+        "meaning": "division, share"
+      },
+      {
+        "form": "قِسْم",
+        "meaning": "part, section"
+      },
+      {
+        "form": "مُقَسَّم",
+        "meaning": "divided"
+      }
+    ],
+    "coverage_weight": 0.000426,
+    "corpus_root_bw": "qsm"
+  },
+  {
+    "id": "a-d-l",
+    "root": "ع د ل",
+    "arabic": "عَدَلَ",
+    "transliteration": "ʿadala",
+    "meanings": [
+      "justice",
+      "to be just",
+      "equal"
+    ],
+    "frequency": 28,
+    "tier": 3,
+    "example_verse": "2:48",
+    "derivatives": [
+      {
+        "form": "عَدْل",
+        "meaning": "justice"
+      },
+      {
+        "form": "عَادِل",
+        "meaning": "just"
+      },
+      {
+        "form": "اِعْتِدَال",
+        "meaning": "moderation"
+      },
+      {
+        "form": "مُعْتَدِل",
+        "meaning": "moderate"
+      }
+    ],
+    "coverage_weight": 0.000362,
+    "corpus_root_bw": "Edl"
+  },
+  {
+    "id": "b-r-k",
+    "root": "ب ر ك",
+    "arabic": "بَارَكَ",
+    "transliteration": "bāraka",
+    "meanings": [
+      "to bless",
+      "blessing",
+      "to kneel"
+    ],
+    "frequency": 32,
+    "tier": 3,
+    "example_verse": "2:157",
+    "derivatives": [
+      {
+        "form": "بَرَكَة",
+        "meaning": "blessing"
+      },
+      {
+        "form": "مُبَارَك",
+        "meaning": "blessed"
+      },
+      {
+        "form": "تَبَارَكَ",
+        "meaning": "Blessed be"
+      },
+      {
+        "form": "بَرَكَات",
+        "meaning": "blessings (pl.)"
+      }
+    ],
+    "coverage_weight": 0.000413,
+    "corpus_root_bw": "brk"
+  },
+  {
+    "id": "a-f-w",
+    "root": "ع ف و",
+    "arabic": "عَفَا",
+    "transliteration": "ʿafā",
+    "meanings": [
+      "to pardon",
+      "forgiveness",
+      "to efface"
+    ],
+    "frequency": 35,
+    "tier": 3,
+    "example_verse": "2:52",
+    "derivatives": [
+      {
+        "form": "عَفْو",
+        "meaning": "pardon, forgiveness"
+      },
+      {
+        "form": "عَافِي",
+        "meaning": "pardoner"
+      },
+      {
+        "form": "عَفُوّ",
+        "meaning": "Pardoner (Allah)"
+      },
+      {
+        "form": "مَعْفُوّ",
+        "meaning": "pardoned"
+      }
+    ],
+    "coverage_weight": 0.000452,
+    "corpus_root_bw": "Efw"
+  },
+  {
+    "id": "t-m-r",
+    "root": "ث م ر",
+    "arabic": "ثَمَرَة",
+    "transliteration": "thamara",
+    "meanings": [
+      "fruit",
+      "result",
+      "to bear fruit"
+    ],
+    "frequency": 24,
+    "tier": 3,
+    "example_verse": "2:22",
+    "derivatives": [
+      {
+        "form": "ثِمَار",
+        "meaning": "fruits (pl.)"
+      },
+      {
+        "form": "ثَمَرَات",
+        "meaning": "fruits (pl.)"
+      },
+      {
+        "form": "مُثْمِر",
+        "meaning": "fruitful"
+      }
+    ],
+    "coverage_weight": 0.00031,
+    "corpus_root_bw": "vmr"
+  },
+  {
+    "id": "n-h-r",
+    "root": "ن ه ر",
+    "arabic": "نَهْر",
+    "transliteration": "nahr",
+    "meanings": [
+      "river",
+      "stream",
+      "to rebuke"
+    ],
+    "frequency": 113,
+    "tier": 2,
+    "example_verse": "2:25",
+    "derivatives": [
+      {
+        "form": "أَنْهَار",
+        "meaning": "rivers (pl.)"
+      },
+      {
+        "form": "انْتِهَار",
+        "meaning": "rebuke"
+      }
+    ],
+    "coverage_weight": 0.001459,
+    "corpus_root_bw": "nhr"
+  },
+  {
+    "id": "f-k-r",
+    "root": "ف ك ر",
+    "arabic": "فَكَّرَ",
+    "transliteration": "fakkara",
+    "meanings": [
+      "to think",
+      "to ponder",
+      "thought"
+    ],
+    "frequency": 18,
+    "tier": 3,
+    "example_verse": "2:219",
+    "derivatives": [
+      {
+        "form": "فِكْر",
+        "meaning": "thought, idea"
+      },
+      {
+        "form": "تَفَكُّر",
+        "meaning": "reflection, pondering"
+      },
+      {
+        "form": "مُفَكِّر",
+        "meaning": "thinker"
+      },
+      {
+        "form": "أَفْكَار",
+        "meaning": "thoughts (pl.)"
+      }
+    ],
+    "coverage_weight": 0.000232,
+    "corpus_root_bw": "fkr"
+  },
+  {
+    "id": "q-r-a",
+    "root": "ق ر أ",
+    "arabic": "قَرَأَ",
+    "transliteration": "qaraʾa",
+    "meanings": [
+      "to read",
+      "to recite",
+      "Quran"
+    ],
+    "frequency": 88,
+    "tier": 3,
+    "example_verse": "96:1",
+    "derivatives": [
+      {
+        "form": "قُرْآن",
+        "meaning": "the Quran (recitation)"
+      },
+      {
+        "form": "قِرَاءَة",
+        "meaning": "reading, recitation"
+      },
+      {
+        "form": "قَارِئ",
+        "meaning": "reader, reciter"
+      },
+      {
+        "form": "مَقْرُوء",
+        "meaning": "read, recited"
+      }
+    ],
+    "coverage_weight": 0.001137,
+    "corpus_root_bw": "qrA"
+  },
+  {
+    "id": "a-r-f",
+    "root": "ع ر ف",
+    "arabic": "عَرَفَ",
+    "transliteration": "ʿarafa",
+    "meanings": [
+      "to know",
+      "to recognize",
+      "goodness"
+    ],
+    "frequency": 70,
+    "tier": 3,
+    "example_verse": "2:273",
+    "derivatives": [
+      {
+        "form": "مَعْرُوف",
+        "meaning": "known, goodness"
+      },
+      {
+        "form": "عَارِف",
+        "meaning": "knower"
+      },
+      {
+        "form": "عِرْفَان",
+        "meaning": "gnosis, gratitude"
+      },
+      {
+        "form": "اِعْتِرَاف",
+        "meaning": "confession, recognition"
+      }
+    ],
+    "coverage_weight": 0.000904,
+    "corpus_root_bw": "Erf"
+  },
+  {
+    "id": "b-d-a2",
+    "root": "ب د ع",
+    "arabic": "بَدِيع",
+    "transliteration": "badīʿ",
+    "meanings": [
+      "unprecedented",
+      "originator",
+      "novel"
+    ],
+    "frequency": 2,
+    "tier": 3,
+    "example_verse": "2:117",
+    "derivatives": [
+      {
+        "form": "بِدْعَة",
+        "meaning": "innovation (in religion)"
+      },
+      {
+        "form": "مُبْتَدَع",
+        "meaning": "innovated"
+      }
+    ],
+    "coverage_weight": 3e-05
+  }
+]

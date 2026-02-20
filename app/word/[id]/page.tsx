@@ -1,0 +1,218 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams, notFound } from 'next/navigation';
+import Link from 'next/link';
+import { AudioButton } from '@/components/study/AudioButton';
+import { MASTERY_LABELS, MASTERY_COLORS } from '@/lib/srs';
+import { getAllWordProgress } from '@/lib/storage';
+import { fetchWordVerses, type AyahResponse } from '@/lib/quran-api';
+import { MorphologyTable } from '@/components/word/MorphologyTable';
+import wordsData from '@/data/words.json';
+
+interface Derivative { form: string; meaning: string; }
+interface WordEntry {
+  id: string;
+  root: string;
+  arabic: string;
+  transliteration: string;
+  meanings: string[];
+  frequency: number;
+  tier: number;
+  example_verse: string;
+  derivatives: Derivative[];
+  coverage_weight: number;
+}
+
+const words = wordsData as WordEntry[];
+const wordsMap = Object.fromEntries(words.map(w => [w.id, w]));
+
+export default function WordDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const word = wordsMap[id];
+
+  const [verses, setVerses] = useState<AyahResponse[]>([]);
+  const [loadingVerses, setLoadingVerses] = useState(true);
+  const [mastery, setMastery] = useState(0);
+
+  useEffect(() => {
+    if (!word) return;
+    const progress = getAllWordProgress();
+    setMastery(progress[id]?.mastery ?? 0);
+
+    // Fetch 3 example verses — use example_verse + adjacent
+    const refs = [word.example_verse];
+    setLoadingVerses(true);
+    fetchWordVerses(refs).then(data => {
+      setVerses(data);
+      setLoadingVerses(false);
+    });
+  }, [id, word]);
+
+  if (!word) return (
+    <div className="py-24 text-center text-muted">
+      Word not found. <Link href="/words" className="text-gold hover:underline">Back to library</Link>
+    </div>
+  );
+
+  const pctCoverage = (word.coverage_weight * 77429 / 77429 * 100).toFixed(3);
+
+  return (
+    <div className="flex flex-col gap-8 py-4">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-muted text-sm">
+        <Link href="/words" className="hover:text-gold transition-colors">Words</Link>
+        <span>/</span>
+        <span className="text-harf-text">{word.transliteration}</span>
+      </div>
+
+      {/* Hero */}
+      <div className="card p-8 flex flex-col md:flex-row gap-8 items-start">
+        {/* Arabic */}
+        <div className="flex flex-col gap-3 items-center md:items-start">
+          <div
+            className="font-amiri text-8xl text-harf-text leading-none"
+            dir="rtl"
+            style={{ fontFamily: 'Amiri, serif' }}
+          >
+            {word.arabic}
+          </div>
+          <div className="text-muted font-mono text-lg">{word.root}</div>
+          <AudioButton text={word.arabic} />
+        </div>
+
+        {/* Divider */}
+        <div className="hidden md:block w-px self-stretch bg-border" />
+
+        {/* Info */}
+        <div className="flex flex-col gap-4 flex-1">
+          <div>
+            <div className="text-muted text-xs uppercase tracking-wider mb-1">Transliteration</div>
+            <div className="text-harf-text text-xl font-medium">{word.transliteration}</div>
+          </div>
+
+          <div>
+            <div className="text-muted text-xs uppercase tracking-wider mb-1">Meanings</div>
+            <div className="flex flex-wrap gap-2">
+              {word.meanings.map((m, i) => (
+                <span key={i} className="bg-surface-plus border border-border px-3 py-1 rounded-full text-harf-text text-sm">
+                  {m}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-6">
+            <div>
+              <div className="text-muted text-xs uppercase tracking-wider mb-1">Frequency</div>
+              <div className="text-gold font-bold text-2xl">{word.frequency}×</div>
+              <div className="text-muted text-xs">in the Quran</div>
+            </div>
+            <div>
+              <div className="text-muted text-xs uppercase tracking-wider mb-1">Coverage</div>
+              <div className="text-gold font-bold text-2xl">{(word.coverage_weight * 100).toFixed(2)}%</div>
+              <div className="text-muted text-xs">of Quran</div>
+            </div>
+          </div>
+
+          {/* Mastery */}
+          <div>
+            <div className="text-muted text-xs uppercase tracking-wider mb-2">Your mastery</div>
+            <div className="flex items-center gap-3">
+              <div className="flex gap-1.5">
+                {[1,2,3,4,5].map(l => (
+                  <div key={l} className={`w-3 h-3 rounded-full ${l <= mastery ? MASTERY_COLORS[mastery] : 'bg-border'}`} />
+                ))}
+              </div>
+              <span className="text-harf-text text-sm">{MASTERY_LABELS[mastery]}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Derivatives */}
+      {word.derivatives.length > 0 && (
+        <div className="card p-6 flex flex-col gap-4">
+          <h2 className="text-harf-text font-semibold">Derived Forms</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {word.derivatives.map((d, i) => (
+              <div key={i} className="bg-surface-plus rounded-xl p-4 flex flex-col gap-2" dir="rtl">
+                <div
+                  className="font-amiri text-2xl text-gold"
+                  style={{ fontFamily: 'Amiri, serif' }}
+                >
+                  {d.form}
+                </div>
+                <div className="text-muted text-sm" dir="ltr">{d.meaning}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Quranic verses */}
+      <div className="card p-6 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-harf-text font-semibold">Quranic Examples</h2>
+          <span className="text-muted text-xs">from api.alquran.cloud</span>
+        </div>
+
+        {loadingVerses ? (
+          <div className="flex flex-col gap-3">
+            {[1,2].map(i => (
+              <div key={i} className="h-20 bg-surface-plus rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : verses.length > 0 ? (
+          <div className="flex flex-col gap-4">
+            {verses.map((v, i) => (
+              <div key={i} className="border border-border rounded-xl p-5 flex flex-col gap-3">
+                <div className="flex justify-between items-center text-xs text-muted">
+                  <span>Surah {v.surahName}</span>
+                  <span className="font-mono">{v.reference}</span>
+                </div>
+                <div
+                  className="font-amiri text-2xl text-harf-text leading-loose"
+                  dir="rtl"
+                  style={{ fontFamily: 'Amiri, serif' }}
+                >
+                  {v.arabic}
+                </div>
+                <div className="text-muted text-sm italic">{v.english}</div>
+                <AudioButton text={v.arabic} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-muted text-sm">Could not load verses. Check your connection.</div>
+        )}
+      </div>
+
+      {/* Morphological analysis */}
+      <div className="card p-6 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-harf-text font-semibold">Morphological Analysis</h2>
+          <span className="text-muted text-xs">verse {word.example_verse}</span>
+        </div>
+        <MorphologyTable verseRef={word.example_verse} />
+      </div>
+
+      {/* Study action */}
+      <div className="flex gap-3">
+        <Link
+          href="/study"
+          className="px-6 py-3 bg-gold text-bg rounded-xl font-semibold hover:bg-gold-muted transition-colors"
+        >
+          Study This Word
+        </Link>
+        <Link
+          href="/words"
+          className="px-6 py-3 bg-surface-plus text-harf-text rounded-xl font-medium hover:bg-border transition-colors"
+        >
+          ← Back to Library
+        </Link>
+      </div>
+    </div>
+  );
+}
