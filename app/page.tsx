@@ -172,7 +172,7 @@ export default function LandingPage() {
       {/* ── Islamic geometric background ─────────────────────────────── */}
       <svg
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full opacity-[0.06] pointer-events-none"
+        className="absolute inset-0 w-full h-full opacity-[0.06] pointer-events-none animate-breathe-bg origin-center"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -260,7 +260,10 @@ export default function LandingPage() {
                 return (
                   <div
                     key={seg.id}
-                    className={isBrand ? 'relative p-4 -mx-4 rounded-2xl bg-[#C41E3A]/5 border border-[#C41E3A]/10 shadow-[0_0_40px_rgba(196,30,58,0.05)]' : ''}
+                    className={`
+                      animate-slide-up animate-fade-in
+                      ${isBrand ? 'relative p-4 -mx-4 rounded-2xl bg-[#C41E3A]/5 border border-[#C41E3A]/10 shadow-[0_0_40px_rgba(196,30,58,0.05)]' : ''}
+                    `}
                   >
                     {/* Arabic term + phonetic */}
                     <div className="flex items-baseline gap-2">
@@ -311,13 +314,14 @@ export default function LandingPage() {
 
             {/* CTA */}
             {showCTA && (
-              <div className="mt-8">
+              <div className="mt-8 animate-slide-up">
                 <Link
                   href="/app"
-                  className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gold text-bg font-semibold text-sm tracking-[0.12em] uppercase transition-all hover:gap-5 hover:-translate-y-0.5"
+                  className="relative overflow-hidden inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gold text-bg font-semibold text-sm tracking-[0.12em] uppercase transition-all hover:gap-5 hover:-translate-y-0.5"
                 >
-                  Begin
-                  <span aria-hidden="true" className="text-base">→</span>
+                  <div className="absolute inset-0 w-1/2 bg-white/20 blur-md animate-shine-sweep" />
+                  <span className="relative z-10">Begin</span>
+                  <span aria-hidden="true" className="text-base relative z-10">→</span>
                 </Link>
               </div>
             )}
