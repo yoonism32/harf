@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { AudioButton } from '@/components/study/AudioButton';
 import { MASTERY_LABELS, MASTERY_COLORS } from '@/lib/srs';
 import { getAllWordProgress } from '@/lib/storage';
 import { fetchWordVerses, type AyahResponse } from '@/lib/quran-api';
@@ -182,7 +181,6 @@ export default function WordDetailPage() {
                   {v.arabic}
                 </div>
                 <div className="text-muted text-sm italic">{v.english}</div>
-                <AudioButton text={v.arabic} />
               </div>
             ))}
           </div>

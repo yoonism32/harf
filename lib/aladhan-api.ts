@@ -108,6 +108,38 @@ export async function fetchQibla(coords: Coordinates): Promise<number | null> {
   }
 }
 
+/** Fetch prayer times by city + country name */
+export async function fetchPrayerTimesByCity(
+  city: string,
+  country: string,
+  method = 2,
+): Promise<PrayerTimes | null> {
+  try {
+    const today = new Date();
+    const date = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
+    const res = await fetch(
+      `${BASE}/timingsByCity/${date}?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=${method}`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const timings = data.data.timings;
+    const dateInfo = data.data.date;
+    return {
+      Fajr:    formatTime(timings.Fajr),
+      Sunrise: formatTime(timings.Sunrise),
+      Dhuhr:   formatTime(timings.Dhuhr),
+      Asr:     formatTime(timings.Asr),
+      Maghrib: formatTime(timings.Maghrib),
+      Isha:    formatTime(timings.Isha),
+      date:    dateInfo.readable,
+      hijriDate: `${dateInfo.hijri.day} ${dateInfo.hijri.month.en} ${dateInfo.hijri.year}`,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Get browser geolocation as a promise */
 export function getBrowserLocation(): Promise<Coordinates> {
   return new Promise((resolve, reject) => {

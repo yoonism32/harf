@@ -47,7 +47,7 @@ export function RootFamilyPanel({ entry }: Props) {
         <div
           className="font-amiri text-4xl text-gold leading-none"
           dir="rtl"
-          style={{ fontFamily: 'Amiri, serif' }}
+          style={{ fontFamily: 'var(--font-amiri-quran), Amiri, serif' }}
         >
           {entry.rootArabic}
         </div>
@@ -92,7 +92,7 @@ export function RootFamilyPanel({ entry }: Props) {
                 <span
                   className="font-amiri text-xl text-harf-text"
                   dir="rtl"
-                  style={{ fontFamily: 'Amiri, serif' }}
+                  style={{ fontFamily: 'var(--font-amiri-quran), Amiri, serif' }}
                 >
                   {arabic}
                 </span>
@@ -125,7 +125,7 @@ export function RootFamilyPanel({ entry }: Props) {
                 <span
                   className="font-amiri text-xl text-harf-text leading-none"
                   dir="rtl"
-                  style={{ fontFamily: 'Amiri, serif' }}
+                  style={{ fontFamily: 'var(--font-amiri-quran), Amiri, serif' }}
                 >
                   {uthmani || '—'}
                 </span>

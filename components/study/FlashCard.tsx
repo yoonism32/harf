@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { AudioButton } from './AudioButton';
+import { useEffect, useRef, useState } from 'react';
 import { MasteryButtons } from './MasteryButtons';
 import { MASTERY_LABELS, MASTERY_COLORS, type ResponseKey } from '@/lib/srs';
 import type { WordProgress } from '@/lib/storage';
+import { verseAudioUrl } from '@/lib/audio';
 
 interface WordData {
   id: string;
@@ -48,9 +48,70 @@ function tokenContainsRoot(token: string, rootLetters: string): boolean {
   const r = normAr(rootLetters.replace(/\s+/g, ''));
   let ri = 0;
   for (let ti = 0; ti < t.length && ri < r.length; ti++) {
-    if (t[ti] === r[ri]) ri++;
+    const rl = r[ri]!;
+    const tl = t[ti]!;
+    // Exact match, or: final root letter is weak (و/ي) and surface shows ا or ي
+    // e.g. root سمو → سماء (و→ا), root دعو → دعا (و→ا)
+    //      root علو → العليّ (و→ي waw/ya interchange in defective roots)
+    const isWeakFinal = ri === r.length - 1 && (
+      ((rl === 'و' || rl === 'ي') && tl === 'ا') ||  // defective: surface alef (دعا، رمى)
+      (rl === 'و' && tl === 'ي') ||                    // waw↔ya: علو→عليّ
+      (rl === 'ي' && tl === 'و')                        // ya-defective plural: لقي→ألقوه، رمي→يرموه
+    );
+    // Hamzat al-wasl: root-initial ا is elided when the token has no ا at all
+    // e.g. root اسم → بسم (ب + إسم, alef wasl dropped after prefix)
+    const isWaslSkip = ri === 0 && rl === 'ا' && !t.includes('ا');
+    if (tl === rl || isWeakFinal) ri++;
+    else if (isWaslSkip) ri++; // skip the ا in root, stay on current token char (ti advances by loop)
   }
   return ri === r.length;
+}
+
+function VersePlayButton({ verseRef }: { verseRef: string }) {
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Stop audio whenever this button unmounts — any mastery response hides the card back
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, []);
+
+  const play = (e: React.MouseEvent) => {
+    e.stopPropagation(); // don't flip the card
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
+    const [ch, vs] = verseRef.split(':');
+    const url = verseAudioUrl(ch!, vs!);
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    audio.onplay = () => setPlaying(true);
+    audio.onended = () => setPlaying(false);
+    audio.onerror = () => setPlaying(false);
+    audio.play().catch(() => setPlaying(false));
+  };
+
+  return (
+    <button
+      onClick={play}
+      aria-label={playing ? 'Playing' : 'Play verse'}
+      className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs transition-colors
+        ${playing ? 'text-gold' : 'text-muted hover:text-gold'}`}
+    >
+      {playing ? (
+        <span className="flex gap-0.5 items-end h-3">
+          <span className="w-0.5 bg-gold rounded animate-bounce" style={{ height: '60%', animationDelay: '0ms' }} />
+          <span className="w-0.5 bg-gold rounded animate-bounce" style={{ height: '100%', animationDelay: '150ms' }} />
+          <span className="w-0.5 bg-gold rounded animate-bounce" style={{ height: '70%', animationDelay: '300ms' }} />
+        </span>
+      ) : (
+        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.784L4.39 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.39l3.993-3.784a1 1 0 011 .076zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
+        </svg>
+      )}
+      Listen
+    </button>
+  );
 }
 
 export function FlashCard({
@@ -105,8 +166,6 @@ export function FlashCard({
           </div>
         </div>
 
-        <AudioButton text={word.arabic} wordKey={wordKey} />
-
         {!flipped && (
           <div className="text-muted text-sm mt-4 animate-pulse">
             Tap to reveal meaning
@@ -145,30 +204,23 @@ export function FlashCard({
             {/* Verse example */}
             {verse?.arabic && (
               <div className="bg-surface-plus rounded-xl p-4 border border-border">
-                <div className="text-muted text-xs uppercase tracking-wider mb-2">
-                  Example — {verse.ref}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-muted text-xs uppercase tracking-wider">
+                    Example — {verse.ref}
+                  </div>
+                  <VersePlayButton verseRef={verse.ref} />
                 </div>
                 <div
                   className="font-amiri text-2xl mb-2"
                   dir="rtl"
                   lang="ar"
-                  style={{ fontFamily: 'Amiri, serif', lineHeight: '2.2' }}
+                  style={{ fontFamily: 'var(--font-amiri-quran), Amiri, serif', lineHeight: '2.2' }}
                 >
-                  {(() => {
-                    const tokens = verse.arabic.split(' ');
-                    // Prefer exact index from CDN key (1-based word number)
-                    const cdnIdx = wordKey ? parseInt(wordKey.split(':')[2] ?? '0', 10) - 1 : -1;
-                    return tokens.map((token, i) => {
-                      const isTarget = cdnIdx >= 0
-                        ? i === cdnIdx
-                        : tokenContainsRoot(token, word.root);
-                      return (
-                        <span key={i} className={isTarget ? 'text-gold' : 'text-harf-text'}>
-                          {token}{' '}
-                        </span>
-                      );
-                    });
-                  })()}
+                  {verse.arabic.split(' ').map((token, i) => (
+                    <span key={i} className={tokenContainsRoot(token, word.root) ? 'text-gold' : 'text-harf-text'}>
+                      {token}{' '}
+                    </span>
+                  ))}
                 </div>
                 {verse.english && (
                   <div className="text-muted text-sm italic">{verse.english}</div>

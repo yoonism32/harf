@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Amiri, Rubik } from 'next/font/google';
+import { Amiri, Amiri_Quran, Rubik } from 'next/font/google';
 import './globals.css';
 import { LayoutShell } from '@/components/LayoutShell';
 
@@ -9,6 +9,15 @@ const amiri = Amiri({
   weight: ['400', '700'],
   style: ['normal', 'italic'],
   variable: '--font-amiri',
+  display: 'swap',
+});
+
+// Amiri Quran: extended variant with full Uthmanic Unicode (U+06D6–06ED annotation marks)
+// Used for verse/ayah text so characters like إِسْرَٰٓءِيلَ render correctly
+const amiriQuran = Amiri_Quran({
+  subsets: ['arabic'],
+  weight: ['400'],
+  variable: '--font-amiri-quran',
   display: 'swap',
 });
 
@@ -53,7 +62,7 @@ export default function RootLayout({
       lang="ar"
       dir="rtl"
       style={{ colorScheme: 'dark' }}
-      className={`${amiri.variable} ${rubik.variable}`}
+      className={`${amiri.variable} ${amiriQuran.variable} ${rubik.variable}`}
     >
       <head>
         {/* DNS-prefetch for CDN resources used at runtime */}

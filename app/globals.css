@@ -227,6 +227,8 @@
 
 html {
   color-scheme: dark;
+  zoom: 1.25;
+  /* scale everything — replicates 125% browser zoom exactly */
   /* Improve font rendering */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;

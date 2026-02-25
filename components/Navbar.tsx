@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: '/words',    label: 'Words'     },
   { href: '/coverage', label: 'Coverage'  },
   { href: '/names',    label: '99 Names'  },
+  { href: '/settings', label: 'Settings'  },
 ];
 
 export function Navbar() {

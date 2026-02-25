@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { fetchPrayerTimes, getBrowserLocation, getNextPrayer, MECCA, type PrayerTimes } from '@/lib/aladhan-api';
+import { fetchPrayerTimesByCity, getNextPrayer, type PrayerTimes } from '@/lib/aladhan-api';
 
 const PRAYER_ICONS: Record<string, string> = {
   Fajr:    '🌙',
@@ -15,26 +16,33 @@ const PRAYER_ICONS: Record<string, string> = {
 export function PrayerTimesWidget() {
   const [times, setTimes] = useState<PrayerTimes | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [location, setLocation] = useState<{ city: string; country: string } | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
+    const saved = localStorage.getItem('harf-location');
+    if (saved) {
       try {
-        const coords = await getBrowserLocation().catch(() => MECCA);
-        const data = await fetchPrayerTimes(coords);
-        if (!cancelled) setTimes(data);
+        setLocation(JSON.parse(saved));
       } catch {
-        if (!cancelled) setError('Could not load prayer times');
-      } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
+    } else {
+      setLoading(false);
     }
-
-    load();
-    return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    if (!location) return;
+    let cancelled = false;
+    setLoading(true);
+    fetchPrayerTimesByCity(location.city, location.country).then(data => {
+      if (!cancelled) {
+        setTimes(data);
+        setLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [location]);
 
   const nextPrayer = times ? getNextPrayer(times) : null;
   const prayerList = times
@@ -57,6 +65,18 @@ export function PrayerTimesWidget() {
         )}
       </div>
 
+      {!location && !loading && (
+        <div className="text-center py-4 flex flex-col gap-3">
+          <p className="text-muted text-sm">Set your location to see prayer times.</p>
+          <Link
+            href="/settings"
+            className="text-gold text-sm hover:underline"
+          >
+            Go to Settings →
+          </Link>
+        </div>
+      )}
+
       {loading && (
         <div className="flex flex-col gap-2">
           {[...Array(5)].map((_, i) => (
@@ -65,37 +85,40 @@ export function PrayerTimesWidget() {
         </div>
       )}
 
-      {error && (
-        <div className="text-muted text-sm">{error}</div>
-      )}
-
       {times && (
-        <div className="flex flex-col gap-1">
-          {prayerList.map(prayer => {
-            const isNext = nextPrayer?.name === prayer.name;
-            return (
-              <div
-                key={prayer.name}
-                className={`flex justify-between items-center px-3 py-2 rounded-lg transition-colors ${
-                  isNext ? 'bg-gold/10 border border-gold/30' : 'hover:bg-surface-plus'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span>{PRAYER_ICONS[prayer.name]}</span>
-                  <span className={`text-sm ${isNext ? 'text-gold font-semibold' : 'text-muted'}`}>
-                    {prayer.name}
+        <>
+          <div className="flex flex-col gap-1">
+            {prayerList.map(prayer => {
+              const isNext = nextPrayer?.name === prayer.name;
+              return (
+                <div
+                  key={prayer.name}
+                  className={`flex justify-between items-center px-3 py-2 rounded-lg transition-colors ${
+                    isNext ? 'bg-gold/10 border border-gold/30' : 'hover:bg-surface-plus'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>{PRAYER_ICONS[prayer.name]}</span>
+                    <span className={`text-sm ${isNext ? 'text-gold font-semibold' : 'text-muted'}`}>
+                      {prayer.name}
+                    </span>
+                    {isNext && (
+                      <span className="text-xs text-gold/70 bg-gold/10 px-1.5 py-0.5 rounded">Next</span>
+                    )}
+                  </div>
+                  <span className={`font-mono text-sm ${isNext ? 'text-gold font-bold' : 'text-harf-text'}`}>
+                    {prayer.time}
                   </span>
-                  {isNext && (
-                    <span className="text-xs text-gold/70 bg-gold/10 px-1.5 py-0.5 rounded">Next</span>
-                  )}
                 </div>
-                <span className={`font-mono text-sm ${isNext ? 'text-gold font-bold' : 'text-harf-text'}`}>
-                  {prayer.time}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+          <div className="text-right">
+            <Link href="/settings" className="text-muted text-xs hover:text-gold transition-colors">
+              {location?.city} · change
+            </Link>
+          </div>
+        </>
       )}
     </div>
   );

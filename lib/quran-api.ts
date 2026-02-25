@@ -20,18 +20,21 @@ function surahName(n: number): string {
   return SURAHS.find(s => s.number === n)?.name ?? `Surah ${n}`;
 }
 
-/** Fetch a single ayah */
+const ayahCache = new Map<string, AyahResponse>();
+
+/** Fetch a single ayah (client-side cached — same ref never fetched twice) */
 export async function fetchAyah(ref: string): Promise<AyahResponse | null> {
+  if (ayahCache.has(ref)) return ayahCache.get(ref)!;
   const [s, a] = ref.split(':');
   if (!s || !a) return null;
   try {
     const [arRes, enRes] = await Promise.all([
-      fetch(`${CDN}/${AR_EDITION}/${s}/${a}.min.json`, { next: { revalidate: 86400 } }),
-      fetch(`${CDN}/${EN_EDITION}/${s}/${a}.min.json`, { next: { revalidate: 86400 } }),
+      fetch(`${CDN}/${AR_EDITION}/${s}/${a}.min.json`),
+      fetch(`${CDN}/${EN_EDITION}/${s}/${a}.min.json`),
     ]);
     if (!arRes.ok || !enRes.ok) return null;
     const [ar, en] = await Promise.all([arRes.json(), enRes.json()]);
-    return {
+    const result: AyahResponse = {
       arabic: ar.text,
       english: en.text,
       reference: `${s}:${a}`,
@@ -39,6 +42,8 @@ export async function fetchAyah(ref: string): Promise<AyahResponse | null> {
       ayahNumber: Number(a),
       surahName: surahName(Number(s)),
     };
+    ayahCache.set(ref, result);
+    return result;
   } catch {
     return null;
   }

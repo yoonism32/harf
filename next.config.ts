@@ -22,6 +22,7 @@ const securityHeaders = [
       "font-src 'self' data:",
       "img-src 'self' data: blob:",
       "connect-src 'self' https://cdn.jsdelivr.net https://api.aladhan.com",
+      "media-src 'self' https://audios.quranwbw.com https://everyayah.com",
       "worker-src blob:",
       "frame-ancestors 'none'",
     ].join('; '),

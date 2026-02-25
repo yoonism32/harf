@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 
 const WORDS_AUDIO_CDN = 'https://audios.quranwbw.com/words';
+const VERSE_AUDIO_CDN = 'https://everyayah.com/data/Alafasy_128kbps';
 
 /** Build the QuranWBW word audio URL from a key like "2:255:3" */
 function wordAudioUrl(key: string): string {
@@ -11,19 +12,38 @@ function wordAudioUrl(key: string): string {
   return `${WORDS_AUDIO_CDN}/${ch}/${file}?version=2`;
 }
 
+/** Build the EveryAyah verse audio URL from a key like "2:255" */
+function verseAudioUrl(key: string): string {
+  const [ch, vs] = key.split(':');
+  return `${VERSE_AUDIO_CDN}/${ch.padStart(3, '0')}${vs.padStart(3, '0')}.mp3`;
+}
+
 interface AudioButtonProps {
   text: string;
   /** Quran word key "chapter:verse:word" — uses CDN audio when provided */
   wordKey?: string;
+  /** Quran verse key "chapter:verse" — plays full verse via EveryAyah CDN (Alafasy) */
+  verseKey?: string;
   lang?: string;
   className?: string;
 }
 
-export function AudioButton({ text, wordKey, lang = 'ar-SA', className = '' }: AudioButtonProps) {
+export function AudioButton({ text, wordKey, verseKey, lang = 'ar-SA', className = '' }: AudioButtonProps) {
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const speak = () => {
+    if (verseKey) {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
+      const audio = new Audio(verseAudioUrl(verseKey));
+      audioRef.current = audio;
+      audio.onplay = () => setPlaying(true);
+      audio.onended = () => setPlaying(false);
+      audio.onerror = () => setPlaying(false);
+      audio.play().catch(() => setPlaying(false));
+      return;
+    }
+
     if (wordKey) {
       // Stop any previous CDN audio
       if (audioRef.current) {
