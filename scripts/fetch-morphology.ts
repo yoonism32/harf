@@ -30,6 +30,7 @@ interface MorphologyEntry {
   summary: string | null;
   rootFamily: string[];       // all word keys e.g. ["2:2:3", ...]
   rootFamilyCount: number;
+  rootFamilyWords: Array<{ key: string; uthmani: string }>;
   verbForms: Record<string, string> | null;
 }
 
@@ -203,6 +204,10 @@ async function main() {
       summary,
       rootFamily,
       rootFamilyCount: rootFamily.length,
+      rootFamilyWords: rootFamily.slice(0, 20).map(key => ({
+        key,
+        uthmani: keyToMeta[key]?.[0] ?? '',
+      })),
       verbForms,
     };
   }

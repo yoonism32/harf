@@ -82,7 +82,6 @@ export default function WordDetailPage() {
             {word.arabic}
           </div>
           <div className="text-muted font-mono text-lg">{word.root}</div>
-          <AudioButton text={word.arabic} />
         </div>
 
         {/* Divider */}

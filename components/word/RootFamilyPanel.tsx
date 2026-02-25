@@ -6,6 +6,7 @@ export interface MorphologyEntry {
   summary: string | null;
   rootFamily: string[];
   rootFamilyCount: number;
+  rootFamilyWords?: Array<{ key: string; uthmani: string }>;
   verbForms: Record<string, string> | null;
 }
 
@@ -113,22 +114,32 @@ export function RootFamilyPanel({ entry }: Props) {
           </span>
         </div>
 
-        <div className="overflow-y-auto max-h-56 rounded-xl border border-border divide-y divide-border">
-          {top20.map((key) => {
-            const { ref, word } = formatKey(key);
+        <div className="flex flex-wrap gap-2">
+          {(entry.rootFamilyWords ?? top20.map(key => ({ key, uthmani: '' }))).map(({ key, uthmani }) => {
+            const { ref } = formatKey(key);
             return (
-              <div key={key} className="flex items-center justify-between px-4 py-2 text-sm hover:bg-surface-plus transition-colors">
-                <span className="font-mono text-muted text-xs">{ref}</span>
-                <span className="text-harf-text text-xs">word {word}</span>
+              <div
+                key={key}
+                className="flex flex-col items-center gap-1 bg-surface-plus border border-border rounded-xl px-3 py-2 hover:border-gold/40 transition-colors"
+              >
+                <span
+                  className="font-amiri text-xl text-harf-text leading-none"
+                  dir="rtl"
+                  style={{ fontFamily: 'Amiri, serif' }}
+                >
+                  {uthmani || '—'}
+                </span>
+                <span className="text-muted text-[10px] font-mono">{ref}</span>
               </div>
             );
           })}
-          {entry.rootFamilyCount > 20 && (
-            <div className="px-4 py-2 text-xs text-muted text-center">
-              +{entry.rootFamilyCount - 20} more occurrences
-            </div>
-          )}
         </div>
+
+        {entry.rootFamilyCount > 20 && (
+          <div className="mt-2 text-xs text-muted text-center">
+            +{entry.rootFamilyCount - 20} more occurrences
+          </div>
+        )}
       </div>
     </div>
   );

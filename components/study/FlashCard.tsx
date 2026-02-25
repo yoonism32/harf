@@ -26,6 +26,7 @@ interface FlashCardProps {
   progress: WordProgress | null;
   onResponse: (key: ResponseKey) => void;
   verse?: Verse;
+  wordKey?: string;
 }
 
 /** Strip diacritics + normalise all hamza/alef/ya variants for root matching */
@@ -57,6 +58,7 @@ export function FlashCard({
   progress,
   onResponse,
   verse,
+  wordKey,
 }: FlashCardProps) {
   const [flipped, setFlipped] = useState(false);
   const mastery = progress?.mastery ?? 0;
@@ -75,10 +77,12 @@ export function FlashCard({
           : `Studying: ${word.transliteration}`}
       </div>
       {/* Card */}
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         className="card min-h-64 w-full flex flex-col items-center justify-center gap-4 p-8 cursor-pointer select-none relative overflow-hidden text-left focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
         onClick={() => !flipped && setFlipped(true)}
-        onKeyDown={e => e.key === 'Enter' || e.key === ' ' ? (!flipped && setFlipped(true)) : null}
+        onKeyDown={e => e.key === 'Enter' || e.key === ' ' ? (!flipped && setFlipped(true)) : undefined}
         aria-label={flipped ? 'Card revealed' : 'Tap to reveal meaning'}
         style={{ borderColor: flipped ? 'var(--gold)' : 'var(--border)' }}
       >
@@ -101,7 +105,7 @@ export function FlashCard({
           </div>
         </div>
 
-        <AudioButton text={word.arabic} />
+        <AudioButton text={word.arabic} wordKey={wordKey} />
 
         {!flipped && (
           <div className="text-muted text-sm mt-4 animate-pulse">
@@ -150,14 +154,21 @@ export function FlashCard({
                   lang="ar"
                   style={{ fontFamily: 'Amiri, serif', lineHeight: '2.2' }}
                 >
-                  {verse.arabic.split(' ').map((token, i) => (
-                    <span
-                      key={i}
-                      className={tokenContainsRoot(token, word.root) ? 'text-gold' : 'text-harf-text'}
-                    >
-                      {token}{' '}
-                    </span>
-                  ))}
+                  {(() => {
+                    const tokens = verse.arabic.split(' ');
+                    // Prefer exact index from CDN key (1-based word number)
+                    const cdnIdx = wordKey ? parseInt(wordKey.split(':')[2] ?? '0', 10) - 1 : -1;
+                    return tokens.map((token, i) => {
+                      const isTarget = cdnIdx >= 0
+                        ? i === cdnIdx
+                        : tokenContainsRoot(token, word.root);
+                      return (
+                        <span key={i} className={isTarget ? 'text-gold' : 'text-harf-text'}>
+                          {token}{' '}
+                        </span>
+                      );
+                    });
+                  })()}
                 </div>
                 {verse.english && (
                   <div className="text-muted text-sm italic">{verse.english}</div>
@@ -166,7 +177,7 @@ export function FlashCard({
             )}
           </div>
         )}
-      </button>
+      </div>
 
       {/* Mastery indicator */}
       <div className="flex items-center justify-center gap-2">

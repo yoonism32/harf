@@ -37,7 +37,7 @@ export default function StudyPage() {
   const [wordsReviewed, setWordsReviewed] = useState(0);
   const [coverageBefore, setCoverageBefore] = useState(0);
   const [coverageAfter, setCoverageAfter] = useState(0);
-  const [verse, setVerse] = useState<{ arabic: string; english: string; ref: string } | null>(null);
+  const [verse, setVerse] = useState<{ arabic: string; english: string; ref: string; wordKey?: string } | null>(null);
   const [loadingVerse, setLoadingVerse] = useState(false);
   const [rank, setRank] = useState('');
 
@@ -98,7 +98,7 @@ export default function StudyPage() {
 
     fetchAyah(verseRef).then(data => {
       if (!cancelled) {
-        if (data) setVerse({ arabic: data.arabic, english: data.english, ref: data.reference });
+        if (data) setVerse({ arabic: data.arabic, english: data.english, ref: data.reference, wordKey: selectedKey });
         setLoadingVerse(false);
       }
     });
@@ -182,6 +182,7 @@ export default function StudyPage() {
         progress={progress}
         onResponse={handleResponse}
         verse={verse ?? undefined}
+        wordKey={verse?.wordKey}
       />
     </div>
   );

@@ -1,17 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+
+const WORDS_AUDIO_CDN = 'https://audios.quranwbw.com/words';
+
+/** Build the QuranWBW word audio URL from a key like "2:255:3" */
+function wordAudioUrl(key: string): string {
+  const [ch, vs, wd = '1'] = key.split(':');
+  const file = `${ch.padStart(3, '0')}_${vs.padStart(3, '0')}_${wd.padStart(3, '0')}.mp3`;
+  return `${WORDS_AUDIO_CDN}/${ch}/${file}?version=2`;
+}
 
 interface AudioButtonProps {
   text: string;
+  /** Quran word key "chapter:verse:word" — uses CDN audio when provided */
+  wordKey?: string;
   lang?: string;
   className?: string;
 }
 
-export function AudioButton({ text, lang = 'ar-SA', className = '' }: AudioButtonProps) {
+export function AudioButton({ text, wordKey, lang = 'ar-SA', className = '' }: AudioButtonProps) {
   const [playing, setPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const speak = () => {
+    if (wordKey) {
+      // Stop any previous CDN audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      const audio = new Audio(wordAudioUrl(wordKey));
+      audioRef.current = audio;
+      audio.onplay = () => setPlaying(true);
+      audio.onended = () => setPlaying(false);
+      audio.onerror = () => setPlaying(false);
+      audio.play().catch(() => setPlaying(false));
+      return;
+    }
+
+    // Fallback: browser TTS
     if (typeof window === 'undefined' || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
 
@@ -20,7 +48,6 @@ export function AudioButton({ text, lang = 'ar-SA', className = '' }: AudioButto
     utterance.rate = 0.8;
     utterance.pitch = 1;
 
-    // Prefer Arabic voice if available
     const voices = window.speechSynthesis.getVoices();
     const arabicVoice = voices.find(v => v.lang.startsWith('ar'));
     if (arabicVoice) utterance.voice = arabicVoice;
