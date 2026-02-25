@@ -8,7 +8,9 @@ import { MASTERY_LABELS, MASTERY_COLORS } from '@/lib/srs';
 import { getAllWordProgress } from '@/lib/storage';
 import { fetchWordVerses, type AyahResponse } from '@/lib/quran-api';
 import { MorphologyTable } from '@/components/word/MorphologyTable';
+import { RootFamilyPanel, type MorphologyEntry } from '@/components/word/RootFamilyPanel';
 import wordsData from '@/data/words.json';
+import wbwMorphologyData from '@/data/wbw-morphology.json';
 
 interface Derivative { form: string; meaning: string; }
 interface WordEntry {
@@ -26,6 +28,7 @@ interface WordEntry {
 
 const words = wordsData as WordEntry[];
 const wordsMap = Object.fromEntries(words.map(w => [w.id, w]));
+const wbwMorphology = wbwMorphologyData as Record<string, MorphologyEntry>;
 
 export default function WordDetailPage() {
   const params = useParams();
@@ -196,6 +199,15 @@ export default function WordDetailPage() {
           <span className="text-muted text-xs">verse {word.example_verse}</span>
         </div>
         <MorphologyTable verseRef={word.example_verse} />
+      </div>
+
+      {/* Root family & lexicon */}
+      <div className="card p-6 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-harf-text font-semibold">Root Family</h2>
+          <span className="text-muted text-xs">via QuranWBW</span>
+        </div>
+        <RootFamilyPanel entry={wbwMorphology[word.id]} />
       </div>
 
       {/* Study action */}

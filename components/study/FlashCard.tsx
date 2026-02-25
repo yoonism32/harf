@@ -28,6 +28,30 @@ interface FlashCardProps {
   verse?: Verse;
 }
 
+/** Strip diacritics + normalise all hamza/alef/ya variants for root matching */
+function normAr(s: string): string {
+  return s
+    .replace(/([\u0621-\u06FF])[\u064B-\u0650\u0653-\u0655]*\u0651/g, '$1$1') // expand shadda: قَّ → قق
+    .replace(/[\u064B-\u065F\u0670\u0640\u06D6-\u06EF]/g, '')
+    .replace(/[أإآؤئءٱ\u0671]/g, 'ا')   // all alef/hamza variants + alef wasla
+    .replace(/[ى\u06CC]/g, 'ي')          // alef maqsura + Farsi ya (U+06CC) → ya
+    .replace(/ة/g, 'ه');
+}
+
+/**
+ * Check whether the root letters appear as a subsequence inside the token.
+ * Handles long vowels between root letters (e.g. كَافِر from root كفر).
+ */
+function tokenContainsRoot(token: string, rootLetters: string): boolean {
+  const t = normAr(token);
+  const r = normAr(rootLetters.replace(/\s+/g, ''));
+  let ri = 0;
+  for (let ti = 0; ti < t.length && ri < r.length; ti++) {
+    if (t[ti] === r[ri]) ri++;
+  }
+  return ri === r.length;
+}
+
 export function FlashCard({
   word,
   progress,
@@ -121,12 +145,19 @@ export function FlashCard({
                   Example — {verse.ref}
                 </div>
                 <div
-                  className="font-amiri text-2xl text-harf-text leading-relaxed mb-2"
+                  className="font-amiri text-2xl mb-2"
                   dir="rtl"
                   lang="ar"
-                  style={{ fontFamily: 'Amiri, serif' }}
+                  style={{ fontFamily: 'Amiri, serif', lineHeight: '2.2' }}
                 >
-                  {verse.arabic}
+                  {verse.arabic.split(' ').map((token, i) => (
+                    <span
+                      key={i}
+                      className={tokenContainsRoot(token, word.root) ? 'text-gold' : 'text-harf-text'}
+                    >
+                      {token}{' '}
+                    </span>
+                  ))}
                 </div>
                 {verse.english && (
                   <div className="text-muted text-sm italic">{verse.english}</div>

@@ -1,0 +1,135 @@
+'use client';
+
+export interface MorphologyEntry {
+  wordId: string;
+  rootArabic: string;
+  summary: string | null;
+  rootFamily: string[];
+  rootFamilyCount: number;
+  verbForms: Record<string, string> | null;
+}
+
+interface Props {
+  entry: MorphologyEntry | undefined;
+}
+
+/** Format a word key "2:255:3" → "2:255 · word 3" */
+function formatKey(key: string): { ref: string; word: string } {
+  const [ch, vs, w] = key.split(':');
+  return { ref: `${ch}:${vs}`, word: w ?? '1' };
+}
+
+/** Strip HTML tags for plain-text summary rendering */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+export function RootFamilyPanel({ entry }: Props) {
+  if (!entry || entry.rootFamilyCount === 0) {
+    return (
+      <div className="text-muted text-sm text-center py-4">
+        Run{' '}
+        <code className="font-mono text-xs bg-surface-plus px-1.5 py-0.5 rounded">
+          npx tsx scripts/fetch-morphology.ts
+        </code>{' '}
+        to populate root-family data.
+      </div>
+    );
+  }
+
+  const top20 = entry.rootFamily.slice(0, 20);
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Root header */}
+      <div className="flex items-center gap-4">
+        <div
+          className="font-amiri text-4xl text-gold leading-none"
+          dir="rtl"
+          style={{ fontFamily: 'Amiri, serif' }}
+        >
+          {entry.rootArabic}
+        </div>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-harf-text text-sm font-medium">Root</span>
+          <span className="text-muted text-xs">{entry.wordId}</span>
+        </div>
+      </div>
+
+      {/* Lexical summary */}
+      {entry.summary && (
+        <div className="bg-surface-plus border border-border rounded-xl p-4">
+          <div className="text-muted text-xs uppercase tracking-wider mb-2">Lexical Summary</div>
+          <p
+            className="text-harf-text text-sm leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: entry.summary }}
+          />
+          <div className="text-muted text-xs mt-2">
+            Source:{' '}
+            <a
+              href="https://quranwbw.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-gold"
+            >
+              QuranWBW
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* Verb forms */}
+      {entry.verbForms && (
+        <div>
+          <div className="text-muted text-xs uppercase tracking-wider mb-3">Verb Forms</div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {Object.entries(entry.verbForms).map(([formKey, arabic]) => (
+              <div
+                key={formKey}
+                className="bg-surface-plus border border-border rounded-xl p-3 flex flex-col gap-1 items-center text-center"
+              >
+                <span
+                  className="font-amiri text-xl text-harf-text"
+                  dir="rtl"
+                  style={{ fontFamily: 'Amiri, serif' }}
+                >
+                  {arabic}
+                </span>
+                <span className="text-muted text-xs capitalize">
+                  {formKey.replace(/_/g, ' ')}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Root family */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-muted text-xs uppercase tracking-wider">Root Family</div>
+          <span className="text-gold text-sm font-medium">
+            {entry.rootFamilyCount.toLocaleString()} occurrences
+          </span>
+        </div>
+
+        <div className="overflow-y-auto max-h-56 rounded-xl border border-border divide-y divide-border">
+          {top20.map((key) => {
+            const { ref, word } = formatKey(key);
+            return (
+              <div key={key} className="flex items-center justify-between px-4 py-2 text-sm hover:bg-surface-plus transition-colors">
+                <span className="font-mono text-muted text-xs">{ref}</span>
+                <span className="text-harf-text text-xs">word {word}</span>
+              </div>
+            );
+          })}
+          {entry.rootFamilyCount > 20 && (
+            <div className="px-4 py-2 text-xs text-muted text-center">
+              +{entry.rootFamilyCount - 20} more occurrences
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

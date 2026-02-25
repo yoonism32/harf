@@ -73,7 +73,7 @@ export function SessionComplete({
           Study More
         </Link>
         <Link
-          href="/"
+          href="/app"
           className="px-6 py-3 bg-surface-plus text-harf-text rounded-xl font-medium hover:bg-border transition-colors"
         >
           Dashboard

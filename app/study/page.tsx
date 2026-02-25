@@ -8,6 +8,7 @@ import { getAllWordProgress, getDueWordIds } from '@/lib/storage';
 import { calculateCoverage, type WordWithWeight } from '@/lib/coverage';
 import { fetchAyah } from '@/lib/quran-api';
 import wordsData from '@/data/words.json';
+import wbwMorphologyData from '@/data/wbw-morphology.json';
 
 interface WordEntry {
   id: string;
@@ -84,7 +85,18 @@ export default function StudyPage() {
     setVerse(null);
     setLoadingVerse(true);
 
-    fetchAyah(word.example_verse).then(data => {
+    const morphEntry = (wbwMorphologyData as Record<string, { rootFamily: string[] }>)[wordId];
+    const family = morphEntry?.rootFamily ?? [];
+
+    const selectedKey = family.length > 0
+      ? family[Math.floor(Math.random() * family.length)]
+      : undefined;
+
+    const verseRef = selectedKey
+      ? selectedKey.split(':').slice(0, 2).join(':')
+      : word.example_verse;
+
+    fetchAyah(verseRef).then(data => {
       if (!cancelled) {
         if (data) setVerse({ arabic: data.arabic, english: data.english, ref: data.reference });
         setLoadingVerse(false);
