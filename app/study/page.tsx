@@ -30,19 +30,38 @@ const wordsForCoverage: WordWithWeight[] = words.map(w => ({
 
 const MAX_NEW_PER_SESSION = 10;
 
-/** Pre-compute one random word key per queue slot */
-function pickWordKeys(q: string[]): (string | undefined)[] {
-  return q.map(wordId => {
-    const morphEntry = (wbwMorphologyData as Record<string, { rootFamily: string[] }>)[wordId];
-    const family = morphEntry?.rootFamily ?? [];
-    return family.length > 0 ? family[Math.floor(Math.random() * family.length)] : undefined;
-  });
+/** Pre-compute one random word key + its WBW gloss per queue slot */
+function pickWordKeysAndGlosses(q: string[]): {
+  keys: (string | undefined)[];
+  glosses: (string | undefined)[];
+} {
+  const keys: (string | undefined)[] = [];
+  const glosses: (string | undefined)[] = [];
+  for (const wordId of q) {
+    const morphEntry = (wbwMorphologyData as Record<string, {
+      rootFamilyWords?: Array<{ key: string; uthmani: string; english: string }>;
+      rootFamily: string[];
+    }>)[wordId];
+    const words40 = morphEntry?.rootFamilyWords ?? [];
+    if (words40.length > 0) {
+      const picked = words40[Math.floor(Math.random() * words40.length)]!;
+      keys.push(picked.key);
+      glosses.push(picked.english || undefined);
+    } else {
+      // Fallback to raw rootFamily (no gloss available)
+      const family = morphEntry?.rootFamily ?? [];
+      keys.push(family.length > 0 ? family[Math.floor(Math.random() * family.length)] : undefined);
+      glosses.push(undefined);
+    }
+  }
+  return { keys, glosses };
 }
 
 export default function StudyPage() {
   const [queue, setQueue] = useState<string[]>([]);
   // One randomly-chosen word key per queue slot, fixed at session start
   const [sessionKeys, setSessionKeys] = useState<(string | undefined)[]>([]);
+  const [sessionGlosses, setSessionGlosses] = useState<(string | undefined)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [done, setDone] = useState(false);
   const [wordsReviewed, setWordsReviewed] = useState(0);
@@ -54,6 +73,7 @@ export default function StudyPage() {
   )[0];
   const [verse, setVerse] = useState<{ arabic: string; english: string; ref: string } | null>(null);
   const [currentWordKey, setCurrentWordKey] = useState<string | undefined>(undefined);
+  const [currentWordGloss, setCurrentWordGloss] = useState<string | undefined>(undefined);
   const [loadingVerse, setLoadingVerse] = useState(false);
   const [rank, setRank] = useState('');
 
@@ -85,9 +105,10 @@ export default function StudyPage() {
     const finalQueue = q.length > 0 ? q : newIds.slice(0, MAX_NEW_PER_SESSION);
     setQueue(finalQueue);
 
-    // Pre-compute a stable random key for every word in this session
-    const keys = pickWordKeys(finalQueue);
+    // Pre-compute a stable random key + gloss for every word in this session
+    const { keys, glosses } = pickWordKeysAndGlosses(finalQueue);
     setSessionKeys(keys);
+    setSessionGlosses(glosses);
 
     // Pre-fetch all verse refs in parallel — results warm the ayahCache in quran-api.ts
     finalQueue.forEach((wordId, i) => {
@@ -114,6 +135,7 @@ export default function StudyPage() {
 
     const selectedKey = sessionKeys[currentIndex];
     setCurrentWordKey(selectedKey);
+    setCurrentWordGloss(sessionGlosses[currentIndex]);
 
     const verseRef = selectedKey
       ? selectedKey.split(':').slice(0, 2).join(':')
@@ -142,7 +164,7 @@ export default function StudyPage() {
     });
 
     return () => { cancelled = true; };
-  }, [queue, sessionKeys, currentIndex]);
+  }, [queue, sessionKeys, sessionGlosses, currentIndex]);
 
   const handleResponse = useCallback((key: ResponseKey) => {
     if (currentIndex >= queue.length) return;
@@ -221,6 +243,7 @@ export default function StudyPage() {
         onResponse={handleResponse}
         verse={verse ?? undefined}
         wordKey={currentWordKey}
+        wordGloss={currentWordGloss}
       />
     </div>
   );

@@ -30,7 +30,7 @@ interface MorphologyEntry {
   summary: string | null;
   rootFamily: string[];       // all word keys e.g. ["2:2:3", ...]
   rootFamilyCount: number;
-  rootFamilyWords: Array<{ key: string; uthmani: string }>;
+  rootFamilyWords: Array<{ key: string; uthmani: string; english: string }>;
   verbForms: Record<string, string> | null;
 }
 
@@ -89,6 +89,10 @@ async function main() {
   const keyToMeta  = uthmaniAndRootsRaw.data  ?? {};   // "1:1:1" → [uthmaniText, rootLetters]
   const rootToKeys = wordsWithSameRootRaw.data ?? {};  // rootLetters → ["1:1:1", ...]
   const verbData   = wordVerbsRaw.data         ?? {};  // "1:1:1" → { formKey: value | null }
+
+  // Load local WBW translation file: flat map "ch:vs:w" → English gloss
+  const wbwPath = path.join(__dirname, '../data/english-wbw.json');
+  const translationData: Record<string, string> = JSON.parse(fs.readFileSync(wbwPath, 'utf-8'));
 
   console.log(`  word keys loaded : ${Object.keys(keyToMeta).length}`);
   console.log(`  root keys loaded : ${Object.keys(rootToKeys).length}`);
@@ -204,9 +208,10 @@ async function main() {
       summary,
       rootFamily,
       rootFamilyCount: rootFamily.length,
-      rootFamilyWords: rootFamily.slice(0, 20).map(key => ({
+      rootFamilyWords: rootFamily.slice(0, 40).map(key => ({
         key,
         uthmani: keyToMeta[key]?.[0] ?? '',
+        english: translationData[key] ?? '',
       })),
       verbForms,
     };

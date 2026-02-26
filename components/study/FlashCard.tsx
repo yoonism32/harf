@@ -27,6 +27,7 @@ interface FlashCardProps {
   onResponse: (key: ResponseKey) => void;
   verse?: Verse;
   wordKey?: string;
+  wordGloss?: string;
 }
 
 /** Strip diacritics + normalise all hamza/alef/ya variants for root matching */
@@ -120,6 +121,7 @@ export function FlashCard({
   onResponse,
   verse,
   wordKey,
+  wordGloss,
 }: FlashCardProps) {
   const [flipped, setFlipped] = useState(false);
   const mastery = progress?.mastery ?? 0;
@@ -211,16 +213,24 @@ export function FlashCard({
                   <VersePlayButton verseRef={verse.ref} />
                 </div>
                 <div
-                  className="font-amiri text-2xl mb-2"
+                  className="font-amiri text-2xl mb-2 flex flex-wrap gap-x-1 justify-end"
                   dir="rtl"
                   lang="ar"
                   style={{ fontFamily: 'var(--font-amiri-quran), Amiri, serif', lineHeight: '2.2' }}
                 >
-                  {verse.arabic.split(' ').map((token, i) => (
-                    <span key={i} className={tokenContainsRoot(token, word.root) ? 'text-gold' : 'text-harf-text'}>
-                      {token}{' '}
-                    </span>
-                  ))}
+                  {verse.arabic.split(' ').map((token, i) => {
+                    const isMatch = tokenContainsRoot(token, word.root);
+                    return (
+                      <span key={i} className="inline-flex flex-col items-center">
+                        <span className={isMatch ? 'text-gold' : 'text-harf-text'}>{token}</span>
+                        {isMatch && wordGloss && (
+                          <span className="text-[10px] text-gold/70 font-sans leading-none mt-0.5" dir="ltr">
+                            {wordGloss}
+                          </span>
+                        )}
+                      </span>
+                    );
+                  })}
                 </div>
                 {verse.english && (
                   <div className="text-muted text-sm italic">{verse.english}</div>
