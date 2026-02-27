@@ -24,7 +24,7 @@ const KEYS = {
 } as const;
 
 export interface WordProgress {
-  id: string;
+  id: WordId;
   mastery: number;          // 0–5
   interval: number;         // SM-2 interval in days
   repetition: number;       // SM-2 repetition count
@@ -71,7 +71,7 @@ export function getAllWordProgress(): Record<string, WordProgress> {
   }
 }
 
-export function getWordProgress(id: string): WordProgress | null {
+export function getWordProgress(id: WordId): WordProgress | null {
   return getAllWordProgress()[id] ?? null;
 }
 

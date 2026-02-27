@@ -7,6 +7,7 @@ import {
   RANKS,
   type WordWithWeight,
 } from '../coverage';
+import { toWordId } from '../storage';
 import type { WordProgress } from '../storage';
 
 // ── getRank ─────────────────────────────────────────────────────
@@ -38,7 +39,7 @@ describe('getRank', () => {
 
 const makeWord = (id: string, weight: number): WordWithWeight => ({ id, coverage_weight: weight });
 const makeProgress = (id: string, mastery: number): WordProgress => ({
-  id,
+  id: toWordId(id),
   mastery,
   interval: 1,
   repetition: 1,

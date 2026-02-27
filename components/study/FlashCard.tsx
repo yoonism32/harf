@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { MasteryButtons } from './MasteryButtons';
 import { MASTERY_LABELS, MASTERY_COLORS, type ResponseKey } from '@/lib/srs';
 import type { WordProgress } from '@/lib/storage';
 import { verseAudioUrl } from '@/lib/audio';
+import { tokenContainsRoot } from '@/lib/arabic';
 
 interface WordData {
   id: string;
@@ -28,44 +29,90 @@ interface FlashCardProps {
   verse?: Verse;
   wordKey?: string;
   wordGloss?: string;
+  /** Exact 1-based word positions in the verse that belong to this root (from WBW morphology data) */
+  verseMatchIndices?: number[];
+  /** WBW English glosses keyed by word position — used to highlight the English translation */
+  verseMatchGlosses?: Record<number, string>;
 }
 
-/** Strip diacritics + normalise all hamza/alef/ya variants for root matching */
-function normAr(s: string): string {
-  return s
-    .replace(/([\u0621-\u06FF])[\u064B-\u0650\u0653-\u0655]*\u0651/g, '$1$1') // expand shadda: قَّ → قق
-    .replace(/[\u064B-\u065F\u0670\u0640\u06D6-\u06EF]/g, '')
-    .replace(/[أإآؤئءٱ\u0671]/g, 'ا')   // all alef/hamza variants + alef wasla
-    .replace(/[ى\u06CC]/g, 'ي')          // alef maqsura + Farsi ya (U+06CC) → ya
-    .replace(/ة/g, 'ه');
+const ENGLISH_STOP = new Set([
+  // Pronouns & determiners
+  'i','he','she','they','we','you','it','his','her','their','our','its','my','your',
+  'a','an','the','of','to','in','from','for','with','at','by','on','as',
+  'into','upon','and','or','but','not','no','so','that','which','who','this','these','those',
+  'all','every','each','both','one','two','what','then','when','there','here',
+  // Copula & auxiliaries — too common to be meaningful keywords
+  'is','are','was','were','be','been','being','am',
+  'have','has','had','do','does','did',
+  'will','shall','may','might','must','can','could','would','should',
+]);
+
+/**
+ * Strip common English suffixes to get a stem for prefix matching.
+ * Returns the original word if stripping would leave fewer than 4 chars.
+ */
+function extractStem(word: string): string {
+  const suffixes = ['ation','tion','ness','ment','ing','est','ed','er','ly','s'];
+  for (const sfx of suffixes) {
+    if (word.endsWith(sfx) && word.length - sfx.length >= 4) {
+      return word.slice(0, word.length - sfx.length);
+    }
+  }
+  return word;
 }
 
 /**
- * Check whether the root letters appear as a subsequence inside the token.
- * Handles long vowels between root letters (e.g. كَافِر from root كفر).
+ * Highlight words from WBW match glosses inside the full English translation.
+ * Uses exact glosses of each matched Arabic word position — far more reliable
+ * than the word being studied's general meaning.
+ * Stem-prefix matching handles morphological variation (nearer ↔ nearest, etc.)
  */
-function tokenContainsRoot(token: string, rootLetters: string): boolean {
-  const t = normAr(token);
-  const r = normAr(rootLetters.replace(/\s+/g, ''));
-  let ri = 0;
-  for (let ti = 0; ti < t.length && ri < r.length; ti++) {
-    const rl = r[ri]!;
-    const tl = t[ti]!;
-    // Exact match, or: final root letter is weak (و/ي) and surface shows ا or ي
-    // e.g. root سمو → سماء (و→ا), root دعو → دعا (و→ا)
-    //      root علو → العليّ (و→ي waw/ya interchange in defective roots)
-    const isWeakFinal = ri === r.length - 1 && (
-      ((rl === 'و' || rl === 'ي') && tl === 'ا') ||  // defective: surface alef (دعا، رمى)
-      (rl === 'و' && tl === 'ي') ||                    // waw↔ya: علو→عليّ
-      (rl === 'ي' && tl === 'و')                        // ya-defective plural: لقي→ألقوه، رمي→يرموه
-    );
-    // Hamzat al-wasl: root-initial ا is elided when the token has no ا at all
-    // e.g. root اسم → بسم (ب + إسم, alef wasl dropped after prefix)
-    const isWaslSkip = ri === 0 && rl === 'ا' && !t.includes('ا');
-    if (tl === rl || isWeakFinal) ri++;
-    else if (isWaslSkip) ri++; // skip the ا in root, stay on current token char (ti advances by loop)
+/**
+ * totalArabicMatches = number of highlighted Arabic positions in the verse.
+ * Used as the per-stem highlight quota so that partial WBW gloss coverage
+ * (some positions lack an English gloss) doesn't under-count the quota.
+ */
+function highlightEnglish(
+  english: string,
+  matchGlosses: Record<number, string>,
+  totalArabicMatches: number,
+): React.ReactNode {
+  const stems = new Set<string>();
+  for (const gloss of Object.values(matchGlosses)) {
+    gloss.replace(/\([^)]*\)/g, '')
+      .toLowerCase()
+      .split(/[\s/,;()+\-]+/)
+      .map(w => w.replace(/[^a-z']/g, ''))
+      .filter(w => w.length > 2 && !ENGLISH_STOP.has(w))
+      .map(extractStem)
+      .filter(s => s.length >= 4)
+      .forEach(s => stems.add(s));
   }
-  return ri === r.length;
+  if (stems.size === 0) return english;
+
+  // Sort longer stems first to avoid prefix ambiguity in alternation
+  const sortedStems = [...stems].sort((a, b) => b.length - a.length);
+  const escaped = sortedStems.map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const pattern = new RegExp(`\\b(${escaped.join('|')})[a-z]*\\b`, 'gi');
+
+  // Quota = total Arabic positions (not gloss count), so partial WBW coverage doesn't under-cap
+  const used = new Map<string, number>();
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = pattern.exec(english)) !== null) {
+    const stem = m[1]!.toLowerCase();
+    const usedCount = used.get(stem) ?? 0;
+    if (usedCount >= totalArabicMatches) continue; // quota exhausted — leave this occurrence un-highlighted
+    used.set(stem, usedCount + 1);
+    if (m.index > last) parts.push(english.slice(last, m.index));
+    parts.push(
+      <span key={m.index} className="text-gold/90 font-medium not-italic">{m[0]}</span>
+    );
+    last = m.index + m[0].length;
+  }
+  if (last < english.length) parts.push(english.slice(last));
+  return parts.length ? parts : english;
 }
 
 function VersePlayButton({ verseRef }: { verseRef: string }) {
@@ -83,7 +130,8 @@ function VersePlayButton({ verseRef }: { verseRef: string }) {
     e.stopPropagation(); // don't flip the card
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
     const [ch, vs] = verseRef.split(':');
-    const url = verseAudioUrl(ch!, vs!);
+    if (!ch || !vs) return; // guard against malformed verseRef
+    const url = verseAudioUrl(ch, vs);
     const audio = new Audio(url);
     audioRef.current = audio;
     audio.onplay = () => setPlaying(true);
@@ -120,11 +168,32 @@ export function FlashCard({
   progress,
   onResponse,
   verse,
-  wordKey,
-  wordGloss,
+  verseMatchIndices,
+  verseMatchGlosses,
 }: FlashCardProps) {
   const [flipped, setFlipped] = useState(false);
   const mastery = progress?.mastery ?? 0;
+
+  // Highlight matched root words in the English translation using WBW glosses
+  const highlightedEnglish = useMemo(
+    () => (verse?.english && verseMatchGlosses)
+      ? highlightEnglish(
+          verse.english,
+          verseMatchGlosses,
+          verseMatchIndices?.length ?? Object.keys(verseMatchGlosses).length,
+        )
+      : verse?.english,
+    [verse?.english, verseMatchGlosses, verseMatchIndices]
+  );
+
+  // Prefer exact morphological positions; fall back to fuzzy root matching only when unavailable
+  const tokenMatches = useMemo(() => {
+    const words = verse?.arabic.split(' ') ?? [];
+    if (verseMatchIndices && verseMatchIndices.length > 0) {
+      return words.map((_, i) => verseMatchIndices.includes(i + 1));
+    }
+    return words.map(t => tokenContainsRoot(t, word.root));
+  }, [verse?.arabic, word.root, verseMatchIndices]);
 
   const handleResponse = (key: ResponseKey) => {
     onResponse(key);
@@ -145,7 +214,12 @@ export function FlashCard({
         tabIndex={0}
         className="card min-h-64 w-full flex flex-col items-center justify-center gap-4 p-8 cursor-pointer select-none relative overflow-hidden text-left focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
         onClick={() => !flipped && setFlipped(true)}
-        onKeyDown={e => e.key === 'Enter' || e.key === ' ' ? (!flipped && setFlipped(true)) : undefined}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault(); // prevent page scroll on Space
+            if (!flipped) setFlipped(true);
+          }
+        }}
         aria-label={flipped ? 'Card revealed' : 'Tap to reveal meaning'}
         style={{ borderColor: flipped ? 'var(--gold)' : 'var(--border)' }}
       >
@@ -159,7 +233,6 @@ export function FlashCard({
           <div
             className="font-amiri text-6xl leading-tight text-harf-text"
             lang="ar"
-            style={{ fontFamily: 'Amiri, serif' }}
           >
             {word.arabic}
           </div>
@@ -191,7 +264,7 @@ export function FlashCard({
                 <div className="flex flex-wrap gap-2 justify-center" dir="rtl">
                   {word.derivatives.map((d, i) => (
                     <div key={i} className="bg-surface-plus rounded-lg px-3 py-1.5 text-center">
-                      <div className="font-amiri text-lg text-gold" lang="ar" style={{ fontFamily: 'Amiri, serif' }}>
+                      <div className="font-amiri text-lg text-gold" lang="ar">
                         {d.form}
                       </div>
                       <div className="text-muted text-xs mt-0.5" dir="ltr">
@@ -213,27 +286,22 @@ export function FlashCard({
                   <VersePlayButton verseRef={verse.ref} />
                 </div>
                 <div
-                  className="font-amiri text-2xl mb-2 flex flex-wrap gap-x-1 justify-end"
+                  className="font-amiri-quran text-2xl mb-2 text-right"
                   dir="rtl"
                   lang="ar"
-                  style={{ fontFamily: 'var(--font-amiri-quran), Amiri, serif', lineHeight: '2.2' }}
+                  style={{ lineHeight: '2.2' }}
                 >
                   {verse.arabic.split(' ').map((token, i) => {
-                    const isMatch = tokenContainsRoot(token, word.root);
+                    const isMatch = tokenMatches[i] ?? false;
                     return (
-                      <span key={i} className="inline-flex flex-col items-center">
-                        <span className={isMatch ? 'text-gold' : 'text-harf-text'}>{token}</span>
-                        {isMatch && wordGloss && (
-                          <span className="text-[10px] text-gold/70 font-sans leading-none mt-0.5" dir="ltr">
-                            {wordGloss}
-                          </span>
-                        )}
+                      <span key={i} className={isMatch ? 'text-gold' : 'text-harf-text'}>
+                        {token}{' '}
                       </span>
                     );
                   })}
                 </div>
                 {verse.english && (
-                  <div className="text-muted text-sm italic">{verse.english}</div>
+                  <div className="text-muted text-sm italic">{highlightedEnglish}</div>
                 )}
               </div>
             )}
@@ -243,8 +311,12 @@ export function FlashCard({
 
       {/* Mastery indicator */}
       <div className="flex items-center justify-center gap-2">
-        <span className="text-muted text-sm">Current mastery:</span>
-        <div className="flex gap-1">
+        <span className="text-muted text-sm" aria-hidden="true">Current mastery:</span>
+        <div
+          className="flex gap-1"
+          role="img"
+          aria-label={`Mastery level ${mastery} of 5: ${MASTERY_LABELS[mastery]}`}
+        >
           {[1, 2, 3, 4, 5].map(level => (
             <div
               key={level}
@@ -252,7 +324,7 @@ export function FlashCard({
             />
           ))}
         </div>
-        <span className="text-muted text-sm">{MASTERY_LABELS[mastery]}</span>
+        <span className="text-muted text-sm" aria-hidden="true">{MASTERY_LABELS[mastery]}</span>
       </div>
 
       {/* Response buttons — only show after flip */}

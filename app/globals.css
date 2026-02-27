@@ -29,6 +29,7 @@
   /* Font families */
   --font-amiri: "Amiri", serif;
   --font-rubik: "Rubik", sans-serif;
+  /* Note: --font-amiri-quran is injected dynamically by next/font onto <html>; see globals.css utility below */
 
   /* ── Fluid typography (clamp-based — eliminates breakpoint jumps) */
   --text-fluid-xs: clamp(0.64rem, 0.58rem + 0.3vw, 0.75rem);
@@ -70,6 +71,9 @@
   --animate-pulsing-gold: pulsing-gold 2s infinite;
   --animate-breathe-bg: breathe-bg 20s ease-in-out infinite both;
   --animate-shine-sweep: shine-sweep 4s ease-in-out infinite;
+  /* Landing page animations — also used via raw CSS in .harf-wordmark / .harf-glow::before */
+  --animate-harf-appear: harf-appear 1.0s cubic-bezier(0.19, 1, 0.22, 1) both;
+  --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
 }
 
 /* ── Fluid typography utilities ────────────────────────────────── */
@@ -227,8 +231,14 @@
 
 html {
   color-scheme: dark;
+  /*
+   * zoom: 1.25 — intentional design decision.
+   * Arabic text + small Tailwind base sizes look cramped at 100% on HiDPI displays.
+   * This replicates 125% browser zoom globally so all rem/px values are proportionally
+   * larger without changing any unit values in CSS. Touch targets also benefit.
+   * If this causes issues in a specific context, consider scoping via @media (resolution).
+   */
   zoom: 1.25;
-  /* scale everything — replicates 125% browser zoom exactly */
   /* Improve font rendering */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -269,6 +279,12 @@ h6 {
 
 .font-amiri {
   font-family: "Amiri", serif;
+}
+
+/* Amiri Quran: extended Uthmanic variant with full annotation marks (U+06D6–06ED).
+   next/font injects --font-amiri-quran onto <html>; this class exposes it as a utility. */
+.font-amiri-quran {
+  font-family: var(--font-amiri-quran), "Amiri Quran", "Amiri", serif;
 }
 
 /* Landing wordmark + glow */

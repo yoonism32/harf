@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { FlashCard } from '@/components/study/FlashCard';
 import { SessionComplete } from '@/components/study/SessionComplete';
 import { reviewWord, RESPONSE_TO_GRADE, type ResponseKey } from '@/lib/srs';
@@ -8,7 +9,8 @@ import { getAllWordProgress, getDueWordIds } from '@/lib/storage';
 import { calculateCoverage, type WordWithWeight } from '@/lib/coverage';
 import { fetchAyah } from '@/lib/quran-api';
 import wordsData from '@/data/words.json';
-import wbwMorphologyData from '@/data/wbw-morphology.json';
+import wbwMorphologyDataRaw from '@/data/wbw-morphology.json';
+import type { WBWMorphologyData } from '@/types/wbw';
 
 interface WordEntry {
   id: string;
@@ -23,6 +25,8 @@ interface WordEntry {
 
 const words = wordsData as WordEntry[];
 const wordsMap = Object.fromEntries(words.map(w => [w.id, w]));
+// Cast at data boundary — wbw-morphology.json conforms to WBWMorphologyData shape
+const wbwMorphologyData = wbwMorphologyDataRaw as WBWMorphologyData;
 const wordsForCoverage: WordWithWeight[] = words.map(w => ({
   id: w.id,
   coverage_weight: w.coverage_weight,
@@ -30,31 +34,81 @@ const wordsForCoverage: WordWithWeight[] = words.map(w => ({
 
 const MAX_NEW_PER_SESSION = 10;
 
-/** Pre-compute one random word key + its WBW gloss per queue slot */
+/** Return matched word indices + their WBW English glosses for a given verse. */
+function getRootMatchData(wordId: string, verseRef: string): {
+  indices: number[];
+  glosses: Record<number, string>;
+} {
+  const morphEntry = wbwMorphologyData[wordId];
+  const indices: number[] = [];
+  const glosses: Record<number, string> = {};
+
+  // rootFamilyWords has both key and english gloss
+  for (const w of morphEntry?.rootFamilyWords ?? []) {
+    if (w.key.startsWith(verseRef + ':')) {
+      const idx = parseInt(w.key.split(':')[2] ?? '0', 10);
+      if (idx > 0) {
+        indices.push(idx);
+        if (w.english) glosses[idx] = w.english;
+      }
+    }
+  }
+
+  // rootFamily may contain keys not in rootFamilyWords (no english available)
+  if (indices.length === 0) {
+    for (const k of morphEntry?.rootFamily ?? []) {
+      if (k.startsWith(verseRef + ':')) {
+        const idx = parseInt(k.split(':')[2] ?? '0', 10);
+        if (idx > 0) indices.push(idx);
+      }
+    }
+  }
+
+  return { indices, glosses };
+}
+
+/** Pre-compute one random word key + its WBW gloss + exact root match indices + match glosses per queue slot */
 function pickWordKeysAndGlosses(q: string[]): {
   keys: (string | undefined)[];
   glosses: (string | undefined)[];
+  matchIndices: (number[] | undefined)[];
+  matchGlosses: (Record<number, string> | undefined)[];
 } {
   const keys: (string | undefined)[] = [];
   const glosses: (string | undefined)[] = [];
+  const matchIndices: (number[] | undefined)[] = [];
+  const matchGlosses: (Record<number, string> | undefined)[] = [];
   for (const wordId of q) {
-    const morphEntry = (wbwMorphologyData as Record<string, {
-      rootFamilyWords?: Array<{ key: string; uthmani: string; english: string }>;
-      rootFamily: string[];
-    }>)[wordId];
+    const morphEntry = wbwMorphologyData[wordId];
     const words40 = morphEntry?.rootFamilyWords ?? [];
+    let pickedKey: string | undefined;
+    let pickedGloss: string | undefined;
     if (words40.length > 0) {
       const picked = words40[Math.floor(Math.random() * words40.length)]!;
-      keys.push(picked.key);
-      glosses.push(picked.english || undefined);
+      pickedKey = picked.key;
+      pickedGloss = picked.english || undefined;
     } else {
       // Fallback to raw rootFamily (no gloss available)
       const family = morphEntry?.rootFamily ?? [];
-      keys.push(family.length > 0 ? family[Math.floor(Math.random() * family.length)] : undefined);
-      glosses.push(undefined);
+      pickedKey = family.length > 0 ? family[Math.floor(Math.random() * family.length)] : undefined;
+    }
+    keys.push(pickedKey);
+    glosses.push(pickedGloss);
+
+    // Compute exact root positions + WBW English glosses for the chosen verse
+    const verseRef = pickedKey
+      ? pickedKey.split(':').slice(0, 2).join(':')
+      : (wordsMap[wordId]?.example_verse ?? '');
+    if (verseRef) {
+      const { indices, glosses: mg } = getRootMatchData(wordId, verseRef);
+      matchIndices.push(indices.length > 0 ? indices : undefined);
+      matchGlosses.push(Object.keys(mg).length > 0 ? mg : undefined);
+    } else {
+      matchIndices.push(undefined);
+      matchGlosses.push(undefined);
     }
   }
-  return { keys, glosses };
+  return { keys, glosses, matchIndices, matchGlosses };
 }
 
 export default function StudyPage() {
@@ -62,15 +116,15 @@ export default function StudyPage() {
   // One randomly-chosen word key per queue slot, fixed at session start
   const [sessionKeys, setSessionKeys] = useState<(string | undefined)[]>([]);
   const [sessionGlosses, setSessionGlosses] = useState<(string | undefined)[]>([]);
+  const [sessionMatchIndices, setSessionMatchIndices] = useState<(number[] | undefined)[]>([]);
+  const [sessionMatchGlosses, setSessionMatchGlosses] = useState<(Record<number, string> | undefined)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [done, setDone] = useState(false);
   const [wordsReviewed, setWordsReviewed] = useState(0);
   const [coverageBefore, setCoverageBefore] = useState(0);
   const [coverageAfter, setCoverageAfter] = useState(0);
-  // verse cache: verseRef → resolved data
-  const verseCache = useState<Map<string, { arabic: string; english: string; ref: string }>>(
-    () => new Map()
-  )[0];
+  // verse cache: verseRef → resolved data (useRef keeps identity stable without triggering re-renders)
+  const verseCache = useRef(new Map<string, { arabic: string; english: string; ref: string }>()).current;
   const [verse, setVerse] = useState<{ arabic: string; english: string; ref: string } | null>(null);
   const [currentWordKey, setCurrentWordKey] = useState<string | undefined>(undefined);
   const [currentWordGloss, setCurrentWordGloss] = useState<string | undefined>(undefined);
@@ -106,9 +160,11 @@ export default function StudyPage() {
     setQueue(finalQueue);
 
     // Pre-compute a stable random key + gloss for every word in this session
-    const { keys, glosses } = pickWordKeysAndGlosses(finalQueue);
+    const { keys, glosses, matchIndices, matchGlosses } = pickWordKeysAndGlosses(finalQueue);
     setSessionKeys(keys);
     setSessionGlosses(glosses);
+    setSessionMatchIndices(matchIndices);
+    setSessionMatchGlosses(matchGlosses);
 
     // Pre-fetch all verse refs in parallel — results warm the ayahCache in quran-api.ts
     finalQueue.forEach((wordId, i) => {
@@ -194,9 +250,9 @@ export default function StudyPage() {
         </div>
         <div className="text-harf-text text-xl font-medium">No words due for review today!</div>
         <div className="text-muted">Come back tomorrow or add more words to your queue.</div>
-        <a href="/words" className="px-6 py-3 bg-gold text-bg rounded-xl font-semibold hover:bg-gold-muted transition-colors">
+        <Link href="/words" className="px-6 py-3 bg-gold text-bg rounded-xl font-semibold hover:bg-gold-muted transition-colors">
           Browse Words
-        </a>
+        </Link>
       </div>
     );
   }
@@ -229,7 +285,14 @@ export default function StudyPage() {
           </div>
         </div>
         {/* Progress bar */}
-        <div className="flex-1 mx-6 h-1.5 bg-surface-plus rounded-full overflow-hidden">
+        <div
+          className="flex-1 mx-6 h-1.5 bg-surface-plus rounded-full overflow-hidden"
+          role="progressbar"
+          aria-valuenow={currentIndex}
+          aria-valuemin={0}
+          aria-valuemax={queue.length}
+          aria-label="Study session progress"
+        >
           <div
             className="h-full bg-gold rounded-full transition-all duration-300"
             style={{ width: `${((currentIndex) / queue.length) * 100}%` }}
@@ -244,6 +307,8 @@ export default function StudyPage() {
         verse={verse ?? undefined}
         wordKey={currentWordKey}
         wordGloss={currentWordGloss}
+        verseMatchIndices={sessionMatchIndices[currentIndex]}
+        verseMatchGlosses={sessionMatchGlosses[currentIndex]}
       />
     </div>
   );

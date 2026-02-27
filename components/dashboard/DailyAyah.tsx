@@ -13,6 +13,7 @@ export function DailyAyah() {
   const [loading, setLoading] = useState(true);
   const [playingWord, setPlayingWord] = useState<number | null>(null);
   const [playingVerse, setPlayingVerse] = useState(false);
+  const [glosses, setGlosses] = useState<string[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Stop audio if the user navigates away from the dashboard
@@ -93,6 +94,22 @@ export function DailyAyah() {
     return () => { cancelled = true; };
   }, []);
 
+  // Load WBW glosses lazily once the verse ref is known.
+  // Dynamic import keeps the 1.9 MB JSON out of the initial bundle.
+  useEffect(() => {
+    if (!ref || !arabic) return;
+    const [ch, vs] = ref.split(':');
+    if (!ch || !vs) return;
+    const wordCount = arabic.split(' ').length;
+
+    import('@/data/english-wbw.json').then(mod => {
+      const data = mod.default as Record<string, string>;
+      setGlosses(
+        Array.from({ length: wordCount }, (_, i) => data[`${ch}:${vs}:${i + 1}`] ?? '')
+      );
+    }).catch(() => { /* silently ignore — glosses are enhancement only */ });
+  }, [ref, arabic]);
+
   const [ch, vs] = ref.split(':') as [string | undefined, string | undefined];
   const words = arabic ? arabic.split(' ') : [];
 
@@ -135,28 +152,47 @@ export function DailyAyah() {
         </div>
       ) : arabic ? (
         <>
-          {/* WBW interactive Arabic — tap any word to hear it */}
+          {/* WBW interactive Arabic — tap to hear, hover for English gloss */}
           <div
-            className="font-amiri text-3xl text-harf-text leading-loose text-right animate-fade-in"
+            className="font-amiri-quran text-3xl text-harf-text leading-[3] text-right animate-fade-in"
             dir="rtl"
             lang="ar"
-            style={{ fontFamily: 'var(--font-amiri-quran), Amiri, serif' }}
           >
             {words.map((word, i) => {
               const idx = i + 1;
               const active = playingWord === idx;
+              const gloss = glosses[i] ?? '';
               return (
-                <span
-                  key={i}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => ch && vs && playWord(ch, vs, idx)}
-                  onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && ch && vs && playWord(ch, vs, idx)}
-                  aria-label={`Word ${idx}`}
-                  className={`cursor-pointer transition-colors rounded-sm px-0.5
-                    ${active ? 'text-gold' : 'hover:text-gold/70'}`}
-                >
-                  {word}{' '}
+                <span key={i} className="relative inline-block group/word">
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => ch && vs && playWord(ch, vs, idx)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        ch && vs && playWord(ch, vs, idx);
+                      }
+                    }}
+                    aria-label={gloss ? `${word} — ${gloss}` : `Word ${idx}`}
+                    className={`cursor-pointer transition-colors rounded-sm px-0.5
+                      ${active ? 'text-gold' : 'hover:text-gold/70'}`}
+                  >
+                    {word}
+                  </span>
+                  {gloss && (
+                    <span
+                      className={`absolute top-full left-1/2 -translate-x-1/2 mt-1
+                        bg-surface-plus border border-border rounded-md px-2 py-0.5
+                        text-xs text-muted max-w-36 text-center leading-tight
+                        pointer-events-none z-20 font-rubik transition-opacity duration-150
+                        ${active ? 'opacity-100' : 'opacity-0 group-hover/word:opacity-100'}`}
+                      dir="ltr"
+                    >
+                      {gloss}
+                    </span>
+                  )}
+                  {' '}
                 </span>
               );
             })}

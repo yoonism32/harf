@@ -174,7 +174,7 @@ async function main() {
     // ── Summary: first key in rootFamily within example_verse chapter ────────
     let summary: string | null = null;
     const [chapterStr] = word.example_verse.split(':');
-    const chapter = parseInt(chapterStr, 10);
+    const chapter = parseInt(chapterStr ?? '0', 10);
 
     const chapterSummaries = await getChapterSummary(chapter);
 
@@ -182,11 +182,11 @@ async function main() {
     for (const key of rootFamily) {
       const [keyChapter, keyVerse] = key.split(':');
       if (
-        parseInt(keyChapter, 10) === chapter &&
+        parseInt(keyChapter ?? '0', 10) === chapter &&
         keyVerse === word.example_verse.split(':')[1] &&
         chapterSummaries[key]
       ) {
-        summary = chapterSummaries[key];
+        summary = chapterSummaries[key] ?? null;
         break;
       }
     }
@@ -195,8 +195,8 @@ async function main() {
     if (!summary) {
       for (const key of rootFamily) {
         const [keyChapter] = key.split(':');
-        if (parseInt(keyChapter, 10) === chapter && chapterSummaries[key]) {
-          summary = chapterSummaries[key];
+        if (parseInt(keyChapter ?? '0', 10) === chapter && chapterSummaries[key]) {
+          summary = chapterSummaries[key] ?? null;
           break;
         }
       }

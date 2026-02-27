@@ -50,6 +50,11 @@ export const metadata: Metadata = {
     description: 'Master Quranic Arabic root words and track your Quran comprehension.',
     type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Harf — Quranic Arabic Mastery',
+    description: 'Master Quranic Arabic root words. Track what percentage of the Quran you understand.',
+  },
 };
 
 export default function RootLayout({

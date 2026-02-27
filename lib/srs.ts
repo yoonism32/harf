@@ -1,6 +1,6 @@
 import { supermemo, SuperMemoItem, SuperMemoGrade } from 'supermemo';
 import type { WordProgress, NameProgress } from './storage';
-import { setWordProgress, setNameProgress, getWordProgress, getNameProgress, getAllWordProgress } from './storage';
+import { setWordProgress, setNameProgress, getWordProgress, getNameProgress, getAllWordProgress, toWordId } from './storage';
 
 export type { SuperMemoGrade };
 
@@ -60,7 +60,8 @@ function addDays(date: Date, days: number): string {
 // ── Word SRS ───────────────────────────────────────────────────
 
 export function reviewWord(wordId: string, grade: SuperMemoGrade): WordProgress {
-  const existing = getWordProgress(wordId);
+  const wid = toWordId(wordId); // cast at the data boundary — caller may pass raw string
+  const existing = getWordProgress(wid);
   const now = new Date();
 
   let item: SuperMemoItem;
@@ -81,7 +82,7 @@ export function reviewWord(wordId: string, grade: SuperMemoGrade): WordProgress 
   const finalMastery = existing ? newMastery : Math.max(1, newMastery);
 
   const updated: WordProgress = {
-    id: wordId,
+    id: wid,
     mastery: finalMastery,
     interval: result.interval,
     repetition: result.repetition,

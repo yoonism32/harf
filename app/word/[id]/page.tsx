@@ -8,6 +8,7 @@ import { getAllWordProgress } from '@/lib/storage';
 import { fetchWordVerses, type AyahResponse } from '@/lib/quran-api';
 import { MorphologyTable } from '@/components/word/MorphologyTable';
 import { RootFamilyPanel, type MorphologyEntry } from '@/components/word/RootFamilyPanel';
+import { InteractiveVerse } from '@/components/word/InteractiveVerse';
 import wordsData from '@/data/words.json';
 import wbwMorphologyData from '@/data/wbw-morphology.json';
 
@@ -76,7 +77,6 @@ export default function WordDetailPage() {
           <div
             className="font-amiri text-8xl text-harf-text leading-none"
             dir="rtl"
-            style={{ fontFamily: 'Amiri, serif' }}
           >
             {word.arabic}
           </div>
@@ -139,10 +139,7 @@ export default function WordDetailPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {word.derivatives.map((d, i) => (
               <div key={i} className="bg-surface-plus rounded-xl p-4 flex flex-col gap-2" dir="rtl">
-                <div
-                  className="font-amiri text-2xl text-gold"
-                  style={{ fontFamily: 'Amiri, serif' }}
-                >
+                <div className="font-amiri text-2xl text-gold">
                   {d.form}
                 </div>
                 <div className="text-muted text-sm" dir="ltr">{d.meaning}</div>
@@ -168,20 +165,7 @@ export default function WordDetailPage() {
         ) : verses.length > 0 ? (
           <div className="flex flex-col gap-4">
             {verses.map((v, i) => (
-              <div key={i} className="border border-border rounded-xl p-5 flex flex-col gap-3">
-                <div className="flex justify-between items-center text-xs text-muted">
-                  <span>Surah {v.surahName}</span>
-                  <span className="font-mono">{v.reference}</span>
-                </div>
-                <div
-                  className="font-amiri text-2xl text-harf-text leading-loose"
-                  dir="rtl"
-                  style={{ fontFamily: 'Amiri, serif' }}
-                >
-                  {v.arabic}
-                </div>
-                <div className="text-muted text-sm italic">{v.english}</div>
-              </div>
+              <InteractiveVerse key={i} verse={v} root={word.root} />
             ))}
           </div>
         ) : (
