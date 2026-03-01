@@ -4,13 +4,14 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { fetchPrayerTimesByCity, getNextPrayer, type PrayerTimes } from '@/lib/aladhan-api';
 
-const PRAYER_ICONS: Record<string, string> = {
-  Fajr:    '🌙',
-  Sunrise: '🌅',
-  Dhuhr:   '☀️',
-  Asr:     '🌤️',
-  Maghrib: '🌇',
-  Isha:    '🌃',
+/** Subtle dot color per prayer — replaces emoji with clean semantic color coding */
+const PRAYER_COLOR: Record<string, string> = {
+  Fajr:    'bg-indigo-400',
+  Sunrise: 'bg-amber-400',
+  Dhuhr:   'bg-yellow-400',
+  Asr:     'bg-orange-400',
+  Maghrib: 'bg-rose-400',
+  Isha:    'bg-blue-400',
 };
 
 export function PrayerTimesWidget() {
@@ -98,7 +99,7 @@ export function PrayerTimesWidget() {
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <span>{PRAYER_ICONS[prayer.name]}</span>
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isNext ? 'bg-gold' : (PRAYER_COLOR[prayer.name] ?? 'bg-border')}`} aria-hidden="true" />
                     <span className={`text-sm ${isNext ? 'text-gold font-semibold' : 'text-muted'}`}>
                       {prayer.name}
                     </span>

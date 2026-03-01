@@ -74,11 +74,14 @@ export default function WordDetailPage() {
       <div className="card p-8 flex flex-col md:flex-row gap-8 items-start">
         {/* Arabic */}
         <div className="flex flex-col gap-3 items-center md:items-start">
-          <div
-            className="font-amiri text-8xl text-harf-text leading-none"
-            dir="rtl"
-          >
-            {word.arabic}
+          {/* Inner arabic box: padding creates tashkeel/ascender clearance */}
+          <div className="overflow-visible pt-8 pb-3 px-2">
+            <div
+              className="font-amiri text-8xl text-harf-text leading-[1.1]"
+              dir="rtl"
+            >
+              {word.arabic}
+            </div>
           </div>
           <div className="text-muted font-mono text-lg">{word.root}</div>
         </div>

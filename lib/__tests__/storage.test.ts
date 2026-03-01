@@ -12,6 +12,7 @@ import {
   getMasteryDistribution,
   getMasteredCount,
   getFutureReviews,
+  getDueWordIds,
   toWordId,
   type WordProgress,
   type StudySession,
@@ -35,14 +36,16 @@ const localStorageMock = {
 vi.stubGlobal('window', {}); // makes typeof window !== 'undefined'
 vi.stubGlobal('localStorage', localStorageMock);
 
-// Helper: make a WordProgress fixture
+// Helper: make a WordProgress fixture (FSRS fields)
 function makeProgress(overrides: Partial<WordProgress> = {}): WordProgress {
   return {
-    id: toWordId('word-1'),
-    mastery: 3,
-    interval: 4,
-    repetition: 3,
-    efactor: 2.5,
+    id:         toWordId('word-1'),
+    mastery:    3,
+    stability:  10,
+    difficulty: 5,
+    state:      2,   // Review
+    lapses:     0,
+    reps:       3,
     nextReview: '2025-01-01',
     ...overrides,
   };
@@ -147,29 +150,34 @@ describe('getLeechIds', () => {
     expect(getLeechIds()).toEqual([]);
   });
 
-  it('identifies leech: repetition > 5 and mastery < 3', () => {
-    setWordProgress(makeProgress({ id: toWordId('leech'), repetition: 6, mastery: 2 }));
+  it('identifies leech: lapses >= 8', () => {
+    setWordProgress(makeProgress({ id: toWordId('leech'), lapses: 8 }));
     expect(getLeechIds()).toContain('leech');
   });
 
-  it('does not flag word with high repetition but sufficient mastery', () => {
-    setWordProgress(makeProgress({ id: toWordId('ok'), repetition: 8, mastery: 3 }));
+  it('does not flag word with lapses < 8', () => {
+    setWordProgress(makeProgress({ id: toWordId('ok'), lapses: 7 }));
     expect(getLeechIds()).not.toContain('ok');
   });
 
-  it('does not flag word with low repetition and low mastery', () => {
-    setWordProgress(makeProgress({ id: toWordId('new'), repetition: 3, mastery: 1 }));
+  it('does not flag word with lapses === 0', () => {
+    setWordProgress(makeProgress({ id: toWordId('new'), lapses: 0 }));
     expect(getLeechIds()).not.toContain('new');
   });
 
-  it('exact boundary: repetition === 5 is NOT a leech', () => {
-    setWordProgress(makeProgress({ id: toWordId('boundary'), repetition: 5, mastery: 2 }));
+  it('exact boundary: lapses === 7 is NOT a leech', () => {
+    setWordProgress(makeProgress({ id: toWordId('boundary'), lapses: 7 }));
     expect(getLeechIds()).not.toContain('boundary');
   });
 
-  it('exact boundary: repetition === 6 and mastery === 2 IS a leech', () => {
-    setWordProgress(makeProgress({ id: toWordId('boundary2'), repetition: 6, mastery: 2 }));
+  it('exact boundary: lapses === 8 IS a leech', () => {
+    setWordProgress(makeProgress({ id: toWordId('boundary2'), lapses: 8 }));
     expect(getLeechIds()).toContain('boundary2');
+  });
+
+  it('does not flag suspended words', () => {
+    setWordProgress(makeProgress({ id: toWordId('suspended'), lapses: 10, suspended: true }));
+    expect(getLeechIds()).not.toContain('suspended');
   });
 });
 
@@ -292,5 +300,48 @@ describe('getDailyAyahCache', () => {
   it('handles corrupt JSON gracefully', () => {
     store['harf:v1:daily_ayah'] = 'bad-json{{';
     expect(getDailyAyahCache()).toBeNull();
+  });
+});
+
+// ── getDueWordIds ──────────────────────────────────────────────
+describe('getDueWordIds', () => {
+  it('returns empty array when no progress', () => {
+    expect(getDueWordIds()).toEqual([]);
+  });
+
+  it('returns id for word due today', () => {
+    const today = new Date().toISOString().slice(0, 10);
+    setWordProgress(makeProgress({ id: toWordId('due-today'), nextReview: today }));
+    expect(getDueWordIds()).toContain('due-today');
+  });
+
+  it('returns id for overdue word (past date)', () => {
+    setWordProgress(makeProgress({ id: toWordId('overdue'), nextReview: '2020-01-01' }));
+    expect(getDueWordIds()).toContain('overdue');
+  });
+
+  it('does not return a word due in the future', () => {
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    setWordProgress(makeProgress({ id: toWordId('future'), nextReview: tomorrow }));
+    expect(getDueWordIds()).not.toContain('future');
+  });
+
+  it('returns multiple due words', () => {
+    const today = new Date().toISOString().slice(0, 10);
+    setWordProgress(makeProgress({ id: toWordId('due-1'), nextReview: today }));
+    setWordProgress(makeProgress({ id: toWordId('due-2'), nextReview: '2020-06-01' }));
+    const ids = getDueWordIds();
+    expect(ids).toContain('due-1');
+    expect(ids).toContain('due-2');
+  });
+
+  it('does not include words due in the future when mixed with due words', () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    setWordProgress(makeProgress({ id: toWordId('now'), nextReview: today }));
+    setWordProgress(makeProgress({ id: toWordId('later'), nextReview: tomorrow }));
+    const ids = getDueWordIds();
+    expect(ids).toContain('now');
+    expect(ids).not.toContain('later');
   });
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MasteryButtons } from './MasteryButtons';
 import { MASTERY_LABELS, MASTERY_COLORS, type ResponseKey } from '@/lib/srs';
 import type { WordProgress } from '@/lib/storage';
@@ -27,8 +27,6 @@ interface FlashCardProps {
   progress: WordProgress | null;
   onResponse: (key: ResponseKey) => void;
   verse?: Verse;
-  wordKey?: string;
-  wordGloss?: string;
   /** Exact 1-based word positions in the verse that belong to this root (from WBW morphology data) */
   verseMatchIndices?: number[];
   /** WBW English glosses keyed by word position — used to highlight the English translation */
@@ -37,7 +35,7 @@ interface FlashCardProps {
 
 const ENGLISH_STOP = new Set([
   // Pronouns & determiners
-  'i','he','she','they','we','you','it','his','her','their','our','its','my','your',
+  'i','me','him','them','he','she','they','we','you','it','his','her','their','our','its','my','your',
   'a','an','the','of','to','in','from','for','with','at','by','on','as',
   'into','upon','and','or','but','not','no','so','that','which','who','this','these','those',
   'all','every','each','both','one','two','what','then','when','there','here',
@@ -72,6 +70,17 @@ function extractStem(word: string): string {
  * Used as the per-stem highlight quota so that partial WBW gloss coverage
  * (some positions lack an English gloss) doesn't under-count the quota.
  */
+/** Return the character ranges [start, end] that are inside (...) in the string. */
+function parentheticalRanges(text: string): Array<[number, number]> {
+  const ranges: Array<[number, number]> = [];
+  let depth = 0, start = -1;
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === '(') { if (depth === 0) start = i; depth++; }
+    else if (text[i] === ')') { depth--; if (depth === 0 && start !== -1) { ranges.push([start, i]); start = -1; } }
+  }
+  return ranges;
+}
+
 function highlightEnglish(
   english: string,
   matchGlosses: Record<number, string>,
@@ -95,12 +104,17 @@ function highlightEnglish(
   const escaped = sortedStems.map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   const pattern = new RegExp(`\\b(${escaped.join('|')})[a-z]*\\b`, 'gi');
 
+  // Pre-compute parenthetical ranges — matches inside (...) are translator notes, not actual translation
+  const parenRanges = parentheticalRanges(english);
+  const inParens = (idx: number) => parenRanges.some(([s, e]) => idx > s && idx < e);
+
   // Quota = total Arabic positions (not gloss count), so partial WBW coverage doesn't under-cap
   const used = new Map<string, number>();
   const parts: React.ReactNode[] = [];
   let last = 0;
   let m: RegExpExecArray | null;
   while ((m = pattern.exec(english)) !== null) {
+    if (inParens(m.index)) continue; // skip translator parenthetical notes
     const stem = m[1]!.toLowerCase();
     const usedCount = used.get(stem) ?? 0;
     if (usedCount >= totalArabicMatches) continue; // quota exhausted — leave this occurrence un-highlighted
@@ -195,37 +209,67 @@ export function FlashCard({
     return words.map(t => tokenContainsRoot(t, word.root));
   }, [verse?.arabic, word.root, verseMatchIndices]);
 
-  const handleResponse = (key: ResponseKey) => {
+  const handleResponse = useCallback((key: ResponseKey) => {
     onResponse(key);
     setFlipped(false);
-  };
+  }, [onResponse]);
+
+  // Global keyboard shortcuts: Space/Enter = toggle flip; 1–4 = grade when flipped
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.code === 'Space' || e.code === 'Enter') {
+        e.preventDefault();
+        setFlipped(prev => !prev);
+      }
+
+      if (flipped) {
+        const keyMap: Record<string, ResponseKey> = {
+          '1': 'blackout',
+          '2': 'hard',
+          '3': 'good',
+          '4': 'perfect',
+        };
+        const response = keyMap[e.key];
+        if (response) {
+          e.preventDefault();
+          handleResponse(response);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [flipped, handleResponse]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto flex flex-col gap-6">
+    <div className="w-full max-w-2xl mx-auto flex flex-col gap-5">
       {/* Screen reader live region — announces card state changes */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
         {flipped
           ? `Card revealed: ${word.meanings.join(', ')}`
           : `Studying: ${word.transliteration}`}
       </div>
+
       {/* Card */}
       <div
         role="button"
         tabIndex={0}
-        className="card min-h-64 w-full flex flex-col items-center justify-center gap-4 p-8 cursor-pointer select-none relative overflow-hidden text-left focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none"
-        onClick={() => !flipped && setFlipped(true)}
+        className="card min-h-64 w-full flex flex-col items-center justify-center gap-4 p-8 cursor-pointer select-none relative overflow-hidden text-left focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none transition-[border-color,box-shadow] duration-300"
+        onClick={() => setFlipped(prev => !prev)}
         onKeyDown={e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault(); // prevent page scroll on Space
-            if (!flipped) setFlipped(true);
-          }
+          if (e.key === ' ' || e.key === 'Enter') e.preventDefault();
         }}
         aria-label={flipped ? 'Card revealed' : 'Tap to reveal meaning'}
-        style={{ borderColor: flipped ? 'var(--gold)' : 'var(--border)' }}
+        style={{
+          borderColor: flipped ? 'var(--gold)' : 'var(--border)',
+          boxShadow: flipped ? 'var(--shadow-gold-sm)' : 'none',
+        }}
       >
-        {/* Gold shimmer on flip */}
+        {/* Gold wash on flip */}
         {flipped && (
-          <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-gold/[0.04] via-transparent to-transparent pointer-events-none" />
         )}
 
         {/* Arabic word */}
@@ -236,34 +280,40 @@ export function FlashCard({
           >
             {word.arabic}
           </div>
-          <div className="text-muted text-lg mt-2 font-rubik" dir="ltr">
-            <span lang="ar">{word.root}</span> • {word.transliteration}
+          <div className="text-muted text-base mt-2 font-rubik tracking-wide" dir="ltr">
+            <span lang="ar" className="text-muted/70">{word.root}</span>
+            <span className="text-border mx-2">·</span>
+            {word.transliteration}
           </div>
         </div>
 
         {!flipped && (
-          <div className="text-muted text-sm mt-4 animate-pulse">
-            Tap to reveal meaning
+          <div className="flex items-center gap-1.5 text-muted/50 text-xs mt-4 tracking-widest uppercase select-none">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Reveal
           </div>
         )}
 
         {/* Back of card — slide-up reveal (Disney slow-out principle) */}
         {flipped && (
-          <div className="w-full mt-2 flex flex-col gap-5 border-t border-border pt-5 animate-card-reveal">
+          <div className="w-full mt-2 flex flex-col gap-5 border-t border-border/60 pt-5 animate-card-reveal">
             {/* Meanings */}
             <div className="text-center">
-              <div className="text-harf-text text-xl font-medium">
-                {word.meanings.join(' • ')}
+              <div className="text-harf-text text-xl font-medium leading-snug">
+                {word.meanings.join(' · ')}
               </div>
             </div>
 
             {/* Derivatives */}
             {word.derivatives.length > 0 && (
               <div className="flex flex-col gap-2">
-                <div className="text-muted text-xs uppercase tracking-wider">Derivatives</div>
+                <div className="text-muted/60 text-[10px] uppercase tracking-widest text-center">Derivatives</div>
                 <div className="flex flex-wrap gap-2 justify-center" dir="rtl">
                   {word.derivatives.map((d, i) => (
-                    <div key={i} className="bg-surface-plus rounded-lg px-3 py-1.5 text-center">
+                    <div key={i} className="bg-surface-plus/80 rounded-lg px-3 py-1.5 text-center border border-border/40">
                       <div className="font-amiri text-lg text-gold" lang="ar">
                         {d.form}
                       </div>
@@ -277,16 +327,16 @@ export function FlashCard({
             )}
 
             {/* Verse example */}
-            {verse?.arabic && (
-              <div className="bg-surface-plus rounded-xl p-4 border border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-muted text-xs uppercase tracking-wider">
-                    Example — {verse.ref}
+            {verse?.arabic ? (
+              <div className="bg-surface-plus/60 rounded-xl p-4 border border-border/50">
+                <div className="flex items-center justify-between mb-2.5">
+                  <div className="text-muted/60 text-[10px] uppercase tracking-widest">
+                    {verse.ref}
                   </div>
                   <VersePlayButton verseRef={verse.ref} />
                 </div>
                 <div
-                  className="font-amiri-quran text-2xl mb-2 text-right"
+                  className="font-amiri-quran text-2xl mb-2.5 text-right"
                   dir="rtl"
                   lang="ar"
                   style={{ lineHeight: '2.2' }}
@@ -301,40 +351,48 @@ export function FlashCard({
                   })}
                 </div>
                 {verse.english && (
-                  <div className="text-muted text-sm italic">{highlightedEnglish}</div>
+                  <div className="text-muted/70 text-sm italic leading-relaxed">{highlightedEnglish}</div>
                 )}
+              </div>
+            ) : (
+              <div className="bg-surface-plus/60 rounded-xl p-4 border border-border/50 animate-pulse flex flex-col gap-2.5">
+                <div className="h-3 w-20 rounded bg-border/50" />
+                <div className="h-8 w-full rounded bg-border/50" />
+                <div className="h-4 w-3/4 rounded bg-border/50" />
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Mastery indicator */}
-      <div className="flex items-center justify-center gap-2">
-        <span className="text-muted text-sm" aria-hidden="true">Current mastery:</span>
-        <div
-          className="flex gap-1"
-          role="img"
-          aria-label={`Mastery level ${mastery} of 5: ${MASTERY_LABELS[mastery]}`}
-        >
+      {/* Mastery indicator — segmented bar */}
+      <div
+        className="flex items-center gap-3"
+        role="img"
+        aria-label={`Mastery level ${mastery} of 5: ${MASTERY_LABELS[mastery]}`}
+      >
+        <span className="text-muted/60 text-xs uppercase tracking-widest shrink-0">Mastery</span>
+        <div className="flex gap-1 flex-1">
           {[1, 2, 3, 4, 5].map(level => (
             <div
               key={level}
-              className={`mastery-dot ${level <= mastery ? MASTERY_COLORS[mastery] : 'bg-border'}`}
+              className={`h-1 flex-1 rounded-full transition-all duration-500 ${
+                level <= mastery ? MASTERY_COLORS[mastery] : 'bg-border'
+              }`}
             />
           ))}
         </div>
-        <span className="text-muted text-sm" aria-hidden="true">{MASTERY_LABELS[mastery]}</span>
+        <span className="text-muted/60 text-xs shrink-0">{MASTERY_LABELS[mastery]}</span>
       </div>
 
       {/* Response buttons — only show after flip */}
       {flipped ? (
-        <div className="flex flex-col gap-3 items-center">
-          <div className="text-muted text-sm">How well did you know it?</div>
+        <div className="flex flex-col gap-2.5 items-center animate-rise">
+          <div className="text-muted/50 text-xs uppercase tracking-widest">How well did you know it?</div>
           <MasteryButtons onResponse={handleResponse} />
         </div>
       ) : (
-        <div className="h-24" /> /* spacer */
+        <div className="h-24" />
       )}
     </div>
   );

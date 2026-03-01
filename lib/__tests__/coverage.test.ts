@@ -41,9 +41,11 @@ const makeWord = (id: string, weight: number): WordWithWeight => ({ id, coverage
 const makeProgress = (id: string, mastery: number): WordProgress => ({
   id: toWordId(id),
   mastery,
-  interval: 1,
-  repetition: 1,
-  efactor: 2.5,
+  stability:  7,
+  difficulty: 5,
+  state:      2,
+  lapses:     0,
+  reps:       1,
   nextReview: '2099-01-01',
 });
 

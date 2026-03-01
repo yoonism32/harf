@@ -1,13 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { RECITERS, DEFAULT_RECITER_ID, RECITER_STORAGE_KEY, type ReciterId } from '@/lib/audio';
+import { useEffect, useRef, useState } from 'react';
+import { DEFAULT_RECITER_ID, RECITER_STORAGE_KEY } from '@/lib/audio';
+import { ReciterSelect } from '@/components/ReciterSelect';
+import { exportAllData, importAllData, getAllWordProgress, getStudySessions } from '@/lib/storage';
 
 export default function SettingsPage() {
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('');
   const [locationSaved, setLocationSaved] = useState(false);
-  const [reciterId, setReciterId] = useState<ReciterId>(DEFAULT_RECITER_ID);
+  const [reciterId, setReciterId] = useState(DEFAULT_RECITER_ID);
+  const [importStatus, setImportStatus] = useState<{ ok: boolean; message: string } | null>(null);
+  const [dataStats, setDataStats] = useState({ words: 0, sessions: 0 });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('harf-location');
@@ -19,7 +24,11 @@ export default function SettingsPage() {
       } catch { /* ignore */ }
     }
     const storedReciter = localStorage.getItem(RECITER_STORAGE_KEY);
-    if (storedReciter) setReciterId((storedReciter as ReciterId) ?? DEFAULT_RECITER_ID);
+    if (storedReciter) setReciterId(storedReciter);
+    setDataStats({
+      words: Object.keys(getAllWordProgress()).length,
+      sessions: getStudySessions().length,
+    });
   }, []);
 
   const handleSaveLocation = () => {
@@ -29,9 +38,31 @@ export default function SettingsPage() {
     setTimeout(() => setLocationSaved(false), 2000);
   };
 
-  const handleReciterChange = (id: ReciterId) => {
+  const handleReciterChange = (id: string) => {
     setReciterId(id);
     localStorage.setItem(RECITER_STORAGE_KEY, id);
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result;
+      if (typeof text !== 'string') return;
+      const result = importAllData(text);
+      setImportStatus(result);
+      if (result.ok) {
+        setDataStats({
+          words: Object.keys(getAllWordProgress()).length,
+          sessions: getStudySessions().length,
+        });
+      }
+      // Reset file input so the same file can be re-imported if needed
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      setTimeout(() => setImportStatus(null), 5000);
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -84,23 +115,73 @@ export default function SettingsPage() {
           <h2 className="text-harf-text font-medium">Quran Reciter</h2>
           <p className="text-muted text-xs mt-1">Used for verse audio on flashcards and daily ayah.</p>
         </div>
+        <ReciterSelect value={reciterId} onChange={handleReciterChange} />
+      </div>
 
-        <div className="flex flex-col gap-2">
-          {RECITERS.map(r => (
-            <button
-              key={r.id}
-              onClick={() => handleReciterChange(r.id)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors
-                ${reciterId === r.id
-                  ? 'border-gold/60 bg-gold/10 text-harf-text'
-                  : 'border-border hover:border-gold/30 text-muted hover:text-harf-text'
-                }`}
-            >
-              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${reciterId === r.id ? 'bg-gold' : 'bg-border'}`} />
-              <span className="text-sm">{r.label}</span>
-            </button>
-          ))}
+      {/* Data */}
+      <div className="card p-6 flex flex-col gap-5">
+        <div>
+          <h2 className="text-harf-text font-medium">Your Data</h2>
+          <p className="text-muted text-xs mt-1">All progress is stored locally on this device.</p>
         </div>
+
+        <div className="flex gap-4 text-sm">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-gold font-bold text-lg tabular-nums">{dataStats.words}</span>
+            <span className="text-muted text-xs">words tracked</span>
+          </div>
+          <div className="w-px bg-border" />
+          <div className="flex flex-col gap-0.5">
+            <span className="text-gold font-bold text-lg tabular-nums">{dataStats.sessions}</span>
+            <span className="text-muted text-xs">study sessions</span>
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={exportAllData}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-surface-plus border border-border text-harf-text text-sm font-medium hover:border-gold/50 hover:text-gold transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export Backup
+          </button>
+
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-surface-plus border border-border text-harf-text text-sm font-medium hover:border-gold/50 hover:text-gold transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12" />
+            </svg>
+            Import Backup
+          </button>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json,application/json"
+            onChange={handleImport}
+            className="sr-only"
+            aria-label="Import backup file"
+          />
+        </div>
+
+        {importStatus && (
+          <div className={`text-sm px-4 py-2.5 rounded-xl border ${
+            importStatus.ok
+              ? 'bg-green/10 border-green/30 text-green'
+              : 'bg-red-500/10 border-red-500/30 text-red-400'
+          }`}>
+            {importStatus.message}
+          </div>
+        )}
+
+        <p className="text-muted/60 text-xs leading-relaxed">
+          Export saves all your word progress, study sessions, and settings to a JSON file.
+          Import from a backup to restore everything on a new device.
+        </p>
       </div>
     </div>
   );

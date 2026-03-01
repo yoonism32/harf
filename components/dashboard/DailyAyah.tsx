@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchAyah, getDailyAyahRef } from '@/lib/quran-api';
 import { getDailyAyahCache, setDailyAyahCache } from '@/lib/storage';
 import { verseAudioUrl, wordAudioUrl } from '@/lib/audio';
+import { searchEnglish, isStopword, stemWord } from '@/lib/english-search';
+import type { SearchResult } from '@/lib/english-search';
 
 export function DailyAyah() {
   const [arabic, setArabic] = useState('');
@@ -15,6 +17,9 @@ export function DailyAyah() {
   const [playingVerse, setPlayingVerse] = useState(false);
   const [glosses, setGlosses] = useState<string[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const wbwDataRef = useRef<Record<string, string> | null>(null);
+  const [selectedWord,  setSelectedWord]  = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<SearchResult[] | null>(null);
 
   // Stop audio if the user navigates away from the dashboard
   useEffect(() => {
@@ -50,6 +55,26 @@ export function DailyAyah() {
     audio.onerror = () => setPlayingVerse(false);
     audio.play().catch(() => setPlayingVerse(false));
   };
+
+  const handleWordSearch = useCallback((word: string) => {
+    if (!wbwDataRef.current) return;
+    if (selectedWord === word) {
+      setSelectedWord(null);
+      setSearchResults(null);
+      return;
+    }
+    setSelectedWord(word);
+    setSearchResults(searchEnglish(word, wbwDataRef.current, 30));
+  }, [selectedWord]);
+
+  useEffect(() => {
+    if (!selectedWord) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setSelectedWord(null); setSearchResults(null); }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectedWord]);
 
   useEffect(() => {
     let cancelled = false;
@@ -104,6 +129,7 @@ export function DailyAyah() {
 
     import('@/data/english-wbw.json').then(mod => {
       const data = mod.default as Record<string, string>;
+      wbwDataRef.current = data;   // keep full dataset for search
       setGlosses(
         Array.from({ length: wordCount }, (_, i) => data[`${ch}:${vs}:${i + 1}`] ?? '')
       );
@@ -198,9 +224,69 @@ export function DailyAyah() {
             })}
           </div>
 
-          <div className="text-muted text-sm italic leading-relaxed">
-            "{english}"
+          <div className="text-muted text-sm leading-relaxed select-none" dir="ltr">
+            &ldquo;
+            {english.split(/(\s+)/).map((token, i) =>
+              /^\s+$/.test(token)
+                ? token
+                : isStopword(token)
+                  ? <span key={i} className="text-muted/50 italic">{token}</span>
+                  : (
+                    <button
+                      key={i}
+                      onClick={() => handleWordSearch(token)}
+                      className={`rounded px-0.5 -mx-0.5 transition-colors italic
+                        hover:text-harf-text hover:bg-surface-plus hover:not-italic
+                        ${selectedWord === token
+                          ? 'text-gold bg-gold/10 not-italic'
+                          : 'text-muted'}`}
+                      title={`Search for "${stemWord(token)}"`}
+                    >
+                      {token}
+                    </button>
+                  )
+            )}
+            &rdquo;
           </div>
+
+          {searchResults !== null && (
+            <div className="flex flex-col gap-2 border-t border-border/50 pt-3 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted font-rubik">
+                  {searchResults.length === 0
+                    ? `No matches for "${selectedWord}"`
+                    : `${searchResults.length} verse${searchResults.length !== 1 ? 's' : ''} mentioning "${selectedWord}"`}
+                </span>
+                <button
+                  onClick={() => { setSelectedWord(null); setSearchResults(null); }}
+                  className="text-xs text-muted hover:text-harf-text transition-colors px-1"
+                  aria-label="Close search results"
+                >
+                  ✕
+                </button>
+              </div>
+              {searchResults.length > 0 && (
+                <div className="flex flex-col gap-0.5 max-h-44 overflow-y-auto">
+                  {searchResults.map(r => (
+                    <a
+                      key={r.verseRef}
+                      href={`https://quran.com/${r.surah}/${r.ayah}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-baseline justify-between gap-3 rounded-md px-2 py-1
+                        hover:bg-surface-plus transition-colors group/result"
+                    >
+                      <span className="text-xs text-gold/80 font-mono shrink-0">{r.verseRef}</span>
+                      <span className="text-xs text-muted/70 truncate group-hover/result:text-harf-text
+                        transition-colors flex-1">{r.gloss}</span>
+                      <span className="text-muted/30 text-xs shrink-0">↗</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="text-muted text-xs">
             Surah {surahName} • {ref}
           </div>

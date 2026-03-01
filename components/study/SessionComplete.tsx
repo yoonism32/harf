@@ -8,6 +8,7 @@ interface SessionCompleteProps {
   coverageBefore: number;
   coverageAfter: number;
   rankLabel?: string;
+  onStudyMore?: () => void;
 }
 
 export function SessionComplete({
@@ -15,6 +16,7 @@ export function SessionComplete({
   coverageBefore,
   coverageAfter,
   rankLabel,
+  onStudyMore,
 }: SessionCompleteProps) {
   const gain = Math.round((coverageAfter - coverageBefore) * 10) / 10;
 
@@ -66,12 +68,21 @@ export function SessionComplete({
 
       {/* Actions */}
       <div className="flex gap-3">
-        <Link
-          href="/study"
-          className="px-6 py-3 bg-gold text-bg rounded-xl font-semibold hover:bg-gold-muted transition-colors"
-        >
-          Study More
-        </Link>
+        {onStudyMore ? (
+          <button
+            onClick={onStudyMore}
+            className="px-6 py-3 bg-gold text-bg rounded-xl font-semibold hover:bg-gold-muted transition-colors"
+          >
+            Study More
+          </button>
+        ) : (
+          <Link
+            href="/study"
+            className="px-6 py-3 bg-gold text-bg rounded-xl font-semibold hover:bg-gold-muted transition-colors"
+          >
+            Study More
+          </Link>
+        )}
         <Link
           href="/app"
           className="px-6 py-3 bg-surface-plus text-harf-text rounded-xl font-medium hover:bg-border transition-colors"

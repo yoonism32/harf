@@ -15,6 +15,49 @@ export const metadata: Metadata = {
   },
 };
 
+const QUICK_LINKS = [
+  {
+    href: '/words',
+    label: 'Word Library',
+    sub: '300 roots',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+      </svg>
+    ),
+  },
+  {
+    href: '/coverage',
+    label: 'Quran Coverage',
+    sub: '114 surahs',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+      </svg>
+    ),
+  },
+  {
+    href: '/names',
+    label: '99 Names',
+    sub: 'Asmā al-Ḥusnā',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+      </svg>
+    ),
+  },
+  {
+    href: '/study',
+    label: 'Study Now',
+    sub: 'SRS flashcards',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+      </svg>
+    ),
+  },
+];
+
 export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
@@ -29,22 +72,22 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { href: '/words',    label: 'Word Library',   sub: '300 roots',      icon: '📖' },
-          { href: '/coverage', label: 'Quran Coverage', sub: '114 surahs',     icon: '🕌' },
-          { href: '/names',    label: '99 Names',        sub: 'Asma Al-Husna', icon: '✨' },
-          { href: '/study',    label: 'Study Now',       sub: 'SRS flashcards', icon: '🎯' },
-        ].map(link => (
+        {QUICK_LINKS.map((link, i) => (
           <Link
             key={link.href}
             href={link.href}
-            className="card p-4 flex flex-col gap-2 hover:border-gold/50 transition-colors group"
+            className="card card-interactive p-4 flex flex-col gap-3 group"
+            style={{ animationDelay: `${i * 60}ms` }}
           >
-            <span className="text-2xl" aria-hidden="true">{link.icon}</span>
-            <div className="text-harf-text font-medium group-hover:text-gold transition-colors">
-              {link.label}
+            <span className="text-muted group-hover:text-gold transition-colors duration-200">
+              {link.icon}
+            </span>
+            <div className="flex flex-col gap-0.5">
+              <div className="text-harf-text text-sm font-medium group-hover:text-gold transition-colors duration-200">
+                {link.label}
+              </div>
+              <div className="text-muted text-xs">{link.sub}</div>
             </div>
-            <div className="text-muted text-xs">{link.sub}</div>
           </Link>
         ))}
       </div>

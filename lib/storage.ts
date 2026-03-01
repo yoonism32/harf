@@ -25,20 +25,26 @@ const KEYS = {
 
 export interface WordProgress {
   id: WordId;
-  mastery: number;          // 0–5
-  interval: number;         // SM-2 interval in days
-  repetition: number;       // SM-2 repetition count
-  efactor: number;          // SM-2 ease factor
-  nextReview: string;       // ISO date string
-  lastReviewed?: string;    // ISO date string
+  mastery: number;          // 0–5 display level (derived from FSRS state + stability)
+  stability: number;        // FSRS S — days until retrieval probability < 90 %
+  difficulty: number;       // FSRS D — intrinsic card difficulty (1–10)
+  state: 0 | 1 | 2 | 3;   // FSRS State: New=0 | Learning=1 | Review=2 | Relearning=3
+  lapses: number;           // times forgotten after graduating to Review
+  reps: number;             // total reviews
+  nextReview: string;       // ISO date string (YYYY-MM-DD)
+  lastReviewed?: string;    // ISO timestamp
+  suspended?: boolean;      // leech flag
+  mnemonic?: string;        // personal memory hint
 }
 
 export interface NameProgress {
   id: number;
   mastery: number;
-  interval: number;
-  repetition: number;
-  efactor: number;
+  stability: number;
+  difficulty: number;
+  state: 0 | 1 | 2 | 3;
+  lapses: number;
+  reps: number;
   nextReview: string;
   lastReviewed?: string;
 }
@@ -65,7 +71,30 @@ export function getAllWordProgress(): Record<string, WordProgress> {
   if (typeof window === 'undefined') return {};
   try {
     const raw = localStorage.getItem(KEYS.WORD_PROGRESS);
-    return raw ? JSON.parse(raw) : {};
+    const all: Record<string, WordProgress> = raw ? JSON.parse(raw) : {};
+    // One-time migration: SM-2 records have `interval`/`efactor` but no `stability`
+    let migrated = false;
+    for (const [id, p] of Object.entries(all)) {
+      if (!('stability' in p)) {
+        const sm2 = p as unknown as { id: string; mastery: number; interval: number; repetition: number; efactor: number; nextReview: string; lastReviewed?: string };
+        all[id] = {
+          id: sm2.id as WordId,
+          mastery: sm2.mastery ?? 0,
+          stability: Math.max(1, sm2.interval ?? 1),
+          difficulty: 5.0,
+          state: sm2.interval > 1 ? 2 : sm2.repetition > 0 ? 1 : 0,
+          lapses: 0,
+          reps: sm2.repetition ?? 0,
+          nextReview: sm2.nextReview,
+          lastReviewed: sm2.lastReviewed,
+        };
+        migrated = true;
+      }
+    }
+    if (migrated) {
+      localStorage.setItem(KEYS.WORD_PROGRESS, JSON.stringify(all));
+    }
+    return all;
   } catch {
     return {};
   }
@@ -88,7 +117,29 @@ export function getAllNameProgress(): Record<number, NameProgress> {
   if (typeof window === 'undefined') return {};
   try {
     const raw = localStorage.getItem(KEYS.NAME_PROGRESS);
-    return raw ? JSON.parse(raw) : {};
+    const all: Record<number, NameProgress> = raw ? JSON.parse(raw) : {};
+    let migrated = false;
+    for (const [id, p] of Object.entries(all)) {
+      if (!('stability' in p)) {
+        const sm2 = p as unknown as { id: number; mastery: number; interval: number; repetition: number; efactor: number; nextReview: string; lastReviewed?: string };
+        all[Number(id)] = {
+          id: sm2.id,
+          mastery: sm2.mastery ?? 0,
+          stability: Math.max(1, sm2.interval ?? 1),
+          difficulty: 5.0,
+          state: sm2.interval > 1 ? 2 : sm2.repetition > 0 ? 1 : 0,
+          lapses: 0,
+          reps: sm2.repetition ?? 0,
+          nextReview: sm2.nextReview,
+          lastReviewed: sm2.lastReviewed,
+        };
+        migrated = true;
+      }
+    }
+    if (migrated) {
+      localStorage.setItem(KEYS.NAME_PROGRESS, JSON.stringify(all));
+    }
+    return all;
   } catch {
     return {};
   }
@@ -202,12 +253,80 @@ export function getStreak(): number {
   return streak;
 }
 
-/** Find "Leech" words (high repetition, low mastery) */
+/** Find "Leech" words (forgot 8+ times after graduating to Review) */
 export function getLeechIds(): string[] {
   const all = getAllWordProgress();
   return Object.values(all)
-    .filter(p => p.repetition > 5 && p.mastery < 3)
+    .filter(p => p.lapses >= 8 && !p.suspended)
     .map(p => p.id);
+}
+
+// ── Export / Import ────────────────────────────────────────────
+
+export interface HarfBackup {
+  version: string;
+  exportedAt: string;
+  wordProgress: Record<string, WordProgress>;
+  nameProgress: Record<number, NameProgress>;
+  studySessions: StudySession[];
+  location: { city: string; country: string } | null;
+  reciter: string | null;
+}
+
+/** Download all user data as a JSON backup file */
+export function exportAllData(): void {
+  if (typeof window === 'undefined') return;
+  const backup: HarfBackup = {
+    version: SCHEMA_VERSION,
+    exportedAt: new Date().toISOString(),
+    wordProgress: getAllWordProgress(),
+    nameProgress: getAllNameProgress(),
+    studySessions: getStudySessions(),
+    location: (() => {
+      try { return JSON.parse(localStorage.getItem('harf-location') ?? 'null'); } catch { return null; }
+    })(),
+    reciter: localStorage.getItem('harf-reciter'),
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `harf-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/** Restore all user data from a JSON backup string. Returns success status and message. */
+export function importAllData(raw: string): { ok: boolean; message: string } {
+  if (typeof window === 'undefined') return { ok: false, message: 'Not available server-side.' };
+  try {
+    const data: Partial<HarfBackup> = JSON.parse(raw);
+    if (!data || typeof data !== 'object') return { ok: false, message: 'Invalid file format.' };
+
+    if (data.wordProgress && typeof data.wordProgress === 'object') {
+      localStorage.setItem(KEYS.WORD_PROGRESS, JSON.stringify(data.wordProgress));
+    }
+    if (data.nameProgress && typeof data.nameProgress === 'object') {
+      localStorage.setItem(KEYS.NAME_PROGRESS, JSON.stringify(data.nameProgress));
+    }
+    if (Array.isArray(data.studySessions)) {
+      localStorage.setItem(KEYS.STUDY_SESSIONS, JSON.stringify(data.studySessions));
+    }
+    if (data.location && typeof data.location === 'object') {
+      localStorage.setItem('harf-location', JSON.stringify(data.location));
+    }
+    if (typeof data.reciter === 'string') {
+      localStorage.setItem('harf-reciter', data.reciter);
+    }
+
+    const wordCount = Object.keys(data.wordProgress ?? {}).length;
+    const sessionCount = (data.studySessions ?? []).length;
+    return { ok: true, message: `Restored: ${wordCount} words · ${sessionCount} sessions.` };
+  } catch {
+    return { ok: false, message: 'Failed to read backup file.' };
+  }
 }
 
 /** Count of words at each mastery level */

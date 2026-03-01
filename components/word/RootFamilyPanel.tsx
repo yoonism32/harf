@@ -61,10 +61,9 @@ export function RootFamilyPanel({ entry }: Props) {
       {entry.summary && (
         <div className="bg-surface-plus border border-border rounded-xl p-4">
           <div className="text-muted text-xs uppercase tracking-wider mb-2">Lexical Summary</div>
-          <p
-            className="text-harf-text text-sm leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: entry.summary }}
-          />
+          <p className="text-harf-text text-sm leading-relaxed">
+            {stripHtml(entry.summary)}
+          </p>
           <div className="text-muted text-xs mt-2">
             Source:{' '}
             <a

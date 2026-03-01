@@ -38,11 +38,14 @@ export function WordCard({
         {/* Header row — pt-5 gives tashkeel ascenders room above the Arabic glyph */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-col gap-1" dir="rtl">
-            <div
-              className="font-amiri text-3xl text-harf-text leading-[1.55]"
-              lang="ar"
-            >
-              {arabic}
+            {/* Inner arabic box: extra top space for tashkeel ascenders */}
+            <div className="overflow-visible pt-4 -mt-1">
+              <div
+                className="font-amiri text-3xl text-harf-text leading-[1.55]"
+                lang="ar"
+              >
+                {arabic}
+              </div>
             </div>
             <div className="text-muted text-xs" dir="ltr">
               <span lang="ar">{root}</span> • {transliteration}

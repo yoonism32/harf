@@ -50,11 +50,47 @@ async function fetchJson(url: string): Promise<unknown> {
 function normalise(r: string): string {
   return r
     .replace(/\s+/g, '')                          // remove whitespace
-    .replace(/[\u064B-\u065F\u0670\u0640]/g, '')  // diacritics, tatweel
-    .replace(/[أإآ]/g, 'ا')                        // hamza → plain alef
+    .replace(/\u0670/g, 'ا')                        // superscript alef (Uthmanic long-vowel) → plain alef
+    .replace(/[\u064B-\u065F\u0640]/g, '')          // other diacritics + tatweel
+    .replace(/[أإآٱ]/g, 'ا')                        // hamza forms + alef wasla → plain alef
     .replace(/ى/g, 'ي')                            // alef maqsura → ya
     .replace(/ة/g, 'ه');                           // teh marbuta → ha
 }
+
+/**
+ * Strip the most common proclitics from a normalised Arabic token so we can
+ * compare its base consonants to a citation form.
+ *
+ * Handles (in order):
+ *   لل   — ل (preposition) + ال (article, assimilated)  e.g. للسماء → سماء
+ *   ال   — definite article                              e.g. السماء → سماء
+ *   و/ف/ب/ل/ك + ال — conjunction/prep + article        e.g. والسماء → سماء
+ *   و/ف/ب/ل/ك      — conjunction/prep alone             e.g. وسماء → سماء
+ */
+function stripArabicPrefix(norm: string): string {
+  if (norm.startsWith('لل')) return norm.slice(2);
+  if (norm.startsWith('ال')) return norm.slice(2);
+  if (norm.length > 2 && 'وفبلك'.includes(norm[0]!)) {
+    const rest = norm.slice(1);
+    if (rest.startsWith('ال')) return rest.slice(2);
+    return rest;
+  }
+  return norm;
+}
+
+/**
+ * Some roots group morphologically distant word families under a single CDN
+ * root key (e.g. سمو covers both سماء "sky" and اسم "name").  When building
+ * rootFamilyWords for a specific word entry, restrict tokens to those whose
+ * base form starts with this prefix (after prefix-stripping).
+ *
+ * Keys are word IDs from words.json; values are normalised 3-char prefixes.
+ */
+const WORD_FORM_PREFIX_FILTER: Record<string, string> = {
+  // Root سمو: CDN groups سماء (sky, ~310×) and اسم (name, ~39×) together.
+  // When studying "sky", only show سماء/سموات verse examples, not اسم/أسماء.
+  's-m-w': 'سما',
+};
 
 /**
  * Manual overrides for words whose root in words.json doesn't match the CDN.
@@ -202,13 +238,31 @@ async function main() {
       }
     }
 
+    // ── Filter rootFamilyWords for roots that mix distinct word families ────
+    // e.g. root سمو groups سماء (sky) and اسم (name); when studying sky
+    // we only want verse examples where the token is a sky/heaven form.
+    const formPrefix = WORD_FORM_PREFIX_FILTER[word.id];
+    let filteredFamily = rootFamily;
+    if (formPrefix) {
+      const filtered = rootFamily.filter(key => {
+        const uthmani = keyToMeta[key]?.[0];
+        if (!uthmani) return true;
+        const stripped = stripArabicPrefix(normalise(uthmani));
+        return stripped.startsWith(formPrefix);
+      });
+      if (filtered.length > 0) {
+        filteredFamily = filtered;
+        console.log(`  [FORM FILTER] ${word.id}: ${rootFamily.length} → ${filtered.length} tokens (prefix "${formPrefix}")`);
+      }
+    }
+
     result[word.id] = {
       wordId: word.id,
       rootArabic: word.root,
       summary,
       rootFamily,
       rootFamilyCount: rootFamily.length,
-      rootFamilyWords: rootFamily.slice(0, 40).map(key => ({
+      rootFamilyWords: filteredFamily.slice(0, 40).map(key => ({
         key,
         uthmani: keyToMeta[key]?.[0] ?? '',
         english: translationData[key] ?? '',

@@ -5,11 +5,10 @@ import Link from 'next/link';
 import { FlashCard } from '@/components/study/FlashCard';
 import { SessionComplete } from '@/components/study/SessionComplete';
 import { reviewWord, RESPONSE_TO_GRADE, type ResponseKey } from '@/lib/srs';
-import { getAllWordProgress, getDueWordIds } from '@/lib/storage';
+import { getAllWordProgress, addStudySession } from '@/lib/storage';
 import { calculateCoverage, type WordWithWeight } from '@/lib/coverage';
 import { fetchAyah } from '@/lib/quran-api';
 import wordsData from '@/data/words.json';
-import wbwMorphologyDataRaw from '@/data/wbw-morphology.json';
 import type { WBWMorphologyData } from '@/types/wbw';
 
 interface WordEntry {
@@ -25,21 +24,28 @@ interface WordEntry {
 
 const words = wordsData as WordEntry[];
 const wordsMap = Object.fromEntries(words.map(w => [w.id, w]));
-// Cast at data boundary — wbw-morphology.json conforms to WBWMorphologyData shape
-const wbwMorphologyData = wbwMorphologyDataRaw as WBWMorphologyData;
 const wordsForCoverage: WordWithWeight[] = words.map(w => ({
   id: w.id,
   coverage_weight: w.coverage_weight,
 }));
 
+// Loaded lazily on first session start — keeps wbw-morphology.json (~928KB) out of the initial bundle
+let wbwMorphologyData: WBWMorphologyData | null = null;
+async function loadMorphology(): Promise<WBWMorphologyData> {
+  if (wbwMorphologyData) return wbwMorphologyData;
+  const mod = await import('@/data/wbw-morphology.json');
+  wbwMorphologyData = mod.default as WBWMorphologyData;
+  return wbwMorphologyData;
+}
+
 const MAX_NEW_PER_SESSION = 10;
 
 /** Return matched word indices + their WBW English glosses for a given verse. */
-function getRootMatchData(wordId: string, verseRef: string): {
+function getRootMatchData(wordId: string, verseRef: string, data: WBWMorphologyData): {
   indices: number[];
   glosses: Record<number, string>;
 } {
-  const morphEntry = wbwMorphologyData[wordId];
+  const morphEntry = data[wordId];
   const indices: number[] = [];
   const glosses: Record<number, string> = {};
 
@@ -67,40 +73,34 @@ function getRootMatchData(wordId: string, verseRef: string): {
   return { indices, glosses };
 }
 
-/** Pre-compute one random word key + its WBW gloss + exact root match indices + match glosses per queue slot */
-function pickWordKeysAndGlosses(q: string[]): {
+/** Pre-compute one random word key + exact root match indices + match glosses per queue slot */
+function pickWordKeysAndData(q: string[], data: WBWMorphologyData): {
   keys: (string | undefined)[];
-  glosses: (string | undefined)[];
   matchIndices: (number[] | undefined)[];
   matchGlosses: (Record<number, string> | undefined)[];
 } {
   const keys: (string | undefined)[] = [];
-  const glosses: (string | undefined)[] = [];
   const matchIndices: (number[] | undefined)[] = [];
   const matchGlosses: (Record<number, string> | undefined)[] = [];
   for (const wordId of q) {
-    const morphEntry = wbwMorphologyData[wordId];
+    const morphEntry = data[wordId];
     const words40 = morphEntry?.rootFamilyWords ?? [];
     let pickedKey: string | undefined;
-    let pickedGloss: string | undefined;
     if (words40.length > 0) {
-      const picked = words40[Math.floor(Math.random() * words40.length)]!;
-      pickedKey = picked.key;
-      pickedGloss = picked.english || undefined;
+      pickedKey = words40[Math.floor(Math.random() * words40.length)]!.key;
     } else {
       // Fallback to raw rootFamily (no gloss available)
       const family = morphEntry?.rootFamily ?? [];
       pickedKey = family.length > 0 ? family[Math.floor(Math.random() * family.length)] : undefined;
     }
     keys.push(pickedKey);
-    glosses.push(pickedGloss);
 
     // Compute exact root positions + WBW English glosses for the chosen verse
     const verseRef = pickedKey
       ? pickedKey.split(':').slice(0, 2).join(':')
       : (wordsMap[wordId]?.example_verse ?? '');
     if (verseRef) {
-      const { indices, glosses: mg } = getRootMatchData(wordId, verseRef);
+      const { indices, glosses: mg } = getRootMatchData(wordId, verseRef, data);
       matchIndices.push(indices.length > 0 ? indices : undefined);
       matchGlosses.push(Object.keys(mg).length > 0 ? mg : undefined);
     } else {
@@ -108,14 +108,16 @@ function pickWordKeysAndGlosses(q: string[]): {
       matchGlosses.push(undefined);
     }
   }
-  return { keys, glosses, matchIndices, matchGlosses };
+  return { keys, matchIndices, matchGlosses };
 }
 
 export default function StudyPage() {
+  // Incrementing this triggers a new session (re-runs queue-build effect)
+  const [sessionId, setSessionId] = useState(0);
+  const [loaded, setLoaded] = useState(false);
   const [queue, setQueue] = useState<string[]>([]);
   // One randomly-chosen word key per queue slot, fixed at session start
   const [sessionKeys, setSessionKeys] = useState<(string | undefined)[]>([]);
-  const [sessionGlosses, setSessionGlosses] = useState<(string | undefined)[]>([]);
   const [sessionMatchIndices, setSessionMatchIndices] = useState<(number[] | undefined)[]>([]);
   const [sessionMatchGlosses, setSessionMatchGlosses] = useState<(Record<number, string> | undefined)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -126,61 +128,69 @@ export default function StudyPage() {
   // verse cache: verseRef → resolved data (useRef keeps identity stable without triggering re-renders)
   const verseCache = useRef(new Map<string, { arabic: string; english: string; ref: string }>()).current;
   const [verse, setVerse] = useState<{ arabic: string; english: string; ref: string } | null>(null);
-  const [currentWordKey, setCurrentWordKey] = useState<string | undefined>(undefined);
-  const [currentWordGloss, setCurrentWordGloss] = useState<string | undefined>(undefined);
-  const [loadingVerse, setLoadingVerse] = useState(false);
   const [rank, setRank] = useState('');
 
   // Build queue on mount, then pre-compute keys + pre-fetch all verses in parallel
   useEffect(() => {
-    const progress = getAllWordProgress();
-    const allIds = words.map(w => w.id);
+    let cancelled = false;
+    async function buildQueue() {
+      const [progress, morphology] = await Promise.all([
+        Promise.resolve(getAllWordProgress()),
+        loadMorphology(),
+      ]);
+      if (cancelled) return;
 
-    // Due reviews
-    const today = new Date().toISOString().slice(0, 10);
-    const dueIds = Object.values(progress)
-      .filter(p => p.nextReview <= today)
-      .map(p => p.id);
+      const allIds = words.map(w => w.id);
 
-    // New words not yet started
-    const newIds = allIds
-      .filter(id => !progress[id])
-      .slice(0, MAX_NEW_PER_SESSION);
+      // Due reviews
+      const today = new Date().toISOString().slice(0, 10);
+      const dueIds = Object.values(progress)
+        .filter(p => p.nextReview <= today)
+        .map(p => p.id);
 
-    // Interleave: 2 due, 1 new
-    const q: string[] = [];
-    let di = 0, ni = 0;
-    while (di < dueIds.length || ni < newIds.length) {
-      const d1 = dueIds[di]; if (d1 !== undefined) { q.push(d1); di++; }
-      const d2 = dueIds[di]; if (d2 !== undefined) { q.push(d2); di++; }
-      const n1 = newIds[ni]; if (n1 !== undefined) { q.push(n1); ni++; }
+      // New words not yet started
+      const newIds = allIds
+        .filter(id => !progress[id])
+        .slice(0, MAX_NEW_PER_SESSION);
+
+      // Interleave: 2 due, 1 new
+      const q: string[] = [];
+      let di = 0, ni = 0;
+      while (di < dueIds.length || ni < newIds.length) {
+        const d1 = dueIds[di]; if (d1 !== undefined) { q.push(d1); di++; }
+        const d2 = dueIds[di]; if (d2 !== undefined) { q.push(d2); di++; }
+        const n1 = newIds[ni]; if (n1 !== undefined) { q.push(n1); ni++; }
+      }
+
+      const finalQueue = q.length > 0 ? q : newIds.slice(0, MAX_NEW_PER_SESSION);
+      setQueue(finalQueue);
+
+      // Pre-compute a stable random key + root match data for every word in this session
+      const { keys, matchIndices, matchGlosses } = pickWordKeysAndData(finalQueue, morphology);
+      setSessionKeys(keys);
+      setSessionMatchIndices(matchIndices);
+      setSessionMatchGlosses(matchGlosses);
+
+      // Pre-fetch all verse refs in parallel — results warm the ayahCache in quran-api.ts
+      finalQueue.forEach((wordId, i) => {
+        const word = wordsMap[wordId];
+        const selectedKey = keys[i];
+        const verseRef = selectedKey
+          ? selectedKey.split(':').slice(0, 2).join(':')
+          : word?.example_verse;
+        if (verseRef) fetchAyah(verseRef);  // fire-and-forget; warms shared cache
+      });
+
+      // Record coverage before session
+      const coverageResult = calculateCoverage(wordsForCoverage, progress);
+      setCoverageBefore(coverageResult.percentage);
+      setRank(coverageResult.rank.arabic + ' ' + coverageResult.rank.transliteration);
+      setLoaded(true);
     }
-
-    const finalQueue = q.length > 0 ? q : newIds.slice(0, MAX_NEW_PER_SESSION);
-    setQueue(finalQueue);
-
-    // Pre-compute a stable random key + gloss for every word in this session
-    const { keys, glosses, matchIndices, matchGlosses } = pickWordKeysAndGlosses(finalQueue);
-    setSessionKeys(keys);
-    setSessionGlosses(glosses);
-    setSessionMatchIndices(matchIndices);
-    setSessionMatchGlosses(matchGlosses);
-
-    // Pre-fetch all verse refs in parallel — results warm the ayahCache in quran-api.ts
-    finalQueue.forEach((wordId, i) => {
-      const word = wordsMap[wordId];
-      const selectedKey = keys[i];
-      const verseRef = selectedKey
-        ? selectedKey.split(':').slice(0, 2).join(':')
-        : word?.example_verse;
-      if (verseRef) fetchAyah(verseRef);  // fire-and-forget; warms shared cache
-    });
-
-    // Record coverage before session
-    const coverageResult = calculateCoverage(wordsForCoverage, progress);
-    setCoverageBefore(coverageResult.percentage);
-    setRank(coverageResult.rank.arabic + ' ' + coverageResult.rank.transliteration);
-  }, []);
+    buildQueue();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId]); // re-runs when sessionId increments (Study More)
 
   // Serve verse for current card from cache (usually instant after pre-fetch)
   useEffect(() => {
@@ -190,8 +200,6 @@ export default function StudyPage() {
     if (!word?.example_verse) return;
 
     const selectedKey = sessionKeys[currentIndex];
-    setCurrentWordKey(selectedKey);
-    setCurrentWordGloss(sessionGlosses[currentIndex]);
 
     const verseRef = selectedKey
       ? selectedKey.split(':').slice(0, 2).join(':')
@@ -200,27 +208,22 @@ export default function StudyPage() {
     // Check local render-state cache first (avoids even the Map lookup flicker)
     if (verseCache.has(verseRef)) {
       setVerse(verseCache.get(verseRef)!);
-      setLoadingVerse(false);
       return;
     }
 
     let cancelled = false;
     setVerse(null);
-    setLoadingVerse(true);
 
     fetchAyah(verseRef).then(data => {
-      if (!cancelled) {
-        if (data) {
-          const v = { arabic: data.arabic, english: data.english, ref: data.reference };
-          verseCache.set(verseRef, v);
-          setVerse(v);
-        }
-        setLoadingVerse(false);
+      if (!cancelled && data) {
+        const v = { arabic: data.arabic, english: data.english, ref: data.reference };
+        verseCache.set(verseRef, v);
+        setVerse(v);
       }
     });
 
     return () => { cancelled = true; };
-  }, [queue, sessionKeys, sessionGlosses, currentIndex]);
+  }, [queue, sessionKeys, currentIndex]);
 
   const handleResponse = useCallback((key: ResponseKey) => {
     if (currentIndex >= queue.length) return;
@@ -236,11 +239,42 @@ export default function StudyPage() {
       const result = calculateCoverage(wordsForCoverage, progress);
       setCoverageAfter(result.percentage);
       setRank(result.rank.arabic + ' — ' + result.rank.transliteration);
+      addStudySession({
+        date: new Date().toISOString().slice(0, 10),
+        wordsReviewed: wordsReviewed + 1, // +1 because setWordsReviewed hasn't run yet
+        coverageBefore,
+        coverageAfter: result.percentage,
+      });
       setDone(true);
     } else {
       setCurrentIndex(next);
     }
   }, [currentIndex, queue]);
+
+  const handleStudyMore = useCallback(() => {
+    // Reset all session state, then increment sessionId to re-run the queue-build effect
+    setDone(false);
+    setCurrentIndex(0);
+    setWordsReviewed(0);
+    setVerse(null);
+    setLoaded(false);
+    setSessionId(id => id + 1);
+  }, []);
+
+  if (!loaded) {
+    return (
+      <div className="flex flex-col gap-6 py-8">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1.5">
+            <div className="h-5 w-32 rounded bg-surface-plus animate-pulse" />
+            <div className="h-4 w-16 rounded bg-surface-plus animate-pulse" />
+          </div>
+          <div className="flex-1 mx-6 h-1.5 bg-surface-plus rounded-full" />
+        </div>
+        <div className="card min-h-64 w-full max-w-2xl mx-auto animate-pulse bg-surface-plus" />
+      </div>
+    );
+  }
 
   if (queue.length === 0) {
     return (
@@ -264,6 +298,7 @@ export default function StudyPage() {
         coverageBefore={coverageBefore}
         coverageAfter={coverageAfter}
         rankLabel={rank}
+        onStudyMore={handleStudyMore}
       />
     );
   }
@@ -305,8 +340,6 @@ export default function StudyPage() {
         progress={progress}
         onResponse={handleResponse}
         verse={verse ?? undefined}
-        wordKey={currentWordKey}
-        wordGloss={currentWordGloss}
         verseMatchIndices={sessionMatchIndices[currentIndex]}
         verseMatchGlosses={sessionMatchGlosses[currentIndex]}
       />

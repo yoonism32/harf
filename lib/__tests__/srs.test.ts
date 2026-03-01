@@ -6,10 +6,13 @@ import {
   MASTERY_COLORS,
   buildSessionQueue,
   reviewWord,
+  reviewName,
 } from '../srs';
+import { Rating } from 'ts-fsrs';
+import { getAllNameProgress } from '../storage';
 import { getAllWordProgress } from '../storage';
 
-// ── localStorage mock (same as storage.test.ts) ───────────────
+// ── localStorage mock ─────────────────────────────────────────
 const store: Record<string, string> = {};
 const localStorageMock = {
   getItem: (key: string) => store[key] ?? null,
@@ -27,19 +30,29 @@ beforeEach(() => {
 });
 
 describe('RESPONSE_TO_GRADE', () => {
-  it('maps all 4 study buttons to valid SM-2 grades (0–5)', () => {
+  it('maps all 4 study buttons to valid FSRS ratings (1–4)', () => {
     for (const grade of Object.values(RESPONSE_TO_GRADE)) {
-      expect(grade).toBeGreaterThanOrEqual(0);
-      expect(grade).toBeLessThanOrEqual(5);
+      expect(grade).toBeGreaterThanOrEqual(1);
+      expect(grade).toBeLessThanOrEqual(4);
     }
   });
 
-  it('blackout maps to grade 0', () => {
-    expect(RESPONSE_TO_GRADE.blackout).toBe(0);
+  it('blackout maps to Rating.Again (1)', () => {
+    expect(RESPONSE_TO_GRADE.blackout).toBe(Rating.Again);
+    expect(RESPONSE_TO_GRADE.blackout).toBe(1);
   });
 
-  it('perfect maps to grade 5', () => {
-    expect(RESPONSE_TO_GRADE.perfect).toBe(5);
+  it('perfect maps to Rating.Easy (4)', () => {
+    expect(RESPONSE_TO_GRADE.perfect).toBe(Rating.Easy);
+    expect(RESPONSE_TO_GRADE.perfect).toBe(4);
+  });
+
+  it('hard maps to Rating.Hard (2)', () => {
+    expect(RESPONSE_TO_GRADE.hard).toBe(Rating.Hard);
+  });
+
+  it('good maps to Rating.Good (3)', () => {
+    expect(RESPONSE_TO_GRADE.good).toBe(Rating.Good);
   });
 });
 
@@ -91,66 +104,79 @@ describe('MASTERY_COLORS', () => {
   });
 });
 
-// ── reviewWord (SM-2 integration) ────────────────────────────
+// ── reviewWord (FSRS) ─────────────────────────────────────────
 describe('reviewWord', () => {
-  it('grade 0 (blackout) on first review sets mastery to 1 (floor for first review)', () => {
-    const result = reviewWord('word-x', 0);
-    // First time: mastery is max(1, gradeToMastery(0, 0)) = max(1, max(0,0-1)) = max(1,0) = 1
+  it('Rating.Again on first review sets mastery to 1 (floor for first view)', () => {
+    const result = reviewWord('word-x', Rating.Again);
     expect(result.mastery).toBe(1);
-    expect(result.repetition).toBe(0);
-    expect(result.interval).toBeGreaterThanOrEqual(1);
+    expect(result.state).toBe(1); // State.Learning
+    expect(result.lapses).toBe(0); // No lapses on first review
+    expect(result.reps).toBe(1);
   });
 
-  it('grade 5 (perfect) on first review raises mastery to 1', () => {
-    const result = reviewWord('word-perfect', 5);
-    expect(result.mastery).toBeGreaterThanOrEqual(1);
-    expect(result.efactor).toBeGreaterThanOrEqual(2.5); // perfect → efactor unchanged or grows
+  it('Rating.Easy on first review graduates immediately (state=Review, mastery >= 2)', () => {
+    const result = reviewWord('word-easy', Rating.Easy);
+    expect(result.mastery).toBeGreaterThanOrEqual(2);
+    expect(result.state).toBe(2); // State.Review — Easy skips learning steps
+    expect(result.stability).toBeGreaterThan(5);
   });
 
-  it('grade 0 after established progress resets repetition and lowers mastery', () => {
-    // Prime the word to mastery 3
-    reviewWord('w-established', 4);
-    reviewWord('w-established', 4);
-    const before = getAllWordProgress()['w-established'];
-    const beforeMastery = before?.mastery ?? 0;
+  it('Rating.Good on first review enters Learning state (mastery=1)', () => {
+    const result = reviewWord('word-good-new', Rating.Good);
+    expect(result.mastery).toBe(1);
+    expect(result.state).toBe(1); // State.Learning
+    expect(result.stability).toBeGreaterThan(0);
+  });
 
-    const result = reviewWord('w-established', 0);
+  it('Rating.Again after graduating to Review increments lapses and lowers mastery', () => {
+    // Prime to Review state with Easy (skips learning steps)
+    reviewWord('w-established', Rating.Easy);
+    reviewWord('w-established', Rating.Easy);
+    const before = getAllWordProgress()['w-established']!;
+    const beforeMastery = before.mastery;
+    expect(before.state).toBe(2); // ensure we're in Review
+
+    const result = reviewWord('w-established', Rating.Again);
     expect(result.mastery).toBeLessThan(beforeMastery);
-    expect(result.repetition).toBe(0); // SM-2 resets on grade < 3
+    expect(result.lapses).toBeGreaterThanOrEqual(1); // FSRS increments lapses on lapse
+    expect(result.state).toBe(3); // State.Relearning
   });
 
-  it('grade 5 (perfect) → efactor stays at or above 2.5 on first review', () => {
-    const result = reviewWord('w-new-perfect', 5);
-    expect(result.efactor).toBeGreaterThanOrEqual(2.5);
-  });
-
-  it('consecutive grade 5 reviews increase interval over time', () => {
-    reviewWord('w-grow', 5);
+  it('consecutive Rating.Good reviews grow stability over time', () => {
+    reviewWord('w-grow', Rating.Good);
     const after1 = getAllWordProgress()['w-grow']!;
-    reviewWord('w-grow', 5);
+    reviewWord('w-grow', Rating.Good);
     const after2 = getAllWordProgress()['w-grow']!;
-    expect(after2.interval).toBeGreaterThanOrEqual(after1.interval);
+    expect(after2.stability).toBeGreaterThanOrEqual(after1.stability);
   });
 
-  it('efactor does not drop below SM-2 floor of 1.3', () => {
-    // Grade 0 repeatedly to drive efactor down
-    for (let i = 0; i < 10; i++) reviewWord('w-floor', 0);
-    const result = getAllWordProgress()['w-floor']!;
-    expect(result.efactor).toBeGreaterThanOrEqual(1.3);
+  it('stability is always a positive number after any rating', () => {
+    for (const rating of [Rating.Again, Rating.Hard, Rating.Good, Rating.Easy]) {
+      const result = reviewWord(`w-stab-${rating}`, rating);
+      expect(result.stability).toBeGreaterThan(0);
+    }
   });
 
   it('nextReview is always at least tomorrow', () => {
-    const result = reviewWord('w-date', 0);
+    const result = reviewWord('w-date', Rating.Again);
     const today = new Date().toISOString().slice(0, 10);
-    // Date strings are ISO-8601 and compare lexicographically
     expect(result.nextReview > today).toBe(true);
   });
 
   it('result is persisted to localStorage', () => {
-    reviewWord('w-persist', 4);
+    reviewWord('w-persist', Rating.Good);
     const stored = getAllWordProgress()['w-persist'];
     expect(stored).toBeDefined();
     expect(stored?.id).toBe('w-persist');
+    expect(stored?.reps).toBe(1);
+  });
+
+  it('reps increments with each review', () => {
+    reviewWord('w-reps', Rating.Good);
+    reviewWord('w-reps', Rating.Good);
+    reviewWord('w-reps', Rating.Good);
+    const result = getAllWordProgress()['w-reps']!;
+    expect(result.reps).toBe(3);
   });
 });
 
@@ -176,9 +202,63 @@ describe('buildSessionQueue', () => {
   it('interleaves due and new words (2:1 pattern)', () => {
     const due = ['d1', 'd2', 'd3', 'd4'];
     const queue = buildSessionQueue(['n1', 'n2', 'n3', ...due], due, 3);
-    // Should have all due words + up to 3 new
     for (const id of due) {
       expect(queue).toContain(id);
     }
+  });
+});
+
+// ── reviewName ────────────────────────────────────────────────
+describe('reviewName', () => {
+  it('Rating.Easy on first review sets mastery >= 2 and graduates to Review', () => {
+    const result = reviewName(1, Rating.Easy);
+    expect(result.mastery).toBeGreaterThanOrEqual(2);
+    expect(result.id).toBe(1);
+    expect(result.state).toBe(2); // State.Review
+  });
+
+  it('Rating.Again on first review sets mastery to 1 (floor)', () => {
+    const result = reviewName(2, Rating.Again);
+    expect(result.mastery).toBe(1);
+    expect(result.lapses).toBe(0); // No lapses on first review
+    expect(result.state).toBe(1); // State.Learning
+  });
+
+  it('result is persisted to localStorage', () => {
+    reviewName(3, Rating.Good);
+    const stored = getAllNameProgress()[3];
+    expect(stored).toBeDefined();
+    expect(stored?.id).toBe(3);
+    expect(stored?.reps).toBe(1);
+  });
+
+  it('nextReview is always at least tomorrow', () => {
+    const result = reviewName(4, Rating.Again);
+    const today = new Date().toISOString().slice(0, 10);
+    expect(result.nextReview > today).toBe(true);
+  });
+
+  it('consecutive Rating.Easy reviews grow stability', () => {
+    reviewName(5, Rating.Easy);
+    const after1 = getAllNameProgress()[5]!;
+    reviewName(5, Rating.Easy);
+    const after2 = getAllNameProgress()[5]!;
+    expect(after2.stability).toBeGreaterThanOrEqual(after1.stability);
+  });
+
+  it('Rating.Again after graduating to Review lowers mastery', () => {
+    reviewName(6, Rating.Easy); // Graduate immediately
+    const before = getAllNameProgress()[6]!;
+    const beforeMastery = before.mastery;
+    const result = reviewName(6, Rating.Again);
+    expect(result.mastery).toBeLessThan(beforeMastery);
+    expect(result.state).toBe(3); // State.Relearning
+  });
+
+  it('difficulty stays in valid FSRS range (1–10)', () => {
+    for (let i = 0; i < 5; i++) reviewName(7, Rating.Again);
+    const result = getAllNameProgress()[7]!;
+    expect(result.difficulty).toBeGreaterThanOrEqual(1);
+    expect(result.difficulty).toBeLessThanOrEqual(10);
   });
 });

@@ -1,23 +1,20 @@
 'use client';
 
 import { useRef, useState } from 'react';
-
-const WORDS_AUDIO_CDN = 'https://audios.quranwbw.com/words';
-const VERSE_AUDIO_CDN = 'https://everyayah.com/data/Alafasy_128kbps';
+import { verseAudioUrl as buildVerseUrl, wordAudioUrl as buildWordUrl } from '@/lib/audio';
 
 /** Build the QuranWBW word audio URL from a key like "2:255:3" */
 function wordAudioUrl(key: string): string | null {
-  const [ch, vs, wd = '1'] = key.split(':');
+  const [ch, vs, wd] = key.split(':');
   if (!ch || !vs) return null;
-  const file = `${ch.padStart(3, '0')}_${vs.padStart(3, '0')}_${wd.padStart(3, '0')}.mp3`;
-  return `${WORDS_AUDIO_CDN}/${ch}/${file}?version=2`;
+  return buildWordUrl(ch, vs, parseInt(wd ?? '1', 10));
 }
 
-/** Build the EveryAyah verse audio URL from a key like "2:255" */
+/** Build the EveryAyah verse audio URL from a key like "2:255" — respects saved reciter */
 function verseAudioUrl(key: string): string | null {
   const [ch, vs] = key.split(':');
   if (!ch || !vs) return null;
-  return `${VERSE_AUDIO_CDN}/${ch.padStart(3, '0')}${vs.padStart(3, '0')}.mp3`;
+  return buildVerseUrl(ch, vs);
 }
 
 interface AudioButtonProps {

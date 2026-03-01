@@ -73,8 +73,9 @@ export default function RootLayout({
         {/* DNS-prefetch for CDN resources used at runtime */}
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <link rel="dns-prefetch" href="https://api.aladhan.com" />
-        <link rel="dns-prefetch" href="https://api.alquran.cloud" />
-        {/* Preconnect for primary CDN (audio files etc.) */}
+        <link rel="dns-prefetch" href="https://everyayah.com" />
+        <link rel="dns-prefetch" href="https://audios.quranwbw.com" />
+        {/* Preconnect for primary CDN (Quran text data) */}
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
       </head>
       <body className="antialiased min-h-screen" dir="ltr">
