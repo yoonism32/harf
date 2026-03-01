@@ -11,10 +11,10 @@
 Harf is a client-side Progressive Web App for mastering Quranic Arabic vocabulary through spaced repetition. No account or backend required — all data lives in your browser.
 
 - **~300 root words** covering ~90% of Quranic vocabulary
-- **SM-2 spaced-repetition flashcards** — SuperMemo algorithm, 6 mastery levels (0→5)
+- **FSRS-6 spaced-repetition flashcards** — modern forgetting-curve algorithm, 6 mastery levels (0→5)
 - **Quran comprehension tracker** — coverage map across all 114 surahs
 - **99 Names of Allah** (Asma Al-Husna) with their own SRS deck
-- **Daily Ayah** — deterministic cycle through all 6,236 verses (same ayah for everyone each day)
+- **Daily Ayah** — deterministic cycle through all 6,236 verses; tap Arabic words to hear audio, click English content words to reverse-search matching verses across all 83k WBW glosses
 - **Prayer times widget** via Aladhan API
 - All data stored client-side (localStorage, no backend, no login)
 
@@ -56,12 +56,15 @@ harf/
 │   ├── word/                 # MorphologyTable
 │   └── words/                # WordCard
 ├── lib/
-│   ├── storage.ts            # localStorage API — branded WordId/NameId types, SM-2 schema
-│   ├── srs.ts                # SuperMemo SM-2 wrapper — reviewWord, reviewName, STUDY_BUTTONS
+│   ├── storage.ts            # localStorage API — branded WordId/NameId types, FSRS schema
+│   ├── srs.ts                # FSRS-6 wrapper — reviewWord, reviewName, STUDY_BUTTONS
 │   ├── quran-api.ts          # CDN Quran fetcher, deterministic daily ayah, parallel fetch
 │   ├── aladhan-api.ts        # Prayer times API wrapper
 │   ├── coverage.ts           # SURAHS static data + coverage calculation
-│   └── __tests__/            # Vitest unit tests — 37 tests total
+│   ├── audio.ts              # verseAudioUrl, wordAudioUrl, RECITERS
+│   ├── arabic.ts             # tokenContainsRoot — Arabic morphological root matching
+│   ├── english-search.ts     # stemWord, isStopword, searchEnglish — WBW reverse lookup
+│   └── __tests__/            # Vitest unit tests — 133 tests total
 ├── e2e/
 │   ├── dashboard.spec.ts     # Landing page + /app dashboard
 │   ├── study.spec.ts         # SRS session flow
@@ -102,7 +105,7 @@ npm run dev        # http://localhost:3000
 ## Testing
 
 ```bash
-npm test                  # Vitest unit tests (37 tests)
+npm test                  # Vitest unit tests (133 tests)
 npm run test:coverage     # + v8 coverage report (lib/)
 npm run test:e2e          # Playwright E2E (chromium + mobile)
 npm run test:e2e:ui       # Playwright UI mode
@@ -123,14 +126,15 @@ Next.js App Router (SSG/SSR)
     │
     ├── Dashboard /app        ← CoverageHero + StudyQueue + widgets
     │       │
-    │       └── lib/storage.ts ──► localStorage (SM-2 state)
+    │       └── lib/storage.ts ──► localStorage (FSRS state)
     │
     ├── Study /study          ← FlashCard
     │       │
-    │       └── lib/srs.ts ──► supermemo (SM-2) ──► lib/storage.ts
+    │       └── lib/srs.ts ──► ts-fsrs (FSRS-6) ──► lib/storage.ts
     │
     └── Widgets
             ├── DailyAyah ──► lib/quran-api.ts ──► cdn.jsdelivr.net
+            │       └── lib/english-search.ts ──► data/english-wbw.json (83k entries, in-memory)
             └── PrayerTimes ──► lib/aladhan-api.ts ──► api.aladhan.com
 ```
 
@@ -138,7 +142,7 @@ Next.js App Router (SSG/SSR)
 
 ## Key Design Patterns
 
-- **SRS**: SM-2 via `supermemo` npm; 4-button UI (Don't Know / Vague / Got It / Perfect) maps to grades 0/2/4/5; mastery 0–5
+- **SRS**: FSRS-6 via `ts-fsrs` npm; 4-button UI (Don't Know / Hard / Good / Perfect) maps to FSRS ratings Again/Hard/Good/Easy; mastery 0–5 derived from FSRS state + stability
 - **Branded types**: `WordId = Brand<string, 'WordId'>`, `NameId = Brand<number, 'NameId'>` — prevents ID confusion at compile time
 - **LayoutShell**: client component using `usePathname()` — landing page gets full viewport, all other pages get navbar + `max-w-5xl` main
 - **Daily Ayah**: day-of-year mod 6236 — deterministic, no randomness, same ayah for all users each day
@@ -175,7 +179,7 @@ GitHub Actions — two sequential jobs:
 | Language | TypeScript 5 |
 | Styling | Tailwind CSS v4 |
 | Fonts | Amiri + Rubik via next/font |
-| SRS algorithm | SuperMemo SM-2 (`supermemo` package) |
+| SRS algorithm | FSRS-6 (`ts-fsrs` package) |
 | Unit tests | Vitest 4 + v8 coverage |
 | E2E tests | Playwright 1.58 |
 | Quran data | fawazahmed0/quran-api (CDN) |
