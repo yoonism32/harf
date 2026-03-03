@@ -15,6 +15,8 @@ export function LayoutShell({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
 
+  const isWide = pathname.startsWith('/drill');
+
   return (
     <>
       <a
@@ -24,7 +26,11 @@ export function LayoutShell({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <Navbar />
-      <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-6">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className={isWide ? 'w-full px-4 py-6' : 'max-w-5xl mx-auto px-4 py-6'}
+      >
         {children}
       </main>
     </>

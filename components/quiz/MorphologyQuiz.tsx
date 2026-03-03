@@ -169,24 +169,24 @@ export function MorphologyQuiz() {
       )}
 
       {question && (
-        <div className="card p-8 flex flex-col items-center gap-7">
+        <div className="card p-6 flex flex-col items-center gap-5">
           {/* The word */}
-          <div className="flex flex-col items-center gap-2">
+          <div className="w-full flex flex-col items-center gap-2 bg-surface rounded-2xl py-7 px-6">
             <span
-              className="font-amiri-quran text-5xl text-harf-text leading-none"
               lang="ar"
               dir="rtl"
-              style={{ fontFamily: 'Amiri Quran, Amiri, serif' }}
+              className="text-harf-text text-center"
+              style={{ fontFamily: 'Amiri Quran, Amiri, serif', fontSize: '3rem', lineHeight: '2.2' }}
             >
               {question.word.arabic}
             </span>
-            <span className="text-muted text-sm font-mono">
+            <span className="text-muted text-xs font-mono tracking-widest">
               {question.word.transliteration}
             </span>
           </div>
 
           {/* Prompt */}
-          <p className="text-muted text-sm text-center -mt-2">
+          <p className="text-muted text-sm text-center">
             {mode === 'root'
               ? 'What is the triliteral root of this word?'
               : 'Which meaning matches this word?'
@@ -198,7 +198,7 @@ export function MorphologyQuiz() {
             {question.choices.map(choice => {
               const isSelected = selected === choice;
               const isCorrect  = choice === question.correct;
-              let cls = 'border-border text-muted hover:border-gold/50 hover:text-gold';
+              let cls = 'border-border text-muted hover:border-gold/50 hover:text-harf-text';
               if (result && isCorrect)  cls = 'border-green/60 bg-green/5 text-green';
               else if (result && isSelected && !isCorrect)
                                          cls = 'border-red-500/60 bg-red-500/5 text-red-400';
@@ -208,13 +208,14 @@ export function MorphologyQuiz() {
                   onClick={() => handleAnswer(choice)}
                   disabled={!!result}
                   className={`
-                    px-4 py-3 rounded-xl border text-sm font-medium text-center
+                    px-4 py-4 rounded-xl border text-base font-medium text-center
                     transition-all duration-150
                     disabled:cursor-not-allowed
                     ${cls}
                   `}
                   dir={mode === 'root' ? 'rtl' : 'ltr'}
                   lang={mode === 'root' ? 'ar' : undefined}
+                  style={mode === 'root' ? { fontFamily: 'Amiri, serif', fontSize: '1.15rem', letterSpacing: '0.1em' } : undefined}
                 >
                   {choice}
                 </button>
@@ -224,8 +225,8 @@ export function MorphologyQuiz() {
 
           {/* Feedback + next */}
           {result && (
-            <div className="flex flex-col items-center gap-4 w-full animate-fade-in">
-              <div className={`text-sm font-semibold px-4 py-2 rounded-lg ${
+            <div className="flex flex-col items-center gap-3 w-full animate-fade-in">
+              <div className={`w-full text-sm font-semibold px-4 py-2.5 rounded-xl text-center ${
                 result === 'correct'
                   ? 'bg-green/10 text-green border border-green/30'
                   : 'bg-red-500/10 text-red-400 border border-red-500/30'
@@ -240,12 +241,13 @@ export function MorphologyQuiz() {
                 href={`/word/${question.word.id}`}
                 className="text-xs text-muted hover:text-gold transition-colors"
               >
-                View full entry for {question.word.arabic} ↗
+                View full entry for{' '}
+                <span lang="ar" style={{ fontFamily: 'Amiri, serif' }}>{question.word.arabic}</span> ↗
               </Link>
 
               <button
                 onClick={handleNext}
-                className="w-full px-6 py-2.5 bg-gold text-bg rounded-xl text-sm font-semibold
+                className="w-full px-6 py-3 bg-gold text-bg rounded-xl text-sm font-semibold
                   hover:bg-gold/90 transition-colors"
               >
                 Next word →

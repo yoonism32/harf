@@ -73,7 +73,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Prayer times location */}
-      <div className="card p-6 flex flex-col gap-5">
+      <div className="card p-6 flex flex-col gap-5 relative z-10">
         <h2 className="text-harf-text font-medium">Prayer Times Location</h2>
 
         <div className="flex flex-col gap-3">
@@ -110,7 +110,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Reciter */}
-      <div className="card p-6 flex flex-col gap-5">
+      <div className="card p-6 flex flex-col gap-5 relative z-10">
         <div>
           <h2 className="text-harf-text font-medium">Quran Reciter</h2>
           <p className="text-muted text-xs mt-1">Used for verse audio on flashcards and daily ayah.</p>

@@ -4,19 +4,23 @@
 // Play a verse audio clip → guess the surah:ayah reference.
 // Pool: Juz Amma (surahs 78-114) + example verses from studied words.
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { RECITERS, RECITER_STORAGE_KEY, DEFAULT_RECITER_ID } from '@/lib/audio';
 import { fetchAyah, type AyahResponse } from '@/lib/quran-api';
 import { getAllWordProgress } from '@/lib/storage';
+import { reciterQuality } from '@/components/ReciterSelect';
 import surahMetaRaw from '@/data/quran-surah-meta.json';
 import wordsRaw from '@/data/words.json';
+import juzDataRaw from '@/data/quran-metadata-juz.json';
 
 interface SurahMeta { id: number; name: string; arabic: string; verses: number; }
 interface WordEntry  { id: string; example_verse: string; }
+interface JuzEntry   { first_verse_key: string; last_verse_key: string; }
 
 const surahMeta = surahMetaRaw as SurahMeta[];
 const wordsData = wordsRaw as WordEntry[];
+const juzData   = juzDataRaw as Record<string, JuzEntry>;
 
 // ── Build verse pool ──────────────────────────────────────────────────────────
 
@@ -62,12 +66,195 @@ function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)]!;
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function parseAyatRange(s: string) {
+  const m = s.trim().match(/^(\d+):(\d+)\s*[-–]\s*(\d+):(\d+)$/);
+  if (!m) return null;
+  const [, ss, sa, es, ea] = m.map(Number);
+  if (!ss || !sa || !es || !ea || ss > 114 || es > 114) return null;
+  return { start: { surah: ss, ayah: sa }, end: { surah: es, ayah: ea } };
+}
+
 // ── State machine ─────────────────────────────────────────────────────────────
 
 type DrillState = 'ready' | 'playing' | 'answering' | 'revealed';
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5] as const;
 type Speed = typeof SPEEDS[number];
+
+// ── Pool label helper ─────────────────────────────────────────────────────────
+
+function buildPoolLabel(
+  juzFilter: Set<number>,
+  surahFilter: Set<number>,
+  parsedAyatRange: ReturnType<typeof parseAyatRange>,
+): string {
+  const parts: string[] = [];
+
+  if (juzFilter.size > 0) {
+    const sorted = Array.from(juzFilter).sort((a, b) => a - b);
+    parts.push(sorted.length === 1 ? `Juz ${sorted[0]}` : `Juz ${sorted.join(', ')}`);
+  }
+
+  if (surahFilter.size > 0) {
+    const sorted = Array.from(surahFilter).sort((a, b) => a - b);
+    if (sorted.length === 1) {
+      const sm = surahMeta.find(s => s.id === sorted[0]);
+      parts.push(`Surah ${sm?.name ?? sorted[0]}`);
+    } else {
+      parts.push(`${sorted.length} surahs`);
+    }
+  }
+
+  if (parsedAyatRange) {
+    const { start: s, end: e } = parsedAyatRange;
+    parts.push(`${s.surah}:${s.ayah}–${e.surah}:${e.ayah}`);
+  }
+
+  return parts.length > 0 ? parts.join(' · ') : 'Juz Amma + studied words';
+}
+
+// ── FilterPanel ───────────────────────────────────────────────────────────────
+
+type FilterTab = 'juz' | 'surah' | 'range';
+
+function FilterPanel({
+  juzFilter, setJuzFilter,
+  surahFilter, setSurahFilter,
+  ayatRange, setAyatRange,
+  parsedAyatRange,
+}: {
+  juzFilter: Set<number>;   setJuzFilter: React.Dispatch<React.SetStateAction<Set<number>>>;
+  surahFilter: Set<number>; setSurahFilter: React.Dispatch<React.SetStateAction<Set<number>>>;
+  ayatRange: string;        setAyatRange: React.Dispatch<React.SetStateAction<string>>;
+  parsedAyatRange: ReturnType<typeof parseAyatRange>;
+}) {
+  const [activeTab, setActiveTab] = useState<FilterTab>('juz');
+  const activeCount = juzFilter.size + surahFilter.size + (parsedAyatRange ? 1 : 0);
+
+  const toggleJuz = (n: number) => setJuzFilter(prev => {
+    const next = new Set(prev); next.has(n) ? next.delete(n) : next.add(n); return next;
+  });
+  const toggleSurah = (n: number) => setSurahFilter(prev => {
+    const next = new Set(prev); next.has(n) ? next.delete(n) : next.add(n); return next;
+  });
+  const clearAll = () => { setJuzFilter(new Set()); setSurahFilter(new Set()); setAyatRange(''); };
+
+  const tabs: { id: FilterTab; label: string; hasActive: boolean }[] = [
+    { id: 'juz',   label: 'JUZ',   hasActive: juzFilter.size > 0 },
+    { id: 'surah', label: 'SURAH', hasActive: surahFilter.size > 0 },
+    { id: 'range', label: 'RANGE', hasActive: !!parsedAyatRange },
+  ];
+
+  return (
+    <div className="card overflow-hidden text-sm min-h-[360px] flex flex-col">
+      {/* Tab header row — horizontal, like a table header */}
+      <div className="flex border-b border-border bg-surface-plus/40">
+        {tabs.map((tab, i) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`relative flex-1 py-3 text-xs font-semibold tracking-widest uppercase transition-all
+                ${i > 0 ? 'border-l border-border' : ''}
+                ${isActive
+                  ? 'text-gold bg-gold/5'
+                  : tab.hasActive
+                    ? 'text-gold/50 hover:text-gold/70 hover:bg-surface'
+                    : 'text-muted hover:text-harf-text hover:bg-surface'
+                }`}
+              style={isActive ? { textShadow: '0 0 10px var(--color-gold)' } : undefined}
+            >
+              {tab.label}
+              {/* Active underline */}
+              {isActive && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold"
+                  style={{ boxShadow: '0 0 6px var(--color-gold)' }} />
+              )}
+              {/* Dot indicator when tab has selections but isn't active */}
+              {!isActive && tab.hasActive && (
+                <span className="absolute top-1.5 right-1.5 w-1 h-1 rounded-full bg-gold/60" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tab content */}
+      <div className="p-4 flex-1 flex flex-col">
+        {activeTab === 'juz' && (
+          <div className="flex-1 flex items-center">
+            <div className="grid grid-cols-5 gap-2 py-2 w-full">
+              {Array.from({ length: 30 }, (_, i) => i + 1).map(n => (
+                <button key={n} onClick={() => toggleJuz(n)}
+                  className={`rounded py-2 text-sm tabular-nums transition-all
+                    ${juzFilter.has(n)
+                      ? 'bg-gold text-bg font-semibold'
+                      : 'border border-border text-muted hover:border-gold/50 hover:text-gold'}`}
+                  style={juzFilter.has(n) ? { boxShadow: '0 0 8px var(--color-gold)' } : undefined}>
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'surah' && (
+          <div className="max-h-80 overflow-y-auto flex flex-col gap-1 -mx-1 px-1">
+            {surahMeta.map(s => (
+              <button key={s.id} onClick={() => toggleSurah(s.id)}
+                className={`w-full text-left px-2 py-2 rounded-lg flex items-center gap-2 transition-colors
+                  ${surahFilter.has(s.id)
+                    ? 'bg-gold/10 text-gold'
+                    : 'text-muted hover:bg-surface hover:text-harf-text'}`}>
+                <span className="font-mono text-xs w-5 text-right flex-shrink-0">{s.id}</span>
+                <span className="truncate flex-1">{s.name}</span>
+                <span className="text-xs opacity-40 flex-shrink-0">{s.verses}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'range' && (
+          <div className="space-y-3">
+            <input type="text" value={ayatRange} onChange={e => setAyatRange(e.target.value)}
+              placeholder="1:1 – 2:141"
+              className={`w-full px-3 py-2 rounded-lg bg-surface border text-harf-text text-xs
+                placeholder:text-muted/40 focus:outline-none transition-colors
+                ${ayatRange && !parsedAyatRange
+                  ? 'border-red-500/50'
+                  : ayatRange && parsedAyatRange ? 'border-green/50'
+                  : 'border-border focus:border-gold/50'}`}
+              autoComplete="off" spellCheck={false} />
+            {ayatRange && !parsedAyatRange && (
+              <p className="text-xs text-red-400 mt-1.5">Format: surah:ayah – surah:ayah</p>
+            )}
+            {ayatRange && parsedAyatRange && (
+              <p className="text-xs text-green/70 mt-1.5">Valid range</p>
+            )}
+            {!ayatRange && (
+              <p className="text-[11px] text-muted/70">
+                Tip: use an en dash like “1:1 – 2:141”
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Reset footer */}
+      {activeCount > 0 && (
+        <div className="px-4 pb-3 border-t border-border pt-3">
+          <button onClick={clearAll}
+            className="text-xs text-muted hover:text-gold transition-colors">
+            Reset ({activeCount})
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -85,9 +272,13 @@ export function ListeningDrill() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsView, setSettingsView] = useState<'root' | 'speed' | 'reciter'>('root');
 
+  // Filter state
+  const [juzFilter,   setJuzFilter]   = useState<Set<number>>(new Set());
+  const [surahFilter, setSurahFilter] = useState<Set<number>>(new Set());
+  const [ayatRange,   setAyatRange]   = useState('');
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [pool]   = useState(() => buildVersePool());
 
   // Read reciter from localStorage on mount
   useEffect(() => {
@@ -95,8 +286,65 @@ export function ListeningDrill() {
     if (stored && RECITERS.some(r => r.id === stored)) setReciterId(stored);
   }, []);
 
+  const parsedAyatRange = useMemo(() => parseAyatRange(ayatRange), [ayatRange]);
+
+  const pool = useMemo(() => {
+    const hasJuz   = juzFilter.size > 0;
+    const hasSurah = surahFilter.size > 0;
+    const hasAyat  = parsedAyatRange !== null;
+
+    if (!hasJuz && !hasSurah && !hasAyat) return buildVersePool();
+
+    const seen = new Set<string>();
+    const result: Array<{ surah: number; ayah: number }> = [];
+    const add = (s: number, a: number) => {
+      const k = `${s}:${a}`;
+      if (!seen.has(k)) { seen.add(k); result.push({ surah: s, ayah: a }); }
+    };
+    const vk = (s: number, a: number) => s * 1000 + a;
+
+    if (hasJuz) {
+      for (const j of juzFilter) {
+        const entry = juzData[String(j)];
+        if (!entry) continue;
+        const [fs, fa] = entry.first_verse_key.split(':').map(Number) as [number, number];
+        const [ls, la] = entry.last_verse_key.split(':').map(Number) as [number, number];
+        const lo = vk(fs, fa), hi = vk(ls, la);
+        for (const sm of surahMeta) {
+          for (let a = 1; a <= sm.verses; a++) {
+            if (vk(sm.id, a) >= lo && vk(sm.id, a) <= hi) add(sm.id, a);
+          }
+        }
+      }
+    }
+
+    if (hasSurah) {
+      for (const sId of surahFilter) {
+        const sm = surahMeta.find(s => s.id === sId);
+        if (!sm) continue;
+        for (let a = 1; a <= sm.verses; a++) add(sId, a);
+      }
+    }
+
+    if (hasAyat) {
+      const lo = vk(parsedAyatRange!.start.surah, parsedAyatRange!.start.ayah);
+      const hi = vk(parsedAyatRange!.end.surah, parsedAyatRange!.end.ayah);
+      for (const sm of surahMeta) {
+        for (let a = 1; a <= sm.verses; a++) {
+          if (vk(sm.id, a) >= lo && vk(sm.id, a) <= hi) add(sm.id, a);
+        }
+      }
+    }
+
+    return result.length > 0 ? result : buildVersePool();
+  }, [juzFilter, surahFilter, parsedAyatRange]);
+
+  // Keep pool in a ref so loadNext doesn't need it as a dep
+  const poolRef = useRef(pool);
+  useEffect(() => { poolRef.current = pool; }, [pool]);
+
   const loadNext = useCallback(() => {
-    const v = pickRandom(pool);
+    const v = pickRandom(poolRef.current);
     setTarget(v);
     setDrillState('ready');
     setGuess('');
@@ -104,9 +352,13 @@ export function ListeningDrill() {
     setAyahData(null);
     setPlayCount(0);
     audioRef.current?.pause();
-  }, [pool]);
+  }, []); // stable — never recreated; uses poolRef
 
-  useEffect(() => { loadNext(); }, [loadNext]);
+  // Refresh target when filters change (stop any active audio)
+  useEffect(() => {
+    audioRef.current?.pause();
+    loadNext();
+  }, [pool, loadNext]);
 
   const playAudio = useCallback(() => {
     if (!target) return;
@@ -160,282 +412,321 @@ export function ListeningDrill() {
   const surahName = target ? surahMeta[target.surah - 1]?.name : '';
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 py-8 animate-fade-in">
-      {/* Title */}
-      <div className="text-center mb-10">
-        <h1 className="text-4xl text-gold mb-2" style={{ fontFamily: 'Amiri, serif' }}>
-          سماع · Drill
-        </h1>
-        <p className="text-muted text-sm">Listen to the recitation — name the verse</p>
-      </div>
+    <div className="w-full px-4 py-8 animate-fade-in">
+      <div className="grid items-start gap-12 2xl:grid-cols-[minmax(0,1fr)_minmax(0,42rem)_minmax(0,1fr)]">
 
-      <div className="card p-8 flex flex-col items-center gap-8">
-
-        {/* Play area */}
-        <div className="flex flex-col items-center gap-4 w-full">
-
-          {/* Play button row with settings gear */}
-          <div className="relative flex items-center justify-center w-full">
-            <button
-              onClick={playAudio}
-              disabled={!target || drillState === 'playing'}
-              aria-label={drillState === 'playing' ? 'Playing…' : playCount === 0 ? 'Play verse' : 'Replay verse'}
-              className={`
-                w-20 h-20 rounded-full flex items-center justify-center
-                border-2 transition-all duration-200
-                ${drillState === 'playing'
-                  ? 'border-gold bg-gold/10 text-gold cursor-not-allowed'
-                  : 'border-border hover:border-gold hover:bg-gold/5 text-muted hover:text-gold cursor-pointer'
-                }
-              `}
-            >
-              {drillState === 'playing' ? (
-                <span className="flex gap-1 items-end h-6">
-                  {[0, 150, 300].map(delay => (
-                    <span
-                      key={delay}
-                      className="w-1.5 bg-gold rounded animate-bounce"
-                      style={{ height: '60%', animationDelay: `${delay}ms` }}
-                    />
-                  ))}
-                </span>
-              ) : (
-                <svg className="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              )}
-            </button>
-
-            {/* Settings gear */}
-            <button
-              onClick={() => { setSettingsOpen(o => !o); setSettingsView('root'); }}
-              aria-label="Playback settings"
-              aria-expanded={settingsOpen}
-              className={`absolute right-0 p-2 rounded-lg transition-colors ${
-                settingsOpen
-                  ? 'text-gold bg-gold/10'
-                  : 'text-muted hover:text-harf-text hover:bg-surface-plus'
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
-            </button>
+        {/* Main drill column — fixed max width, never shrinks */}
+        <div className="w-full max-w-2xl min-w-0 2xl:col-start-2 2xl:justify-self-center">
+          {/* Title */}
+          <div className="text-center mb-10">
+            <h1 className="text-4xl text-gold mb-2" style={{ fontFamily: 'Amiri, serif' }}>
+              سماع · Drill
+            </h1>
+            <p className="text-muted text-sm">Listen to the recitation — name the verse</p>
           </div>
 
-          {/* Replay */}
-          {playCount > 0 && drillState !== 'playing' && drillState !== 'ready' && (
-            <button
-              onClick={playAudio}
-              className="text-xs text-muted hover:text-gold transition-colors flex items-center gap-1"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Replay
-            </button>
-          )}
+          <div className="card p-8 flex flex-col items-center gap-8">
 
-          {/* Settings panel */}
-          {settingsOpen && (
-            <div className="w-full rounded-xl border border-border bg-surface-plus text-sm animate-fade-in overflow-hidden">
+            {/* Play area */}
+            <div className="flex flex-col items-center gap-4 w-full">
 
-              {/* Root view: Speed + Reciter tiles */}
-              {settingsView === 'root' && (
-                <div className="flex divide-x divide-border">
-                  <button
-                    onClick={() => setSettingsView('speed')}
-                    className="flex-1 flex flex-col items-center gap-1 py-3 px-4 hover:bg-surface transition-colors"
-                  >
-                    <span className="text-gold font-semibold tabular-nums">{speed}×</span>
-                    <span className="text-muted text-xs">Speed</span>
-                  </button>
-                  <button
-                    onClick={() => setSettingsView('reciter')}
-                    className="flex-1 flex flex-col items-center gap-1 py-3 px-4 hover:bg-surface transition-colors"
-                  >
-                    <span className="text-harf-text font-medium truncate max-w-[140px] text-xs text-center leading-tight">
-                      {currentReciterLabel}
-                    </span>
-                    <span className="text-muted text-xs">Reciter</span>
-                  </button>
-                </div>
-              )}
-
-              {/* Speed sub-panel */}
-              {settingsView === 'speed' && (
-                <div className="p-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <button
-                      onClick={() => setSettingsView('root')}
-                      className="text-muted hover:text-harf-text transition-colors"
-                      aria-label="Back"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                      </svg>
-                    </button>
-                    <span className="text-harf-text font-medium">Playback Speed</span>
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    {SPEEDS.map(s => (
-                      <button
-                        key={s}
-                        onClick={() => handleSelectSpeed(s)}
-                        className={`px-3 py-1.5 rounded-lg font-mono text-sm transition-colors ${
-                          speed === s
-                            ? 'bg-gold text-bg font-semibold'
-                            : 'border border-border text-muted hover:border-gold/50 hover:text-gold'
-                        }`}
-                      >
-                        {s}×
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Reciter sub-panel */}
-              {settingsView === 'reciter' && (
-                <div className="p-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <button
-                      onClick={() => setSettingsView('root')}
-                      className="text-muted hover:text-harf-text transition-colors"
-                      aria-label="Back"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                      </svg>
-                    </button>
-                    <span className="text-harf-text font-medium">Reciter</span>
-                  </div>
-                  <div className="max-h-52 overflow-y-auto flex flex-col gap-0.5">
-                    {RECITERS.map(r => (
-                      <button
-                        key={r.id}
-                        onClick={() => handleSelectReciter(r.id)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                          reciterId === r.id
-                            ? 'bg-gold/10 text-gold'
-                            : 'text-muted hover:bg-surface hover:text-harf-text'
-                        }`}
-                      >
-                        {r.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-            </div>
-          )}
-        </div>
-
-        {/* Hint: play to begin */}
-        {drillState === 'ready' && (
-          <p className="text-muted text-sm animate-fade-in">Press play to hear the verse</p>
-        )}
-
-        {/* Answer input */}
-        {(drillState === 'answering' || drillState === 'revealed') && (
-          <div className="w-full flex flex-col items-center gap-4 animate-fade-in">
-            <div className="flex gap-3 w-full max-w-xs">
-              <input
-                ref={inputRef}
-                value={guess}
-                onChange={e => setGuess(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="surah:ayah  e.g. 112:1"
-                disabled={drillState === 'revealed'}
-                className={`
-                  flex-1 px-4 py-2.5 rounded-xl text-sm bg-surface-plus border
-                  text-harf-text placeholder:text-muted/50
-                  focus:outline-none transition-colors
-                  ${drillState === 'revealed'
-                    ? correct ? 'border-green/50' : 'border-red-500/40'
-                    : 'border-border focus:border-gold/60'
-                  }
-                `}
-                autoComplete="off"
-                spellCheck={false}
-              />
-              {drillState === 'answering' && (
+              {/* Play button row with settings gear */}
+              <div className="relative flex items-center justify-center w-full">
                 <button
-                  onClick={handleSubmit}
-                  disabled={!guess.trim()}
-                  className="px-4 py-2.5 bg-gold text-bg rounded-xl text-sm font-semibold
-                    hover:bg-gold/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  onClick={playAudio}
+                  disabled={!target}
+                  aria-label={drillState === 'playing' ? 'Replay verse' : playCount === 0 ? 'Play verse' : 'Replay verse'}
+                  className={`
+                    w-20 h-20 rounded-full flex items-center justify-center
+                    border-2 transition-all duration-200
+                    ${drillState === 'playing'
+                      ? 'border-gold bg-gold/10 text-gold hover:bg-gold/15 cursor-pointer'
+                      : 'border-border hover:border-gold hover:bg-gold/5 text-muted hover:text-gold cursor-pointer'
+                    }
+                  `}
                 >
-                  Check
+                  {drillState === 'playing' ? (
+                    <span className="flex gap-1 items-end h-6">
+                      {[0, 150, 300].map(delay => (
+                        <span
+                          key={delay}
+                          className="w-1.5 bg-gold rounded animate-bounce"
+                          style={{ height: '60%', animationDelay: `${delay}ms` }}
+                        />
+                      ))}
+                    </span>
+                  ) : (
+                    <svg className="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  )}
                 </button>
-              )}
-            </div>
-          </div>
-        )}
 
-        {/* Result */}
-        {drillState === 'revealed' && (
-          <div className="w-full flex flex-col items-center gap-5 animate-fade-in">
-            {/* Correct / wrong banner */}
-            <div className={`text-sm font-semibold px-4 py-2 rounded-lg ${
-              correct
-                ? 'bg-green/10 text-green border border-green/30'
-                : 'bg-red-500/10 text-red-400 border border-red-500/30'
-            }`}>
-              {correct ? '✓ Correct!' : `✗ It was ${target?.surah}:${target?.ayah} — ${surahName}`}
-            </div>
-
-            {/* Revealed verse */}
-            <div className="w-full card p-5 flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-gold font-mono text-sm tabular-nums">
-                  {target?.surah}:{target?.ayah}
-                </span>
-                <span className="text-muted text-xs">{surahName}</span>
-                <Link
-                  href={`/verse/${target?.surah}/${target?.ayah}`}
-                  className="ml-auto text-muted hover:text-gold text-xs flex items-center gap-1 transition-colors"
+                {/* Settings gear */}
+                <button
+                  onClick={() => { setSettingsOpen(o => !o); setSettingsView('root'); }}
+                  aria-label="Playback settings"
+                  aria-expanded={settingsOpen}
+                  className={`absolute right-0 p-2 rounded-lg transition-colors ${
+                    settingsOpen
+                      ? 'text-gold bg-gold/10'
+                      : 'text-muted hover:text-harf-text hover:bg-surface-plus'
+                  }`}
                 >
-                  View full ↗
-                </Link>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+                </button>
               </div>
 
-              {ayahData ? (
-                <>
-                  <p
-                    className="font-amiri-quran text-harf-text leading-loose text-right"
-                    dir="rtl" lang="ar"
-                    style={{ fontSize: '1.4rem' }}
-                  >
-                    {ayahData.arabic}
-                  </p>
-                  <p className="text-muted text-sm leading-relaxed">
-                    {ayahData.english}
-                  </p>
-                </>
-              ) : (
-                <div className="space-y-2">
-                  <div className="h-8 bg-surface-plus rounded animate-pulse" />
-                  <div className="h-4 bg-surface-plus rounded w-3/4 animate-pulse" />
+              {/* Replay */}
+              {playCount > 0 && drillState !== 'playing' && drillState !== 'ready' && (
+                <button
+                  onClick={playAudio}
+                  className="text-xs text-muted hover:text-gold transition-colors flex items-center gap-1"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Replay
+                </button>
+              )}
+
+              {/* Settings panel */}
+              {settingsOpen && (
+                <div className="w-full rounded-xl border border-border bg-surface-plus text-sm animate-fade-in overflow-hidden">
+
+                  {/* Root view: Speed + Reciter tiles */}
+                  {settingsView === 'root' && (
+                    <div className="flex divide-x divide-border">
+                      <button
+                        onClick={() => setSettingsView('speed')}
+                        className="flex-1 flex flex-col items-center gap-1 py-3 px-4 hover:bg-surface transition-colors"
+                      >
+                        <span className="text-gold font-semibold tabular-nums">{speed}×</span>
+                        <span className="text-muted text-xs">Speed</span>
+                      </button>
+                      <button
+                        onClick={() => setSettingsView('reciter')}
+                        className="flex-1 flex flex-col items-center gap-1 py-3 px-4 hover:bg-surface transition-colors"
+                      >
+                        <span className="text-harf-text font-medium truncate max-w-[140px] text-xs text-center leading-tight">
+                          {currentReciterLabel}
+                        </span>
+                        <span className="text-muted text-xs">Reciter</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Speed sub-panel */}
+                  {settingsView === 'speed' && (
+                    <div className="p-3">
+                      <div className="flex items-center gap-2 mb-3">
+                        <button
+                          onClick={() => setSettingsView('root')}
+                          className="text-muted hover:text-harf-text transition-colors"
+                          aria-label="Back"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                          </svg>
+                        </button>
+                        <span className="text-harf-text font-medium">Playback Speed</span>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        {SPEEDS.map(s => (
+                          <button
+                            key={s}
+                            onClick={() => handleSelectSpeed(s)}
+                            className={`px-3 py-1.5 rounded-lg font-mono text-sm transition-colors ${
+                              speed === s
+                                ? 'bg-gold text-bg font-semibold'
+                                : 'border border-border text-muted hover:border-gold/50 hover:text-gold'
+                            }`}
+                          >
+                            {s}×
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Reciter sub-panel */}
+                  {settingsView === 'reciter' && (
+                    <div className="p-3">
+                      <div className="flex items-center gap-2 mb-3">
+                        <button
+                          onClick={() => setSettingsView('root')}
+                          className="text-muted hover:text-harf-text transition-colors"
+                          aria-label="Back"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                          </svg>
+                        </button>
+                        <span className="text-harf-text font-medium">Reciter</span>
+                      </div>
+                      <div className="max-h-52 overflow-y-auto flex flex-col gap-0.5">
+                    {RECITERS.map(r => {
+                      const quality = reciterQuality(r.id);
+                      return (
+                        <button
+                          key={r.id}
+                          onClick={() => handleSelectReciter(r.id)}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors
+                            flex items-center justify-between gap-2 ${
+                              reciterId === r.id
+                                ? 'bg-gold/10 text-gold'
+                                : 'text-muted hover:bg-surface hover:text-harf-text'
+                            }`}
+                        >
+                          <span className="truncate">{r.label}</span>
+                          {quality && (
+                            <span className={`text-[10px] font-mono shrink-0 ${
+                              reciterId === r.id ? 'text-gold/60' : 'text-muted/50'
+                            }`}>
+                              {quality}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
                 </div>
               )}
             </div>
 
-            <button
-              onClick={loadNext}
-              className="px-6 py-2.5 bg-gold text-bg rounded-xl text-sm font-semibold
-                hover:bg-gold/90 transition-colors"
-            >
-              Next verse →
-            </button>
+            {/* Hint: play to begin */}
+            {drillState === 'ready' && (
+              <p className="text-muted text-sm animate-fade-in">Press play to hear the verse</p>
+            )}
+
+            {/* Answer input */}
+            {(drillState === 'answering' || drillState === 'revealed') && (
+              <div className="w-full flex flex-col items-center gap-4 animate-fade-in">
+                <div className="flex gap-3 w-full max-w-xs">
+                  <input
+                    ref={inputRef}
+                    value={guess}
+                    onChange={e => setGuess(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="surah:ayah  e.g. 112:1"
+                    disabled={drillState === 'revealed'}
+                    className={`
+                      flex-1 px-4 py-2.5 rounded-xl text-sm bg-surface-plus border
+                      text-harf-text placeholder:text-muted/50
+                      focus:outline-none transition-colors
+                      ${drillState === 'revealed'
+                        ? correct ? 'border-green/50' : 'border-red-500/40'
+                        : 'border-border focus:border-gold/60'
+                      }
+                    `}
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                  {drillState === 'answering' && (
+                    <button
+                      onClick={handleSubmit}
+                      disabled={!guess.trim()}
+                      className="px-4 py-2.5 bg-gold text-bg rounded-xl text-sm font-semibold
+                        hover:bg-gold/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Check
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Result */}
+            {drillState === 'revealed' && (
+              <div className="w-full flex flex-col items-center gap-5 animate-fade-in">
+                {/* Correct / wrong banner */}
+                <div className={`text-sm font-semibold px-4 py-2 rounded-lg ${
+                  correct
+                    ? 'bg-green/10 text-green border border-green/30'
+                    : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                }`}>
+                  {correct ? '✓ Correct!' : `✗ It was ${target?.surah}:${target?.ayah} — ${surahName}`}
+                </div>
+
+                {/* Revealed verse */}
+                <div className="w-full card p-5 flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gold font-mono text-sm tabular-nums">
+                      {target?.surah}:{target?.ayah}
+                    </span>
+                    <span className="text-muted text-xs">{surahName}</span>
+                    <Link
+                      href={`/verse/${target?.surah}/${target?.ayah}`}
+                      className="ml-auto text-muted hover:text-gold text-xs flex items-center gap-1 transition-colors"
+                    >
+                      View full ↗
+                    </Link>
+                  </div>
+
+                  {ayahData ? (
+                    <>
+                      <p
+                        className="font-amiri-quran text-harf-text leading-loose text-right"
+                        dir="rtl" lang="ar"
+                        style={{ fontSize: '1.4rem' }}
+                      >
+                        {ayahData.arabic}
+                      </p>
+                      <p className="text-muted text-sm leading-relaxed">
+                        {ayahData.english}
+                      </p>
+                    </>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="h-8 bg-surface-plus rounded animate-pulse" />
+                      <div className="h-4 bg-surface-plus rounded w-3/4 animate-pulse" />
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={loadNext}
+                  className="px-6 py-2.5 bg-gold text-bg rounded-xl text-sm font-semibold
+                    hover:bg-gold/90 transition-colors"
+                >
+                  Next verse →
+                </button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Filter panel — right of drill on 2xl, hidden on smaller (shown below) */}
+        <div className="hidden 2xl:block w-80 flex-shrink-0 2xl:col-start-3 2xl:justify-self-start">
+          <FilterPanel
+            juzFilter={juzFilter}     setJuzFilter={setJuzFilter}
+            surahFilter={surahFilter} setSurahFilter={setSurahFilter}
+            ayatRange={ayatRange}     setAyatRange={setAyatRange}
+            parsedAyatRange={parsedAyatRange}
+          />
+        </div>
+
       </div>
 
+      {/* Filter panel stacked below on smaller screens */}
+      <div className="2xl:hidden mt-6 max-w-2xl mx-auto">
+        <FilterPanel
+          juzFilter={juzFilter}     setJuzFilter={setJuzFilter}
+          surahFilter={surahFilter} setSurahFilter={setSurahFilter}
+          ayatRange={ayatRange}     setAyatRange={setAyatRange}
+          parsedAyatRange={parsedAyatRange}
+        />
+      </div>
+
+      {/* footer — live pool count */}
       <p className="text-center text-muted/50 text-xs mt-6">
-        Pool: Juz Amma (surahs 78–114) + your studied words&rsquo; example verses
+        Pool: {pool.length} verse{pool.length !== 1 ? 's' : ''} · {buildPoolLabel(juzFilter, surahFilter, parsedAyatRange)}
       </p>
     </div>
   );
