@@ -71,9 +71,15 @@ function getResults(raw: string): Result[] {
         surah: meta!.id, ayah: i + 1, name: meta!.name, arabic: meta!.arabic,
       }));
     }
-    const ayahNum = parseInt(aPart, 10);
-    if (!ayahNum || ayahNum < 1 || ayahNum > meta.verses) return [];
-    return [{ surah: meta.id, ayah: ayahNum, name: meta.name, arabic: meta.arabic }];
+    // Prefix match: "2" → ayahs 2, 20, 21, 22 … ; "11" → 11, 110, 111 …
+    const out: Result[] = [];
+    for (let a = 1; a <= meta.verses; a++) {
+      if (String(a).startsWith(aPart)) {
+        out.push({ surah: meta.id, ayah: a, name: meta.name, arabic: meta.arabic });
+        if (out.length >= MAX_RESULTS) break;
+      }
+    }
+    return out;
   }
 
   // Pure number — match as ayah number across all surahs

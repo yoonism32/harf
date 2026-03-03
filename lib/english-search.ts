@@ -95,9 +95,10 @@ export function searchEnglish(
   const out: SearchResult[] = [];
 
   for (const [key, gloss] of Object.entries(glosses)) {
-    const tokens = gloss.toLowerCase().split(/[\s,;()\-]+/);
+    const tokens = gloss.toLowerCase().split(/[\s,;()\-]+/).filter(t => t.length > 0);
     const match = tokens.some(t => {
       const s = stemWord(t);
+      if (!s || s.length < 2) return false;  // skip numeric/punctuation tokens (e.g. verse markers "(1)")
       if (s === qStem) return true;
       const minLen = Math.max(4, Math.min(s.length, qStem.length));
       return (

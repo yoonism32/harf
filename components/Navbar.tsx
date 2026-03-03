@@ -9,6 +9,9 @@ const LEFT_LINKS = [
   { href: '/study',    label: 'Study'     },
   { href: '/words',    label: 'Words'     },
   { href: '/coverage', label: 'Coverage'  },
+  { href: '/search',   label: 'Search'    },
+  { href: '/drill',    label: 'Drill'     },
+  { href: '/quiz',     label: 'Quiz'      },
 ];
 
 const RIGHT_LINKS = [
@@ -62,7 +65,7 @@ export function Navbar() {
             <NavLink key={link.href} {...link} active={isActive(link.href)} />
           ))}
 
-          {/* Ayah search — expands in-place between Coverage and 99 Names */}
+          {/* Ayah search — expands in-place */}
           <AyahSearchInput />
 
           {RIGHT_LINKS.map(link => (

@@ -1,0 +1,417 @@
+{
+  "version": "v1",
+  "exportedAt": "2026-03-03T01:12:08.244Z",
+  "wordProgress": {
+    "a-l-h": {
+      "id": "a-l-h",
+      "mastery": 2,
+      "stability": 6,
+      "difficulty": 5,
+      "state": 2,
+      "lapses": 0,
+      "reps": 2,
+      "nextReview": "2026-03-06",
+      "lastReviewed": "2026-02-28T00:09:08.792Z"
+    },
+    "q-w-l": {
+      "id": "q-w-l",
+      "mastery": 2,
+      "stability": 6,
+      "difficulty": 5,
+      "state": 2,
+      "lapses": 0,
+      "reps": 2,
+      "nextReview": "2026-03-06",
+      "lastReviewed": "2026-02-28T00:09:10.404Z"
+    },
+    "k-w-n": {
+      "id": "k-w-n",
+      "mastery": 2,
+      "stability": 6,
+      "difficulty": 5,
+      "state": 2,
+      "lapses": 0,
+      "reps": 2,
+      "nextReview": "2026-03-06",
+      "lastReviewed": "2026-02-28T00:23:05.026Z"
+    },
+    "r-b-b": {
+      "id": "r-b-b",
+      "mastery": 2,
+      "stability": 6,
+      "difficulty": 5,
+      "state": 2,
+      "lapses": 0,
+      "reps": 2,
+      "nextReview": "2026-03-06",
+      "lastReviewed": "2026-02-28T00:23:23.461Z"
+    },
+    "a-m-n": {
+      "id": "a-m-n",
+      "mastery": 2,
+      "stability": 6,
+      "difficulty": 5,
+      "state": 2,
+      "lapses": 0,
+      "reps": 2,
+      "nextReview": "2026-03-06",
+      "lastReviewed": "2026-02-28T00:54:28.784Z"
+    },
+    "a-l-m": {
+      "id": "a-l-m",
+      "mastery": 2,
+      "stability": 6,
+      "difficulty": 5,
+      "state": 2,
+      "lapses": 0,
+      "reps": 2,
+      "nextReview": "2026-03-06",
+      "lastReviewed": "2026-02-28T00:54:36.358Z"
+    },
+    "q-y-m": {
+      "id": "q-y-m",
+      "mastery": 2,
+      "stability": 6,
+      "difficulty": 5,
+      "state": 2,
+      "lapses": 0,
+      "reps": 2,
+      "nextReview": "2026-03-06",
+      "lastReviewed": "2026-02-28T00:54:37.896Z"
+    },
+    "a-t-y": {
+      "id": "a-t-y",
+      "mastery": 2,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T00:54:45.366Z"
+    },
+    "a-m-n2": {
+      "id": "a-m-n2",
+      "mastery": 2,
+      "stability": 6,
+      "difficulty": 5,
+      "state": 2,
+      "lapses": 0,
+      "reps": 2,
+      "nextReview": "2026-03-06",
+      "lastReviewed": "2026-02-28T00:54:48.643Z"
+    },
+    "a-r-d": {
+      "id": "a-r-d",
+      "mastery": 2,
+      "stability": 6,
+      "difficulty": 5,
+      "state": 2,
+      "lapses": 0,
+      "reps": 2,
+      "nextReview": "2026-03-06",
+      "lastReviewed": "2026-02-28T00:54:51.651Z"
+    },
+    "y-w-m": {
+      "id": "y-w-m",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T00:09:43.936Z"
+    },
+    "b-y-n": {
+      "id": "b-y-n",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T00:54:39.216Z"
+    },
+    "r-s-l": {
+      "id": "r-s-l",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T00:54:50.466Z"
+    },
+    "k-f-r": {
+      "id": "k-f-r",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T00:54:53.346Z"
+    },
+    "j-a-l": {
+      "id": "j-a-l",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T00:54:54.531Z"
+    },
+    "h-d-y": {
+      "id": "h-d-y",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T00:57:16.036Z"
+    },
+    "r-h-m": {
+      "id": "r-h-m",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T00:57:17.971Z"
+    },
+    "z-l-m": {
+      "id": "z-l-m",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T00:57:19.861Z"
+    },
+    "h-w-l": {
+      "id": "h-w-l",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T00:57:21.796Z"
+    },
+    "r-a-y": {
+      "id": "r-a-y",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T00:57:23.656Z"
+    },
+    "a-dh-b": {
+      "id": "a-dh-b",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T00:57:25.216Z"
+    },
+    "s-m-w": {
+      "id": "s-m-w",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T01:11:06.873Z"
+    },
+    "a-l-w": {
+      "id": "a-l-w",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T01:11:27.977Z"
+    },
+    "f-t-h": {
+      "id": "f-t-h",
+      "mastery": 2,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T01:11:38.129Z"
+    },
+    "h-m-d": {
+      "id": "h-m-d",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T01:11:46.321Z"
+    },
+    "t-w-b": {
+      "id": "t-w-b",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T23:47:37.030Z"
+    },
+    "q-r-b": {
+      "id": "q-r-b",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T23:48:31.477Z"
+    },
+    "s-b-h": {
+      "id": "s-b-h",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T23:48:36.811Z"
+    },
+    "a-x-w": {
+      "id": "a-x-w",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T23:48:45.024Z"
+    },
+    "k-t-b": {
+      "id": "k-t-b",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T23:48:50.811Z"
+    },
+    "f-l-h": {
+      "id": "f-l-h",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T23:48:57.272Z"
+    },
+    "b-a-th": {
+      "id": "b-a-th",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T23:49:27.309Z"
+    },
+    "a-r-s-l": {
+      "id": "a-r-s-l",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T23:49:32.368Z"
+    },
+    "s-l-w": {
+      "id": "s-l-w",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T23:50:02.287Z"
+    },
+    "h-r-m": {
+      "id": "h-r-m",
+      "mastery": 1,
+      "stability": 1,
+      "difficulty": 5,
+      "state": 1,
+      "lapses": 0,
+      "reps": 1,
+      "nextReview": "2026-03-01",
+      "lastReviewed": "2026-02-28T23:50:19.507Z"
+    }
+  },
+  "nameProgress": {},
+  "studySessions": [
+    {
+      "date": "2026-02-27",
+      "wordsReviewed": 10,
+      "coverageBefore": 0,
+      "coverageAfter": 0
+    },
+    {
+      "date": "2026-02-28",
+      "wordsReviewed": 10,
+      "coverageBefore": 0,
+      "coverageAfter": 0
+    },
+    {
+      "date": "2026-02-28",
+      "wordsReviewed": 10,
+      "coverageBefore": 0,
+      "coverageAfter": 0
+    }
+  ],
+  "location": {
+    "city": "Leeds",
+    "country": "GB"
+  },
+  "reciter": "Ahmed_Neana_128kbps"
+}

@@ -21,6 +21,7 @@ const KEYS = {
   NAME_PROGRESS: `harf:${SCHEMA_VERSION}:name_progress`,
   STUDY_SESSIONS: `harf:${SCHEMA_VERSION}:study_sessions`,
   DAILY_AYAH: `harf:${SCHEMA_VERSION}:daily_ayah`,
+  LAST_VERSE: `harf:${SCHEMA_VERSION}:last_verse`,
 } as const;
 
 export interface WordProgress {
@@ -195,6 +196,23 @@ export function getDailyAyahCache(): DailyAyahCache | null {
 export function setDailyAyahCache(data: DailyAyahCache): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(KEYS.DAILY_AYAH, JSON.stringify(data));
+}
+
+// ── Last Visited Verse ─────────────────────────────────────────
+
+export function setLastVerse(surah: number, ayah: number): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(KEYS.LAST_VERSE, JSON.stringify({ surah, ayah }));
+}
+
+export function getLastVerse(): { surah: number; ayah: number } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(KEYS.LAST_VERSE);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 }
 
 // ── Derived helpers ────────────────────────────────────────────

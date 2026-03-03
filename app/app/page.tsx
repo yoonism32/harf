@@ -3,6 +3,7 @@ import { CoverageHero } from '@/components/dashboard/CoverageHero';
 import { StudyQueue } from '@/components/dashboard/StudyQueue';
 import { PrayerTimesWidget } from '@/components/dashboard/PrayerTimes';
 import { DailyAyah } from '@/components/dashboard/DailyAyah';
+import { ContinueReading } from '@/components/dashboard/ContinueReading';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import type { Metadata } from 'next';
 
@@ -90,6 +91,7 @@ export default function DashboardPage() {
             </div>
           </Link>
         ))}
+        <ErrorBoundary><ContinueReading /></ErrorBoundary>
       </div>
     </div>
   );

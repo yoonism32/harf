@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchAyah, getDailyAyahRef } from '@/lib/quran-api';
 import { getDailyAyahCache, setDailyAyahCache } from '@/lib/storage';
 import { verseAudioUrl, wordAudioUrl } from '@/lib/audio';
+import Link from 'next/link';
 import { searchEnglish, isStopword, stemWord } from '@/lib/english-search';
 import type { SearchResult } from '@/lib/english-search';
 
@@ -268,11 +269,9 @@ export function DailyAyah() {
               {searchResults.length > 0 && (
                 <div className="flex flex-col gap-0.5 max-h-44 overflow-y-auto">
                   {searchResults.map(r => (
-                    <a
+                    <Link
                       key={r.verseRef}
-                      href={`https://quran.com/${r.surah}/${r.ayah}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href={`/verse/${r.surah}/${r.ayah}`}
                       className="flex items-baseline justify-between gap-3 rounded-md px-2 py-1
                         hover:bg-surface-plus transition-colors group/result"
                     >
@@ -280,7 +279,7 @@ export function DailyAyah() {
                       <span className="text-xs text-muted/70 truncate group-hover/result:text-harf-text
                         transition-colors flex-1">{r.gloss}</span>
                       <span className="text-muted/30 text-xs shrink-0">↗</span>
-                    </a>
+                    </Link>
                   ))}
                 </div>
               )}
