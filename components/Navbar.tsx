@@ -5,13 +5,14 @@ import { usePathname } from 'next/navigation';
 import { AyahSearchInput } from '@/components/ayah/AyahSearchInput';
 
 const LEFT_LINKS = [
-  { href: '/app',      label: 'Dashboard' },
-  { href: '/study',    label: 'Study'     },
-  { href: '/words',    label: 'Words'     },
-  { href: '/coverage', label: 'Coverage'  },
-  { href: '/search',   label: 'Search'    },
-  { href: '/drill',    label: 'Drill'     },
-  { href: '/quiz',     label: 'Quiz'      },
+  { href: '/app',          label: 'Dashboard' },
+  { href: '/study',        label: 'Study'     },
+  { href: '/words',        label: 'Words'     },
+  { href: '/coverage',     label: 'Coverage'  },
+  { href: '/tadabbur',     label: 'Tadabbur'  },
+  { href: '/search',       label: 'Search'    },
+  { href: '/drill',        label: 'Drill'     },
+  { href: '/quiz',         label: 'Quiz'      },
 ];
 
 const RIGHT_LINKS = [

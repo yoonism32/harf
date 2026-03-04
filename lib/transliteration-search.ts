@@ -319,12 +319,12 @@ export function* searchVersesStreaming(
   maxResults = 15,
 ): Generator<TranslitSearchResult[]> {
   const raw = query.trim();
-  if (raw.length < 6) return;
+  if (raw.length < 3) return;
 
   const { verseTokens, idf } = ensureIndex(translitData);
   const norm        = normalizeInput(raw);
   const queryTokens = tokenize(norm);
-  if (queryTokens.length < 2) return;
+  if (queryTokens.length < 1) return;
 
   const qtData   = buildQueryTokenData(norm);
   const minHits  = Math.max(1, Math.ceil(qtData.length * 0.4));
@@ -361,17 +361,17 @@ export function searchVerses(
   translitData: Record<string, string>,
   maxResults = 15,
 ): TranslitSearchResult[] {
-  // Minimum query length gate
+  // Minimum query length gate — 3 chars to avoid accidental triggers
   const raw = query.trim();
-  if (raw.length < 6) return [];
+  if (raw.length < 3) return [];
 
   const { verseTokens, idf } = ensureIndex(translitData);
 
   const norm = normalizeInput(raw);
   const queryTokens = tokenize(norm);
 
-  // Need at least 2 significant tokens for quality results
-  if (queryTokens.length < 2) return [];
+  // Need at least 1 significant token
+  if (queryTokens.length < 1) return [];
 
   // Pre-compute variants + skeletons for each query token
   const queryTokenData = queryTokens.map(qt => ({

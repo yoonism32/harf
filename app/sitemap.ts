@@ -18,6 +18,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: 'https://harf.app/coverage', lastModified: new Date(), priority: 0.7 },
     { url: 'https://harf.app/names', lastModified: new Date(), priority: 0.7 },
     { url: 'https://harf.app/search', lastModified: new Date(), priority: 0.8 },
+    { url: 'https://harf.app/tadabbur', lastModified: new Date(), priority: 0.8 },
+    { url: 'https://harf.app/mutashabihat', lastModified: new Date(), priority: 0.7 },
     ...wordUrls,
   ];
 }

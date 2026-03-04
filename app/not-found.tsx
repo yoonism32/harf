@@ -9,7 +9,7 @@ export default function NotFound() {
       <div className="text-harf-text text-xl font-medium">Page Not Found</div>
       <div className="text-muted text-sm">The page you are looking for does not exist.</div>
       <Link
-        href="/"
+        href="/app"
         className="px-6 py-3 bg-gold text-bg rounded-xl font-semibold hover:bg-gold-muted transition-colors"
       >
         Go Home

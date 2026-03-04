@@ -62,7 +62,7 @@ export function QuranSearch() {
 
   const runSearch = useCallback((q: string) => {
     const trimmed = q.trim();
-    if (trimmed.length < 6) {
+    if (trimmed.length < 3) {
       setState('idle');
       setResults([]);
       return;
@@ -141,7 +141,7 @@ export function QuranSearch() {
       )}
 
       {/* Too short hint */}
-      {state === 'idle' && query.length > 0 && query.length < 6 && (
+      {state === 'idle' && query.length > 0 && query.length < 3 && (
         <p className="text-center text-muted text-sm animate-fade-in">
           Keep typing…
         </p>

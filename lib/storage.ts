@@ -19,6 +19,8 @@ export function toNameId(raw: number): NameId { return raw as NameId; }
 const KEYS = {
   WORD_PROGRESS: `harf:${SCHEMA_VERSION}:word_progress`,
   NAME_PROGRESS: `harf:${SCHEMA_VERSION}:name_progress`,
+  MUTASHABIHAT_PROGRESS: `harf:${SCHEMA_VERSION}:mutashabihat_progress`,
+  MUTASHABIHAT_PAIR_PROGRESS: `harf:${SCHEMA_VERSION}:mutashabihat_pair_progress`,
   STUDY_SESSIONS: `harf:${SCHEMA_VERSION}:study_sessions`,
   DAILY_AYAH: `harf:${SCHEMA_VERSION}:daily_ayah`,
   LAST_VERSE: `harf:${SCHEMA_VERSION}:last_verse`,
@@ -47,6 +49,18 @@ export interface NameProgress {
   lapses: number;
   reps: number;
   nextReview: string;
+  lastReviewed?: string;
+}
+
+export interface MutashabihatProgress {
+  id: string;           // phrase ID (string key from phrases.json)
+  mastery: number;      // 0–5
+  stability: number;
+  difficulty: number;
+  state: 0 | 1 | 2 | 3;
+  lapses: number;
+  reps: number;
+  nextReview: string;   // ISO date string
   lastReviewed?: string;
 }
 
@@ -155,6 +169,64 @@ export function setNameProgress(progress: NameProgress): void {
   const all = getAllNameProgress();
   all[progress.id] = progress;
   localStorage.setItem(KEYS.NAME_PROGRESS, JSON.stringify(all));
+}
+
+// ── Mutashabihat Progress ──────────────────────────────────────
+
+export function getAllMutashabihatProgress(): Record<string, MutashabihatProgress> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(KEYS.MUTASHABIHAT_PROGRESS);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function getMutashabihatProgress(id: string): MutashabihatProgress | null {
+  return getAllMutashabihatProgress()[id] ?? null;
+}
+
+export function setMutashabihatProgress(progress: MutashabihatProgress): void {
+  if (typeof window === 'undefined') return;
+  const all = getAllMutashabihatProgress();
+  all[progress.id] = progress;
+  localStorage.setItem(KEYS.MUTASHABIHAT_PROGRESS, JSON.stringify(all));
+}
+
+export function getDueMutashabihatIds(): string[] {
+  const all = getAllMutashabihatProgress();
+  const today = new Date().toISOString().slice(0, 10);
+  return Object.values(all)
+    .filter(p => p.nextReview <= today)
+    .map(p => p.id);
+}
+
+// ── Mutashabihat Pair Progress ─────────────────────────────────
+
+export function getAllPairProgress(): Record<string, MutashabihatProgress> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(KEYS.MUTASHABIHAT_PAIR_PROGRESS);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+export function getPairProgress(id: string): MutashabihatProgress | null {
+  return getAllPairProgress()[id] ?? null;
+}
+
+export function setPairProgress(progress: MutashabihatProgress): void {
+  if (typeof window === 'undefined') return;
+  const all = getAllPairProgress();
+  all[progress.id] = progress;
+  localStorage.setItem(KEYS.MUTASHABIHAT_PAIR_PROGRESS, JSON.stringify(all));
+}
+
+export function getDuePairIds(): string[] {
+  const all = getAllPairProgress();
+  const today = new Date().toISOString().slice(0, 10);
+  return Object.values(all).filter(p => p.nextReview <= today).map(p => p.id);
 }
 
 // ── Study Sessions ─────────────────────────────────────────────
