@@ -38,10 +38,20 @@ export interface PhraseEntry {
 }
 
 export interface SurahInfo {
-  surah_number: number;
-  surah_name: string;
-  text: string;
-  short_text?: string;
+  id: number;
+  name: string;
+  nameArabic: string;
+  translation: string;
+  verses: number;
+  revelationPlace: string;
+  chronologicalOrder: number;
+  juz: number[];
+  summary: string;
+  themes?: string;
+  context?: string;
+  names?: string;
+  virtue?: string;
+  overview?: string[];
 }
 
 type RawPhrase = Omit<PhraseEntry, 'id'>;

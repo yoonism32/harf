@@ -18,6 +18,8 @@ export function PrayerTimesWidget() {
   const [times, setTimes] = useState<PrayerTimes | null>(null);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState<{ city: string; country: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [reloads, setReloads] = useState(0);
 
   useEffect(() => {
     const saved = localStorage.getItem('harf-location');
@@ -36,14 +38,26 @@ export function PrayerTimesWidget() {
     if (!location) return;
     let cancelled = false;
     setLoading(true);
+    setError(null);
     fetchPrayerTimesByCity(location.city, location.country).then(data => {
       if (!cancelled) {
-        setTimes(data);
+        if (data) {
+          setTimes(data);
+        } else {
+          setTimes(null);
+          setError('Could not load prayer times. Check your connection and retry.');
+        }
+        setLoading(false);
+      }
+    }).catch(() => {
+      if (!cancelled) {
+        setTimes(null);
+        setError('Could not load prayer times. Check your connection and retry.');
         setLoading(false);
       }
     });
     return () => { cancelled = true; };
-  }, [location]);
+  }, [location, reloads]);
 
   const nextPrayer = times ? getNextPrayer(times) : null;
   const prayerList = times
@@ -86,13 +100,25 @@ export function PrayerTimesWidget() {
         </div>
       )}
 
+      {error && !loading && (
+        <div className="flex flex-col gap-2 text-sm">
+          <span className="text-red-400">{error}</span>
+          <button
+            onClick={() => setReloads(r => r + 1)}
+            className="self-start px-3 py-1.5 rounded-lg bg-surface-plus border border-border hover:border-gold/50 hover:text-gold transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {times && (
         <>
-          <div className="flex flex-col gap-1">
+          <ul aria-label="Prayer times today" className="flex flex-col gap-1 list-none p-0 m-0">
             {prayerList.map(prayer => {
               const isNext = nextPrayer?.name === prayer.name;
               return (
-                <div
+                <li
                   key={prayer.name}
                   className={`flex justify-between items-center px-3 py-2 rounded-lg transition-colors ${
                     isNext ? 'bg-gold/10 border border-gold/30' : 'hover:bg-surface-plus'
@@ -110,10 +136,10 @@ export function PrayerTimesWidget() {
                   <span className={`font-mono text-sm ${isNext ? 'text-gold font-bold' : 'text-harf-text'}`}>
                     {prayer.time}
                   </span>
-                </div>
+                </li>
               );
             })}
-          </div>
+          </ul>
           <div className="text-right">
             <Link href="/settings" className="text-muted text-xs hover:text-gold transition-colors">
               {location?.city} · change

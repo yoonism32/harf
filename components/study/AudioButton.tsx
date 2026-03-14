@@ -97,10 +97,10 @@ export function AudioButton({ text, wordKey, verseKey, lang = 'ar-SA', className
       {playing ? (
         <>
           <span aria-hidden="true" className="flex gap-0.5 items-end h-4">
-            <span className="w-0.5 bg-gold rounded animate-bounce" style={{ height: '60%', animationDelay: '0ms' }} />
-            <span className="w-0.5 bg-gold rounded animate-bounce" style={{ height: '100%', animationDelay: '150ms' }} />
-            <span className="w-0.5 bg-gold rounded animate-bounce" style={{ height: '70%', animationDelay: '300ms' }} />
-            <span className="w-0.5 bg-gold rounded animate-bounce" style={{ height: '90%', animationDelay: '100ms' }} />
+            <span className="w-0.5 bg-gold rounded animate-bounce motion-reduce:animate-none" style={{ height: '60%', animationDelay: '0ms' }} />
+            <span className="w-0.5 bg-gold rounded animate-bounce motion-reduce:animate-none" style={{ height: '100%', animationDelay: '150ms' }} />
+            <span className="w-0.5 bg-gold rounded animate-bounce motion-reduce:animate-none" style={{ height: '70%', animationDelay: '300ms' }} />
+            <span className="w-0.5 bg-gold rounded animate-bounce motion-reduce:animate-none" style={{ height: '90%', animationDelay: '100ms' }} />
           </span>
           Playing…
         </>

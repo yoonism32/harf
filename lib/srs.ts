@@ -97,7 +97,11 @@ function buildCard(progress: WordProgress | NameProgress) {
     due:            new Date(progress.nextReview),
     stability:      progress.stability,
     difficulty:     progress.difficulty,
-    elapsed_days:   0,
+    elapsed_days:   progress.lastReviewed
+      ? Math.max(0, Math.floor(
+          (Date.now() - new Date(progress.lastReviewed).getTime()) / 86_400_000
+        ))
+      : 0,
     scheduled_days: Math.max(1, Math.round(progress.stability)),
     reps:           progress.reps,
     lapses:         progress.lapses,

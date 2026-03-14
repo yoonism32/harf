@@ -25,19 +25,28 @@ const ayahCache = new Map<string, AyahResponse>();
 /** Fetch a single ayah (client-side cached — same ref never fetched twice) */
 export async function fetchAyah(ref: string): Promise<AyahResponse | null> {
   if (ayahCache.has(ref)) return ayahCache.get(ref)!;
-  const [s, a] = ref.split(':');
+  // Validate exactly "surah:ayah" — reject word keys like "2:255:3"
+  const parts = ref.split(':');
+  if (parts.length !== 2) return null;
+  const [s, a] = parts;
   // Validate both parts are positive integers before using in URLs
   if (!s || !a || !/^\d+$/.test(s) || !/^\d+$/.test(a)) return null;
   try {
-    const [arRes, enRes] = await Promise.all([
+    // Use allSettled so a temporary EN CDN outage doesn't kill the Arabic fetch
+    const [arResult, enResult] = await Promise.allSettled([
       fetch(`${CDN}/${AR_EDITION}/${s}/${a}.min.json`),
       fetch(`${CDN}/${EN_EDITION}/${s}/${a}.min.json`),
     ]);
-    if (!arRes.ok || !enRes.ok) return null;
-    const [ar, en] = await Promise.all([arRes.json(), enRes.json()]);
+    if (arResult.status === 'rejected' || !arResult.value.ok) return null;
+    const ar = await arResult.value.json() as { text: string };
+    let english = '';
+    if (enResult.status === 'fulfilled' && enResult.value.ok) {
+      const en = await enResult.value.json() as { text: string };
+      english = en.text ?? '';
+    }
     const result: AyahResponse = {
       arabic: ar.text,
-      english: en.text,
+      english,
       reference: `${s}:${a}`,
       surahNumber: Number(s),
       ayahNumber: Number(a),

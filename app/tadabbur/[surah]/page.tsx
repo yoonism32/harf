@@ -173,8 +173,8 @@ export default function TadabburSurahPage({ params }: PageProps) {
           {/* Surah info accordion */}
           {surahInfo && (
             <div className="card p-4 flex flex-col gap-2">
-              <p className="text-sm text-harf-text">{surahInfo.short_text}</p>
-              {!infoExpanded && (
+              <p className="text-sm text-harf-text">{surahInfo.summary}</p>
+              {!infoExpanded && (surahInfo.themes || surahInfo.context || surahInfo.virtue) && (
                 <button
                   onClick={() => setInfoExpanded(true)}
                   className="text-xs text-gold hover:text-gold/80 transition-colors self-start"
@@ -184,10 +184,11 @@ export default function TadabburSurahPage({ params }: PageProps) {
               )}
               {infoExpanded && (
                 <>
-                  <div
-                    className="text-sm text-muted prose prose-invert prose-sm max-w-none [&_h2]:text-harf-text [&_h2]:font-semibold [&_h2]:mt-4 [&_p]:text-muted [&_a]:text-gold"
-                    dangerouslySetInnerHTML={{ __html: surahInfo.text }}
-                  />
+                  <div className="text-sm text-muted flex flex-col gap-3 mt-1">
+                    {surahInfo.context && <p>{surahInfo.context}</p>}
+                    {surahInfo.names   && <p><span className="text-harf-text font-medium">Names: </span>{surahInfo.names}</p>}
+                    {surahInfo.virtue  && <p><span className="text-harf-text font-medium">Virtue: </span>{surahInfo.virtue}</p>}
+                  </div>
                   <button
                     onClick={() => setInfoExpanded(false)}
                     className="text-xs text-gold hover:text-gold/80 transition-colors self-start"

@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 export interface MorphologyEntry {
   wordId: string;
   rootArabic: string;
@@ -26,6 +28,8 @@ function stripHtml(html: string): string {
 }
 
 export function RootFamilyPanel({ entry }: Props) {
+  const [showAll, setShowAll] = useState(false);
+
   if (!entry || entry.rootFamilyCount === 0) {
     return (
       <div className="text-muted text-sm text-center py-4">
@@ -38,7 +42,8 @@ export function RootFamilyPanel({ entry }: Props) {
     );
   }
 
-  const top20 = entry.rootFamily.slice(0, 20);
+  const allItems = entry.rootFamilyWords ?? entry.rootFamily.map(key => ({ key, uthmani: '' }));
+  const displayedItems = showAll ? allItems : allItems.slice(0, 20);
 
   return (
     <div className="flex flex-col gap-6">
@@ -114,7 +119,7 @@ export function RootFamilyPanel({ entry }: Props) {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {(entry.rootFamilyWords ?? top20.map(key => ({ key, uthmani: '' }))).map(({ key, uthmani }) => {
+          {displayedItems.map(({ key, uthmani }) => {
             const { ref } = formatKey(key);
             return (
               <div
@@ -134,10 +139,13 @@ export function RootFamilyPanel({ entry }: Props) {
           })}
         </div>
 
-        {entry.rootFamilyCount > 20 && (
-          <div className="mt-2 text-xs text-muted text-center">
-            +{entry.rootFamilyCount - 20} more occurrences
-          </div>
+        {!showAll && entry.rootFamilyCount > 20 && (
+          <button
+            onClick={() => setShowAll(true)}
+            className="mt-2 text-sm text-gold hover:text-gold-muted transition-colors self-center"
+          >
+            Show all {entry.rootFamilyCount.toLocaleString()} occurrences
+          </button>
         )}
       </div>
     </div>

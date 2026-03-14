@@ -48,8 +48,9 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b border-border/60 glass">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group shrink-0">
+        <Link href="/" aria-label="Harf — home" className="flex items-center gap-2 group shrink-0">
           <span
+            lang="ar"
             className="font-amiri text-3xl leading-none text-gold transition-opacity duration-200 group-hover:opacity-80"
             style={{ fontFamily: 'Amiri, serif' }}
           >

@@ -35,6 +35,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   themeColor: '#0b0f1a',
+  colorScheme: 'dark',
 };
 
 export const metadata: Metadata = {
@@ -64,9 +65,8 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="ar"
-      dir="rtl"
-      style={{ colorScheme: 'dark' }}
+      lang="en"
+      dir="ltr"
       className={`${amiri.variable} ${amiriQuran.variable} ${rubik.variable}`}
     >
       <head>
@@ -78,7 +78,7 @@ export default function RootLayout({
         {/* Preconnect for primary CDN (Quran text data) */}
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
       </head>
-      <body className="antialiased min-h-screen" dir="ltr">
+      <body className="antialiased min-h-screen">
         <LayoutShell>{children}</LayoutShell>
         {/* Aria-live announcer for dynamic page updates */}
         <div

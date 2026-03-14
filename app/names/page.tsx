@@ -26,6 +26,7 @@ export default function NamesPage() {
   const [flipped, setFlipped] = useState(false);
   const [done, setDone] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [noDue, setNoDue] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -47,9 +48,10 @@ export default function NamesPage() {
 
     const q = [...dueIds, ...newIds];
     if (q.length === 0) {
-      alert('No names due for review! Come back tomorrow.');
+      setNoDue(true);
       return;
     }
+    setNoDue(false);
     setQueue(q);
     setCurrentIndex(0);
     setFlipped(false);
@@ -72,6 +74,19 @@ export default function NamesPage() {
       setCurrentIndex(next);
     }
   }, [currentIndex, queue]);
+
+  // Keyboard shortcuts for grading (1–4) when card is flipped
+  useEffect(() => {
+    if (mode !== 'study' || !flipped) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const map: Record<string, ResponseKey> = { '1': 'blackout', '2': 'hard', '3': 'good', '4': 'perfect' };
+      const key = map[e.key];
+      if (key) handleResponse(key);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [mode, flipped, handleResponse]);
 
   // Study mode
   if (mode === 'study') {
@@ -103,6 +118,7 @@ export default function NamesPage() {
 
     return (
       <div className="flex flex-col gap-6 py-8 max-w-2xl mx-auto">
+        <h1 className="sr-only">Studying 99 Names of Allah</h1>
         {/* Progress */}
         <div className="flex items-center gap-4">
           <div className="text-muted text-sm">{currentIndex + 1} / {queue.length}</div>
@@ -119,8 +135,17 @@ export default function NamesPage() {
 
         {/* Card */}
         <div
+          role="button"
+          tabIndex={flipped ? -1 : 0}
           className="card min-h-64 flex flex-col items-center justify-center gap-4 p-8 cursor-pointer"
           onClick={() => !flipped && setFlipped(true)}
+          onKeyDown={e => {
+            if ((e.key === ' ' || e.key === 'Enter') && !flipped) {
+              e.preventDefault();
+              setFlipped(true);
+            }
+          }}
+          aria-label={flipped ? 'Card revealed' : `${name.arabic} — press Space to reveal`}
           style={{ borderColor: flipped ? 'var(--gold)' : 'var(--border)' }}
         >
           {flipped && <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent pointer-events-none rounded-2xl" />}
@@ -210,6 +235,21 @@ export default function NamesPage() {
           Start Study Session
         </button>
       </div>
+
+      {/* No-due banner */}
+      {noDue && (
+        <div role="status" className="card p-5 flex flex-col items-center gap-2 text-center">
+          <div className="font-amiri text-3xl text-gold" dir="rtl" lang="ar">ما شاء الله</div>
+          <p className="text-harf-text font-medium">No names due for review</p>
+          <p className="text-muted text-sm">Come back tomorrow.</p>
+          <button
+            onClick={() => setNoDue(false)}
+            className="text-xs text-muted hover:text-harf-text transition-colors mt-1"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Names grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">

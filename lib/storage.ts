@@ -1,5 +1,5 @@
 // Schema version — bump when data shape changes to avoid stale data
-const SCHEMA_VERSION = 'v1';
+export const SCHEMA_VERSION = 'v1';
 
 // ── Branded types — prevent mix-ups between word IDs and name IDs ──
 declare const __brand: unique symbol;
@@ -97,7 +97,7 @@ export function getAllWordProgress(): Record<string, WordProgress> {
           mastery: sm2.mastery ?? 0,
           stability: Math.max(1, sm2.interval ?? 1),
           difficulty: 5.0,
-          state: sm2.interval > 1 ? 2 : sm2.repetition > 0 ? 1 : 0,
+          state: sm2.repetition >= 2 ? 2 : sm2.repetition > 0 ? 1 : 0,
           lapses: 0,
           reps: sm2.repetition ?? 0,
           nextReview: sm2.nextReview,
@@ -110,7 +110,8 @@ export function getAllWordProgress(): Record<string, WordProgress> {
       localStorage.setItem(KEYS.WORD_PROGRESS, JSON.stringify(all));
     }
     return all;
-  } catch {
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') console.error('[storage] word progress parse error:', err);
     return {};
   }
 }
@@ -142,7 +143,7 @@ export function getAllNameProgress(): Record<number, NameProgress> {
           mastery: sm2.mastery ?? 0,
           stability: Math.max(1, sm2.interval ?? 1),
           difficulty: 5.0,
-          state: sm2.interval > 1 ? 2 : sm2.repetition > 0 ? 1 : 0,
+          state: sm2.repetition >= 2 ? 2 : sm2.repetition > 0 ? 1 : 0,
           lapses: 0,
           reps: sm2.repetition ?? 0,
           nextReview: sm2.nextReview,
@@ -155,7 +156,8 @@ export function getAllNameProgress(): Record<number, NameProgress> {
       localStorage.setItem(KEYS.NAME_PROGRESS, JSON.stringify(all));
     }
     return all;
-  } catch {
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') console.error('[storage] name progress parse error:', err);
     return {};
   }
 }
@@ -394,6 +396,10 @@ export function importAllData(raw: string): { ok: boolean; message: string } {
   try {
     const data: Partial<HarfBackup> = JSON.parse(raw);
     if (!data || typeof data !== 'object') return { ok: false, message: 'Invalid file format.' };
+
+    if (data.version && data.version !== SCHEMA_VERSION) {
+      return { ok: false, message: `Backup version ${data.version} does not match app schema ${SCHEMA_VERSION}.` };
+    }
 
     if (data.wordProgress && typeof data.wordProgress === 'object') {
       localStorage.setItem(KEYS.WORD_PROGRESS, JSON.stringify(data.wordProgress));

@@ -34,7 +34,7 @@ export function WordCard({
 
   return (
     <Link href={`/word/${id}`} className="block word-card-lazy">
-      <div className="card px-4 pb-4 pt-5 flex flex-col gap-3 hover:border-gold/40 transition-[border-color,box-shadow,transform] duration-200 hover:shadow-lg hover:-translate-y-0.5 h-full">
+      <div className="card px-4 pb-4 pt-5 flex flex-col gap-3 hover:border-gold/40 transition-[border-color,box-shadow,transform] duration-200 hover:shadow-lg hover:-translate-y-0.5 h-full cursor-pointer">
         {/* Header row — pt-5 gives tashkeel ascenders room above the Arabic glyph */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-col gap-1" dir="rtl">
@@ -59,6 +59,9 @@ export function WordCard({
         {/* Meaning */}
         <div className="text-harf-text text-sm">
           {meanings.slice(0, 2).join(', ')}
+          {meanings.length > 2 && (
+            <span className="text-muted text-xs ml-1">+{meanings.length - 2} more</span>
+          )}
         </div>
 
         {/* Mastery dots */}

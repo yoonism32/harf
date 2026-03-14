@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { formatPct } from '@/lib/coverage';
 
@@ -20,12 +21,19 @@ export function SessionComplete({
 }: SessionCompleteProps) {
   const gain = Math.round((coverageAfter - coverageBefore) * 10) / 10;
 
+  useEffect(() => {
+    const el = document.getElementById('aria-announcer');
+    if (el) el.textContent = `Study session complete. You reviewed ${wordsReviewed} words.`;
+  }, [wordsReviewed]);
+
   return (
     <div className="flex flex-col items-center justify-center gap-8 py-16 text-center">
       {/* Arabic calligraphy-style header */}
       <div
         className="font-amiri text-5xl text-gold"
+        lang="ar"
         dir="rtl"
+        aria-label="Ahsanta — Well done!"
         style={{ fontFamily: 'Amiri, serif' }}
       >
         أحسنت
@@ -33,25 +41,25 @@ export function SessionComplete({
       <div className="text-muted text-sm -mt-4">Well done!</div>
 
       {/* Stats */}
-      <div className="card p-8 flex flex-col gap-6 w-full max-w-sm">
+      <dl className="card p-8 flex flex-col gap-6 w-full max-w-sm">
         <div className="flex flex-col gap-1">
-          <div className="text-muted text-sm uppercase tracking-wider">Words reviewed</div>
-          <div className="text-4xl font-bold text-harf-text">{wordsReviewed}</div>
+          <dt className="text-muted text-sm uppercase tracking-wider">Words reviewed</dt>
+          <dd className="text-4xl font-bold text-harf-text">{wordsReviewed}</dd>
         </div>
 
         <div className="border-t border-border" />
 
         <div className="flex flex-col gap-2">
-          <div className="text-muted text-sm uppercase tracking-wider">Quran coverage</div>
-          <div className="flex items-baseline justify-center gap-2">
+          <dt className="text-muted text-sm uppercase tracking-wider">Quran coverage</dt>
+          <dd className="flex items-baseline justify-center gap-2">
             <span className="text-muted text-xl">{formatPct(coverageBefore)}</span>
-            <span className="text-muted">→</span>
+            <span className="text-muted" aria-hidden="true">→</span>
             <span className="text-gold text-3xl font-bold">{formatPct(coverageAfter)}</span>
-          </div>
+          </dd>
           {gain > 0 && (
-            <div className="text-green-400 text-sm">
+            <dd className="text-green-400 text-sm">
               +{formatPct(gain)} this session
-            </div>
+            </dd>
           )}
         </div>
 
@@ -59,12 +67,12 @@ export function SessionComplete({
           <>
             <div className="border-t border-border" />
             <div className="flex flex-col gap-1">
-              <div className="text-muted text-sm uppercase tracking-wider">Your rank</div>
-              <div className="text-gold text-xl font-medium">{rankLabel}</div>
+              <dt className="text-muted text-sm uppercase tracking-wider">Your rank</dt>
+              <dd className="text-gold text-xl font-medium">{rankLabel}</dd>
             </div>
           </>
         )}
-      </div>
+      </dl>
 
       {/* Actions */}
       <div className="flex gap-3">

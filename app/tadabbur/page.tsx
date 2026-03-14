@@ -25,10 +25,9 @@ interface SurahNameMeta {
 }
 
 interface SurahInfo {
-  surah_number: number;
-  surah_name: string;
-  text: string;
-  short_text?: string;
+  id: number;
+  name: string;
+  summary: string;
 }
 
 const surahs = surahMetaRaw as SurahMeta[];
@@ -109,8 +108,8 @@ export default function TadabburIndexPage() {
                     <span className="text-xs text-muted">{surah.verses} verses</span>
                   </div>
                 </div>
-                {info?.short_text && (
-                  <p className="text-xs text-muted mt-1 line-clamp-2">{info.short_text}</p>
+                {info?.summary && (
+                  <p className="text-xs text-muted mt-1 line-clamp-2">{info.summary}</p>
                 )}
               </div>
             </Link>

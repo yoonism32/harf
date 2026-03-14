@@ -14,9 +14,11 @@ export function DailyAyah() {
   const [ref, setRef] = useState('');
   const [surahName, setSurahName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [playingWord, setPlayingWord] = useState<number | null>(null);
   const [playingVerse, setPlayingVerse] = useState(false);
   const [glosses, setGlosses] = useState<string[]>([]);
+  const [reloads, setReloads] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const wbwDataRef = useRef<Record<string, string> | null>(null);
   const [selectedWord,  setSelectedWord]  = useState<string | null>(null);
@@ -81,6 +83,8 @@ export function DailyAyah() {
     let cancelled = false;
 
     async function load() {
+      setError(null);
+      setLoading(true);
       const cached = getDailyAyahCache();
       if (cached) {
         if (!cancelled) {
@@ -111,6 +115,8 @@ export function DailyAyah() {
             english: data.english,
             surahName: data.surahName,
           });
+        } else {
+          setError('Could not load today’s ayah. Check your connection and retry.');
         }
         setLoading(false);
       }
@@ -118,7 +124,7 @@ export function DailyAyah() {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [reloads]);
 
   // Load WBW glosses lazily once the verse ref is known.
   // Dynamic import keeps the 1.9 MB JSON out of the initial bundle.
@@ -176,6 +182,16 @@ export function DailyAyah() {
         <div className="flex flex-col gap-3">
           <div className="h-12 bg-surface-plus rounded animate-pulse" />
           <div className="h-4 bg-surface-plus rounded w-3/4 animate-pulse" />
+        </div>
+      ) : error ? (
+        <div className="flex flex-col gap-2">
+          <div className="text-red-400 text-sm">{error}</div>
+          <button
+            onClick={() => setReloads(r => r + 1)}
+            className="self-start px-3 py-1.5 rounded-lg bg-surface-plus border border-border text-sm hover:border-gold/60 hover:text-gold transition-colors"
+          >
+            Retry
+          </button>
         </div>
       ) : arabic ? (
         <>
@@ -248,6 +264,15 @@ export function DailyAyah() {
                   )
             )}
             &rdquo;
+          </div>
+
+          {/* Screen-reader announcement for search results */}
+          <div aria-live="polite" aria-atomic="true" className="sr-only">
+            {searchResults !== null && (
+              searchResults.length === 0
+                ? `No verses found for "${selectedWord}"`
+                : `${searchResults.length} verse${searchResults.length > 1 ? 's' : ''} found for "${selectedWord}"`
+            )}
           </div>
 
           {searchResults !== null && (

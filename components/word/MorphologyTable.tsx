@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import morphologyData from '@/data/morphology.json';
 
 interface MorphToken {
@@ -35,7 +34,7 @@ const TYPE_COLORS: Record<string, string> = {
 
 const data = morphologyData as Record<string, MorphToken[]>;
 
-export function MorphologyTable({ verseRef, verseArabic }: MorphologyTableProps) {
+export function MorphologyTable({ verseRef }: MorphologyTableProps) {
   const tokens = data[verseRef];
 
   if (!tokens || tokens.length === 0) {
@@ -90,45 +89,55 @@ export function MorphologyTable({ verseRef, verseArabic }: MorphologyTableProps)
               </div>
 
               {/* Segment rows */}
-              <div className="flex flex-col gap-1">
-                {segs.map((seg, i) => (
-                  <div key={i} className="grid grid-cols-[auto_1fr_auto] gap-3 items-center text-sm">
-                    {/* Type badge */}
-                    <span className={`text-xs px-1.5 py-0.5 rounded font-mono ${TYPE_COLORS[seg.type] ?? 'text-muted'}`}>
-                      {seg.type}
-                    </span>
-
-                    {/* Form + analysis */}
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span
-                        className="font-amiri text-xl text-harf-text"
-                        dir="rtl"
-                        style={{ fontFamily: 'Amiri, serif' }}
-                      >
-                        {seg.f}
-                      </span>
-                      <span className="text-harf-text text-sm">{seg.pos}</span>
-                      {seg.lem && (
-                        <span className="text-muted text-xs">
-                          lem: <span className="font-amiri" dir="rtl" style={{ fontFamily: 'Amiri, serif' }}>{seg.lem}</span>
+              <table className="w-full text-sm border-collapse">
+                <thead className="sr-only">
+                  <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Analysis</th>
+                    <th scope="col">Features</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {segs.map((seg, i) => (
+                    <tr key={i} className="border-t border-border/40 first:border-t-0">
+                      <td className="py-1.5 pr-3 align-middle">
+                        <span className={`text-xs px-1.5 py-0.5 rounded font-mono ${TYPE_COLORS[seg.type] ?? 'text-muted'}`}>
+                          {seg.type}
                         </span>
-                      )}
-                    </div>
-
-                    {/* Feature chips */}
-                    <div className="flex gap-1 flex-wrap justify-end">
-                      {[seg.tense, seg.voice, seg.mood, seg.gender, seg.number, seg.case, seg.form]
-                        .filter(Boolean)
-                        .map((feat, fi) => (
-                          <span key={fi} className="text-xs text-muted bg-surface px-1.5 py-0.5 rounded border border-border">
-                            {feat}
+                      </td>
+                      <td className="py-1.5 pr-3 align-middle">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span
+                            className="font-amiri text-xl text-harf-text"
+                            dir="rtl"
+                            style={{ fontFamily: 'Amiri, serif' }}
+                          >
+                            {seg.f}
                           </span>
-                        ))
-                      }
-                    </div>
-                  </div>
-                ))}
-              </div>
+                          <span className="text-harf-text text-sm">{seg.pos}</span>
+                          {seg.lem && (
+                            <span className="text-muted text-xs">
+                              lem: <span className="font-amiri" dir="rtl" style={{ fontFamily: 'Amiri, serif' }}>{seg.lem}</span>
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-1.5 align-middle text-right">
+                        <div className="flex gap-1 flex-wrap justify-end">
+                          {[seg.tense, seg.voice, seg.mood, seg.gender, seg.number, seg.case, seg.form]
+                            .filter(Boolean)
+                            .map((feat, fi) => (
+                              <span key={fi} className="text-xs text-muted bg-surface px-1.5 py-0.5 rounded border border-border">
+                                {feat}
+                              </span>
+                            ))
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           );
         })}

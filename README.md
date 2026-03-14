@@ -1,6 +1,6 @@
 # حرف · Harf
 
-*Quranic Arabic vocabulary mastery — track what percentage of the Quran you understand*
+*Quranic Arabic vocabulary mastery — track what percentage of the Quran you understand (up to 80% based on dataset scope)*
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![React](https://img.shields.io/badge/React-19-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6) ![Tailwind](https://img.shields.io/badge/Tailwind-v4-06b6d4) ![Vitest](https://img.shields.io/badge/Vitest-4-6e9f18) ![Playwright](https://img.shields.io/badge/Playwright-1.58-2ead33)
 
@@ -10,7 +10,7 @@
 
 Harf is a client-side Progressive Web App for mastering Quranic Arabic vocabulary through spaced repetition. No account or backend required — all data lives in your browser.
 
-- **~300 root words** covering ~90% of Quranic vocabulary
+- **~300 root words** covering ~80% of Quranic vocabulary (dataset ceiling)
 - **FSRS-6 spaced-repetition flashcards** — modern forgetting-curve algorithm, 6 mastery levels (0→5)
 - **Quran comprehension tracker** — coverage map across all 114 surahs
 - **99 Names of Allah** (Asma Al-Husna) with their own SRS deck
@@ -147,6 +147,7 @@ Next.js App Router (SSG/SSR)
 - **LayoutShell**: client component using `usePathname()` — landing page gets full viewport, all other pages get navbar + `max-w-5xl` main
 - **Daily Ayah**: day-of-year mod 6236 — deterministic, no randomness, same ayah for all users each day
 - **Quran data**: two CDN editions fetched in parallel (Uthmani Arabic `ara-quranacademy` + Hilali English `eng-muhammadtaqiudd`)
+- **Coverage metric**: dataset covers ~80% of Quran word occurrences; comprehension percentage is capped at 80% to reflect that ceiling
 
 ---
 

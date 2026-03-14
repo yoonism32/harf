@@ -113,7 +113,9 @@ export default function WordsPage() {
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Search */}
+        <label htmlFor="word-search" className="sr-only">Search words</label>
         <input
+          id="word-search"
           type="text"
           placeholder="Search words…"
           value={search}
@@ -122,7 +124,9 @@ export default function WordsPage() {
         />
 
         {/* Sort */}
+        <label htmlFor="word-sort" className="sr-only">Sort words by</label>
         <select
+          id="word-sort"
           value={sort}
           onChange={e => setSort(e.target.value as SortKey)}
           className="bg-surface border border-border rounded-xl px-3 py-2.5 text-harf-text text-sm focus:outline-none focus:border-gold/50"
@@ -139,10 +143,11 @@ export default function WordsPage() {
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${
+            aria-pressed={filter === f.key}
+            className={`px-4 py-1.5 rounded-full text-sm transition-colors border ${
               filter === f.key
-                ? 'bg-gold/10 text-gold border-gold/30'
-                : 'text-muted border-border hover:text-harf-text hover:border-muted'
+                ? 'bg-gold/10 text-gold border-gold/30 font-semibold underline decoration-dotted decoration-gold'
+                : 'font-medium text-muted border-border hover:text-harf-text hover:border-muted'
             }`}
           >
             {f.label}

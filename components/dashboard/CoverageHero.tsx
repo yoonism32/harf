@@ -36,8 +36,8 @@ export function CoverageHero() {
     <div className="card p-8 relative overflow-hidden" aria-label="Quran comprehension progress">
       <h2 className="sr-only">Quran Comprehension</h2>
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-32 h-32 bg-green/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+      <div aria-hidden="true" className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+      <div aria-hidden="true" className="absolute bottom-0 left-0 w-32 h-32 bg-green/10 rounded-full translate-y-1/2 -translate-x-1/2" />
 
       <div className="relative flex flex-col md:flex-row md:items-center gap-6">
         {/* Left: big percentage */}
@@ -48,6 +48,9 @@ export function CoverageHero() {
           </div>
           <div className="text-harf-text text-lg">
             of the Quran you understand
+          </div>
+          <div className="text-muted text-xs">
+            Metric capped at 80% based on available dataset coverage.
           </div>
         </div>
 

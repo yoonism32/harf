@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { SURAHS, calculateCoverage, formatPct, type WordWithWeight } from '@/lib/coverage';
-import { getAllWordProgress, type WordProgress } from '@/lib/storage';
+import { getAllWordProgress } from '@/lib/storage';
 import wordsData from '@/data/words.json';
 
 interface WordEntry {
@@ -17,14 +17,12 @@ const wordsForCoverage: WordWithWeight[] = words.map(w => ({
 }));
 
 export default function CoveragePage() {
-  const [allProgress, setAllProgress] = useState<Record<string, WordProgress>>({});
   const [overallPct, setOverallPct] = useState(0);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const progress = getAllWordProgress();
-    setAllProgress(progress);
     const result = calculateCoverage(wordsForCoverage, progress);
     setOverallPct(result.percentage);
   }, []);
@@ -75,25 +73,32 @@ export default function CoveragePage() {
       </div>
 
       {/* Surah grid */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+      <ul
+        role="list"
+        className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 list-none p-0 m-0"
+      >
         {SURAHS.map(surah => {
           // Each surah gets the overall coverage (simplified)
           // A full implementation would tag each word to its surahs
           const colorCls = pctToColor(displayPct);
 
           return (
-            <div
+            <li
               key={surah.number}
-              className={`border rounded-xl p-2.5 flex flex-col gap-1 transition-all hover:scale-105 cursor-default ${colorCls}`}
-              title={`${surah.name} (${surah.ayahs} ayahs) — ${surah.nameArabic}`}
+              role="listitem"
+              className={`border rounded-xl p-2.5 flex flex-col gap-1 transition-[transform,border-color] hover:scale-105 cursor-default ${colorCls}`}
+              aria-label={`Surah ${surah.number}: ${surah.name} (${surah.ayahs} ayahs)`}
+              title={`${surah.name} (${surah.ayahs} ayahs) — ${formatPct(displayPct)} coverage`}
             >
-              <div className="font-mono text-xs opacity-60">
+              <div className="font-mono text-xs opacity-60" aria-hidden="true">
                 {surah.number}
               </div>
               <div
                 className="font-amiri text-base leading-tight text-right"
                 dir="rtl"
+                lang="ar"
                 style={{ fontFamily: 'Amiri, serif' }}
+                aria-hidden="true"
               >
                 {surah.nameArabic}
               </div>
@@ -103,10 +108,10 @@ export default function CoveragePage() {
               <div className="text-xs opacity-50">
                 {surah.ayahs}v
               </div>
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ul>
 
       {/* Note */}
       <div className="text-muted text-xs text-center border border-border rounded-xl p-4">

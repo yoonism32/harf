@@ -36,8 +36,8 @@ components/
 
 lib/
   storage.ts          — ALL localStorage I/O; defines WordProgress, NameProgress, StudySession
-  srs.ts              — SuperMemo-2 wrapper: reviewWord(), reviewName(), buildSessionQueue()
-  coverage.ts         — calculateCoverage() → percentage of Quran understood
+  srs.ts              — FSRS-6 scheduler wrapper: reviewWord(), reviewName(), buildSessionQueue()
+  coverage.ts         — calculateCoverage() → percentage of Quran understood (capped at 80% dataset ceiling)
   quran-api.ts        — fetchAyah(): fetches from cdn.jsdelivr.net, caches in module Map
   aladhan-api.ts      — Prayer times from api.aladhan.com
   audio.ts            — verseAudioUrl() + RECITERS list + localStorage key
@@ -104,6 +104,9 @@ Three Google fonts loaded via `next/font` in `layout.tsx`:
 
 ### 7. SRS Algorithm
 `lib/srs.ts` wraps the `ts-fsrs` package (FSRS-6 algorithm). `RESPONSE_TO_GRADE` maps 4 UI buttons (`blackout/hard/good/perfect`) to FSRS `Rating` values (Again=1, Hard=2, Good=3, Easy=4). Mastery (0–5) is derived from the resulting FSRS `State` + `stability`: Learning→1, Review<7d→2, <21d→3, <90d→4, ≥90d→5. On lapse (Review→Relearning), mastery drops by 1. `MASTERY_LABELS` and `MASTERY_COLORS` are display helpers. `reviewWord()` persists via `setWordProgress()`. Old SM-2 data (has `interval`/`efactor` fields) is automatically migrated to FSRS fields in `getAllWordProgress()`.
+
+### 8. Coverage Ceiling
+The current word dataset (~300 roots) accounts for ~80% of Quran word occurrences. `calculateCoverage()` caps reported comprehension at 80% to reflect that scope; UI surfaces this cap in CoverageHero.
 
 ---
 

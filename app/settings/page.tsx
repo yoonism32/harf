@@ -78,8 +78,9 @@ export default function SettingsPage() {
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-muted text-xs uppercase tracking-wider">City</label>
+            <label htmlFor="settings-city" className="text-muted text-xs uppercase tracking-wider">City</label>
             <input
+              id="settings-city"
               type="text"
               value={city}
               onChange={e => { setCity(e.target.value); setLocationSaved(false); }}
@@ -89,8 +90,9 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-muted text-xs uppercase tracking-wider">Country</label>
+            <label htmlFor="settings-country" className="text-muted text-xs uppercase tracking-wider">Country</label>
             <input
+              id="settings-country"
               type="text"
               value={country}
               onChange={e => { setCountry(e.target.value); setLocationSaved(false); }}
@@ -107,6 +109,7 @@ export default function SettingsPage() {
         >
           {locationSaved ? 'Saved ✓' : 'Save Location'}
         </button>
+        <span aria-live="polite" className="sr-only">{locationSaved ? 'Location saved' : ''}</span>
       </div>
 
       {/* Reciter */}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, notFound } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { MASTERY_LABELS, MASTERY_COLORS } from '@/lib/srs';
 import { getAllWordProgress } from '@/lib/storage';
@@ -9,8 +9,8 @@ import { fetchWordVerses, type AyahResponse } from '@/lib/quran-api';
 import { MorphologyTable } from '@/components/word/MorphologyTable';
 import { RootFamilyPanel, type MorphologyEntry } from '@/components/word/RootFamilyPanel';
 import { InteractiveVerse } from '@/components/word/InteractiveVerse';
+import { SURAHS } from '@/lib/coverage';
 import wordsData from '@/data/words.json';
-import wbwMorphologyData from '@/data/wbw-morphology.json';
 
 interface Derivative { form: string; meaning: string; }
 interface WordEntry {
@@ -28,7 +28,24 @@ interface WordEntry {
 
 const words = wordsData as WordEntry[];
 const wordsMap = Object.fromEntries(words.map(w => [w.id, w]));
-const wbwMorphology = wbwMorphologyData as Record<string, MorphologyEntry>;
+
+async function loadMorphology(): Promise<Record<string, MorphologyEntry>> {
+  const mod = await import('@/data/wbw-morphology.json');
+  return mod.default as Record<string, MorphologyEntry>;
+}
+
+function buildExampleRefs(example: string): string[] {
+  const [sStr, aStr] = example.split(':');
+  const surah = Number(sStr);
+  const ayah = Number(aStr);
+  if (!Number.isFinite(surah) || !Number.isFinite(ayah)) return [example];
+  const maxAyah = SURAHS.find(s => s.number === surah)?.ayahs ?? ayah;
+  const refs = [];
+  if (ayah > 1) refs.push(`${surah}:${ayah - 1}`);
+  refs.push(`${surah}:${ayah}`);
+  if (ayah < maxAyah) refs.push(`${surah}:${ayah + 1}`);
+  return refs;
+}
 
 export default function WordDetailPage() {
   const params = useParams();
@@ -38,14 +55,15 @@ export default function WordDetailPage() {
   const [verses, setVerses] = useState<AyahResponse[]>([]);
   const [loadingVerses, setLoadingVerses] = useState(true);
   const [mastery, setMastery] = useState(0);
+  const [morphEntry, setMorphEntry] = useState<MorphologyEntry | null>(null);
+  const [loadingMorph, setLoadingMorph] = useState(true);
 
   useEffect(() => {
     if (!word) return;
     const progress = getAllWordProgress();
     setMastery(progress[id]?.mastery ?? 0);
 
-    // Fetch 3 example verses — use example_verse + adjacent
-    const refs = [word.example_verse];
+    const refs = buildExampleRefs(word.example_verse);
     setLoadingVerses(true);
     fetchWordVerses(refs).then(data => {
       setVerses(data);
@@ -53,13 +71,28 @@ export default function WordDetailPage() {
     });
   }, [id, word]);
 
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingMorph(true);
+    loadMorphology()
+      .then(data => {
+        if (cancelled) return;
+        setMorphEntry(data[id] ?? null);
+        setLoadingMorph(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setMorphEntry(null);
+        setLoadingMorph(false);
+      });
+    return () => { cancelled = true; };
+  }, [id]);
+
   if (!word) return (
     <div className="py-24 text-center text-muted">
       Word not found. <Link href="/words" className="text-gold hover:underline">Back to library</Link>
     </div>
   );
-
-  const pctCoverage = (word.coverage_weight * 77429 / 77429 * 100).toFixed(3);
 
   return (
     <div className="flex flex-col gap-8 py-4">
@@ -93,7 +126,7 @@ export default function WordDetailPage() {
         <div className="flex flex-col gap-4 flex-1">
           <div>
             <div className="text-muted text-xs uppercase tracking-wider mb-1">Transliteration</div>
-            <div className="text-harf-text text-xl font-medium">{word.transliteration}</div>
+            <h1 className="text-harf-text text-xl font-medium">{word.transliteration}</h1>
           </div>
 
           <div>
@@ -156,7 +189,7 @@ export default function WordDetailPage() {
       <div className="card p-6 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-harf-text font-semibold">Quranic Examples</h2>
-          <span className="text-muted text-xs">from api.alquran.cloud</span>
+          <span className="text-muted text-xs">via CDN Quran API</span>
         </div>
 
         {loadingVerses ? (
@@ -191,7 +224,13 @@ export default function WordDetailPage() {
           <h2 className="text-harf-text font-semibold">Root Family</h2>
           <span className="text-muted text-xs">via QuranWBW</span>
         </div>
-        <RootFamilyPanel entry={wbwMorphology[word.id]} />
+        {loadingMorph ? (
+          <div className="h-20 bg-surface-plus rounded animate-pulse" />
+        ) : morphEntry ? (
+          <RootFamilyPanel entry={morphEntry} />
+        ) : (
+          <div className="text-muted text-sm">No morphology data available for this root.</div>
+        )}
       </div>
 
       {/* Study action */}

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { FlashCard } from '@/components/study/FlashCard';
 import { SessionComplete } from '@/components/study/SessionComplete';
-import { reviewWord, RESPONSE_TO_GRADE, type ResponseKey } from '@/lib/srs';
+import { reviewWord, RESPONSE_TO_GRADE, buildSessionQueue, type ResponseKey } from '@/lib/srs';
 import { getAllWordProgress, addStudySession } from '@/lib/storage';
 import { calculateCoverage, type WordWithWeight } from '@/lib/coverage';
 import { fetchAyah } from '@/lib/quran-api';
@@ -142,27 +142,17 @@ export default function StudyPage() {
 
       const allIds = words.map(w => w.id);
 
-      // Due reviews
       const today = new Date().toISOString().slice(0, 10);
       const dueIds = Object.values(progress)
         .filter(p => p.nextReview <= today)
         .map(p => p.id);
 
-      // New words not yet started
-      const newIds = allIds
-        .filter(id => !progress[id])
-        .slice(0, MAX_NEW_PER_SESSION);
-
-      // Interleave: 2 due, 1 new
-      const q: string[] = [];
-      let di = 0, ni = 0;
-      while (di < dueIds.length || ni < newIds.length) {
-        const d1 = dueIds[di]; if (d1 !== undefined) { q.push(d1); di++; }
-        const d2 = dueIds[di]; if (d2 !== undefined) { q.push(d2); di++; }
-        const n1 = newIds[ni]; if (n1 !== undefined) { q.push(n1); ni++; }
-      }
-
-      const finalQueue = q.length > 0 ? q : newIds.slice(0, MAX_NEW_PER_SESSION);
+      // Reuse shared SRS queue builder (tested in lib/srs.ts) to avoid drift
+      const queueFromScheduler = buildSessionQueue(allIds, dueIds, MAX_NEW_PER_SESSION);
+      const newIds = allIds.filter(id => !progress[id]).slice(0, MAX_NEW_PER_SESSION);
+      const finalQueue = queueFromScheduler.length > 0
+        ? queueFromScheduler
+        : newIds.slice(0, MAX_NEW_PER_SESSION);
       setQueue(finalQueue);
 
       // Pre-compute a stable random key + root match data for every word in this session
@@ -230,7 +220,9 @@ export default function StudyPage() {
     const wordId = queue[currentIndex] ?? '';
     const grade = RESPONSE_TO_GRADE[key] ?? 0;
     reviewWord(wordId, grade);
-    setWordsReviewed(prev => prev + 1);
+
+    const nextReviewed = wordsReviewed + 1;
+    setWordsReviewed(nextReviewed);
 
     const next = currentIndex + 1;
     if (next >= queue.length) {
@@ -241,7 +233,7 @@ export default function StudyPage() {
       setRank(result.rank.arabic + ' — ' + result.rank.transliteration);
       addStudySession({
         date: new Date().toISOString().slice(0, 10),
-        wordsReviewed: wordsReviewed + 1, // +1 because setWordsReviewed hasn't run yet
+        wordsReviewed: nextReviewed,
         coverageBefore,
         coverageAfter: result.percentage,
       });
@@ -249,7 +241,7 @@ export default function StudyPage() {
     } else {
       setCurrentIndex(next);
     }
-  }, [currentIndex, queue]);
+  }, [currentIndex, queue, coverageBefore, wordsReviewed]);
 
   const handleStudyMore = useCallback(() => {
     // Reset all session state, then increment sessionId to re-run the queue-build effect

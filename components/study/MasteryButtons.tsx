@@ -7,12 +7,20 @@ interface MasteryButtonsProps {
   disabled?: boolean;
 }
 
+const BUTTON_TITLES: Record<string, string> = {
+  blackout: "Complete blackout — I didn't remember (keyboard: 1)",
+  hard:     'Vague recall — barely remembered (keyboard: 2)',
+  good:     'Got it with effort — remembered after thinking (keyboard: 3)',
+  perfect:  'Perfect recall — knew it immediately (keyboard: 4)',
+};
+
 export function MasteryButtons({ onResponse, disabled = false }: MasteryButtonsProps) {
   return (
     <div className="grid grid-cols-2 gap-2.5 w-full max-w-md mx-auto">
       {STUDY_BUTTONS.map((btn, i) => (
         <button
           key={btn.key}
+          title={BUTTON_TITLES[btn.key]}
           onClick={() => onResponse(btn.key)}
           disabled={disabled}
           className={`

@@ -69,11 +69,19 @@ export function StudyQueue() {
 
           <div className="mt-2">
             <h3 className="text-xs uppercase tracking-wider text-muted font-semibold mb-3">7-Day Forecast</h3>
-            <div className="flex justify-between items-end gap-1 h-12">
+            <div
+              className="flex justify-between items-end gap-1 h-12"
+              role="img"
+              aria-label={`7-day review forecast: ${Object.entries(forecast).map(([d, c], i) => {
+                const day = i === 0 ? 'Today' : new Date(d).toLocaleDateString('en-US', { weekday: 'short' });
+                return `${day}: ${c} cards`;
+              }).join(', ')}`}
+            >
               {Object.entries(forecast).map(([date, count], i) => {
                 const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'narrow' });
                 const isToday = i === 0;
-                const height = Math.min(100, Math.max(10, (count / 20) * 100)); // Normalize height
+                const maxCount = Math.max(1, ...Object.values(forecast));
+                const height = Math.min(100, Math.max(10, (count / maxCount) * 100));
 
                 return (
                   <div key={date} className="flex-1 flex flex-col items-center gap-1.5 group relative">
@@ -85,7 +93,7 @@ export function StudyQueue() {
                       {dayName}
                     </span>
                     {count > 0 && (
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-bg border border-border px-1.5 py-0.5 rounded text-[9px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-Above">
+                      <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-bg border border-border px-1.5 py-0.5 rounded text-[9px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
                         {count} cards
                       </div>
                     )}
