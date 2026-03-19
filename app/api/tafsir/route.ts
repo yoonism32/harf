@@ -25,7 +25,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // tafsir section covers them (e.g. 17:84 → "17:83"). Follow it once.
     const resolved = typeof entry === 'string' ? data[entry] : entry;
     const text = resolved && typeof resolved === 'object' ? resolved.text : null;
-    return NextResponse.json({ text: text ?? null });
+    return NextResponse.json({ text: text ?? null }, {
+      headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },
+    });
   } catch {
     return NextResponse.json({ error: 'failed to load tafsir' }, { status: 500 });
   }

@@ -21,7 +21,7 @@ export function LayoutShell({ children }: { children: ReactNode }) {
     <>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-gold focus:text-bg focus:rounded-lg"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-dropdown focus:px-4 focus:py-2 focus:bg-gold focus:text-bg focus:rounded-lg"
       >
         Skip to content
       </a>
@@ -29,7 +29,7 @@ export function LayoutShell({ children }: { children: ReactNode }) {
       <main
         id="main-content"
         tabIndex={-1}
-        className={isWide ? 'w-full px-4 py-6' : 'max-w-5xl mx-auto px-4 py-6'}
+        className={isWide ? 'w-full px-4 py-6 pb-safe' : 'max-w-5xl mx-auto px-4 py-6 pb-safe'}
       >
         {children}
       </main>

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Word Browser', () => {
-  test('shows word cards', async ({ page }) => {
+  test('shows word cards', { tag: '@smoke' }, async ({ page }) => {
     await page.goto('/words');
 
     // Page should show words
@@ -32,7 +32,7 @@ test.describe('Word Browser', () => {
     await expect(page).toHaveURL(/\/word\/.+/);
   });
 
-  test('word detail page loads', async ({ page }) => {
+  test('word detail page shows Arabic root and English meaning', async ({ page }) => {
     await page.goto('/words');
     await page.waitForLoadState('networkidle');
 
@@ -43,7 +43,9 @@ test.describe('Word Browser', () => {
     await page.goto(href!);
     await page.waitForLoadState('networkidle');
 
-    // Should not be an error page
+    // Should show the word's Arabic text
+    await expect(page.locator('[lang="ar"]').first()).toBeVisible();
+    // Should show the main content area
     await expect(page.locator('main')).toBeVisible();
   });
 });

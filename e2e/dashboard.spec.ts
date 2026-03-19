@@ -32,7 +32,7 @@ test.describe('Landing Page', () => {
 });
 
 test.describe('Dashboard', () => {
-  test('loads at /app and shows main sections', async ({ page }) => {
+  test('loads at /app and shows main sections', { tag: '@smoke' }, async ({ page }) => {
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
@@ -47,5 +47,15 @@ test.describe('Dashboard', () => {
     await page.goto('/app');
     await page.getByRole('link', { name: /Word Library/i }).click();
     await expect(page).toHaveURL('/words');
+  });
+
+  test('active nav link has aria-current="page"', async ({ page }) => {
+    await page.goto('/words');
+    await page.waitForLoadState('networkidle');
+
+    // The "Words" nav link should be marked as the current page
+    const wordsNavLink = page.getByRole('navigation', { name: 'Main navigation' })
+      .getByRole('link', { name: 'Words', exact: true });
+    await expect(wordsNavLink).toHaveAttribute('aria-current', 'page');
   });
 });

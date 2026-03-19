@@ -162,10 +162,10 @@ function VersePlayButton({ verseRef }: { verseRef: string }) {
         ${playing ? 'text-gold' : 'text-muted hover:text-gold'}`}
     >
       {playing ? (
-        <span className="flex gap-0.5 items-end h-3">
-          <span className="w-0.5 bg-gold rounded animate-bounce" style={{ height: '60%', animationDelay: '0ms' }} />
-          <span className="w-0.5 bg-gold rounded animate-bounce" style={{ height: '100%', animationDelay: '150ms' }} />
-          <span className="w-0.5 bg-gold rounded animate-bounce" style={{ height: '70%', animationDelay: '300ms' }} />
+        <span className="flex gap-0.5 items-end h-3" aria-hidden="true">
+          <span className="w-0.5 bg-gold rounded h-[60%] animate-bounce motion-reduce:animate-none" />
+          <span className="w-0.5 bg-gold rounded h-full animate-bounce motion-reduce:animate-none [animation-delay:150ms]" />
+          <span className="w-0.5 bg-gold rounded h-[70%] animate-bounce motion-reduce:animate-none [animation-delay:300ms]" />
         </span>
       ) : (
         <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -256,7 +256,7 @@ export function FlashCard({
       <div
         role="button"
         tabIndex={0}
-        className="card min-h-64 w-full flex flex-col items-center justify-center gap-4 p-8 cursor-pointer select-none relative overflow-hidden text-left focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none transition-[border-color,box-shadow] duration-300"
+        className="card min-h-64 w-full flex flex-col items-center justify-center gap-4 p-5 sm:p-8 cursor-pointer select-none relative overflow-hidden text-left focus-ring transition-[border-color,box-shadow] duration-300"
         onClick={() => setFlipped(prev => !prev)}
         onKeyDown={e => {
           if (e.key === ' ' || e.key === 'Enter') e.preventDefault();
@@ -379,7 +379,7 @@ export function FlashCard({
           {[1, 2, 3, 4, 5].map(level => (
             <div
               key={level}
-              className={`h-1 flex-1 rounded-full transition-all duration-500 ${
+              className={`h-1 flex-1 rounded-full transition-all duration-500 [transition-timing-function:var(--ease-out-expo)] ${
                 level <= mastery ? MASTERY_COLORS[mastery] : 'bg-border'
               }`}
             />

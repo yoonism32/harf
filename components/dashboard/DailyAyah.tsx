@@ -29,16 +29,16 @@ export function DailyAyah() {
     return () => { audioRef.current?.pause(); };
   }, []);
 
-  const stopAudio = () => {
+  const stopAudio = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
     setPlayingWord(null);
     setPlayingVerse(false);
-  };
+  }, []);
 
-  const playWord = (ch: string, vs: string, idx: number) => {
+  const playWord = useCallback((ch: string, vs: string, idx: number) => {
     stopAudio();
     const audio = new Audio(wordAudioUrl(ch, vs, idx));
     audioRef.current = audio;
@@ -46,9 +46,9 @@ export function DailyAyah() {
     audio.onended = () => setPlayingWord(null);
     audio.onerror = () => setPlayingWord(null);
     audio.play().catch(() => setPlayingWord(null));
-  };
+  }, [stopAudio]);
 
-  const handleVerseClick = (ch: string, vs: string) => {
+  const handleVerseClick = useCallback((ch: string, vs: string) => {
     if (playingVerse) { stopAudio(); return; }
     stopAudio();
     const audio = new Audio(verseAudioUrl(ch, vs));
@@ -57,7 +57,7 @@ export function DailyAyah() {
     audio.onended = () => setPlayingVerse(false);
     audio.onerror = () => setPlayingVerse(false);
     audio.play().catch(() => setPlayingVerse(false));
-  };
+  }, [playingVerse, stopAudio]);
 
   const handleWordSearch = useCallback((word: string) => {
     if (!wbwDataRef.current) return;

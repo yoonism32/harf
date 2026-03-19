@@ -23,12 +23,14 @@ export function MasteryButtons({ onResponse, disabled = false }: MasteryButtonsP
           title={BUTTON_TITLES[btn.key]}
           onClick={() => onResponse(btn.key)}
           disabled={disabled}
+          style={{ animationDelay: `${i * 60}ms` }}
           className={`
             py-3 px-5 rounded-xl font-medium text-sm
             min-h-[44px] min-w-[44px]
             border border-border/60
             flex items-center justify-between gap-2
             ${btn.bg} ${btn.color}
+            animate-rise motion-reduce:animate-none
             transition-[transform,box-shadow,opacity] duration-150
             hover:scale-[1.02] hover:brightness-110
             active:scale-[0.97]

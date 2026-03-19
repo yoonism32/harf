@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { FlashCard } from '@/components/study/FlashCard';
 import { SessionComplete } from '@/components/study/SessionComplete';
@@ -271,7 +271,7 @@ export default function StudyPage() {
   if (queue.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-6 py-24 text-center">
-        <div className="font-amiri text-4xl text-gold" dir="rtl" style={{ fontFamily: 'Amiri, serif' }}>
+        <div className="font-amiri text-4xl text-gold" dir="rtl">
           ما شاء الله
         </div>
         <div className="text-harf-text text-xl font-medium">No words due for review today!</div>
@@ -299,7 +299,13 @@ export default function StudyPage() {
   const currentWord = wordsMap[currentWordId];
   if (!currentWord) return null;
 
-  const progress = currentWordId ? (getAllWordProgress()[currentWordId] ?? null) : null;
+  // Memoised so localStorage is re-parsed only when the current word changes,
+  // not on every re-render (e.g. when the verse state updates).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const progress = useMemo(
+    () => currentWordId ? (getAllWordProgress()[currentWordId] ?? null) : null,
+    [currentWordId],
+  );
 
   return (
     <div className="flex flex-col gap-6 py-8">

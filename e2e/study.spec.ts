@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import wordsData from '../data/words.json';
+
+const ALL_WORD_IDS = (wordsData as Array<{ id: string }>).map(w => w.id);
 
 test.describe('Study Flow', () => {
   test.beforeEach(async ({ page }) => {
@@ -8,7 +11,7 @@ test.describe('Study Flow', () => {
     });
   });
 
-  test('shows flashcard on fresh session (new words available)', async ({ page }) => {
+  test('shows flashcard on fresh session (new words available)', { tag: '@smoke' }, async ({ page }) => {
     await page.goto('/study');
     await page.waitForLoadState('networkidle');
 
@@ -40,23 +43,28 @@ test.describe('Study Flow', () => {
     await page.goto('/study');
     await page.waitForLoadState('networkidle');
 
-    // Click through all cards quickly using "Don't Know"
-    let attempts = 0;
-    while (attempts < 15) {
+    // Click through all cards using "Don't Know"
+    for (let attempts = 0; attempts < 15; attempts++) {
       const tapHint = page.getByText(/Tap to reveal meaning/i);
-      if (!(await tapHint.isVisible())) break;
+      if (!(await tapHint.isVisible({ timeout: 500 }).catch(() => false))) break;
 
       // Flip the card
       await page.locator('button').filter({ hasText: /Tap to reveal/ }).click();
-      await page.waitForTimeout(200);
 
-      // Click "Don't Know"
+      // Wait for flip to complete (mastery buttons appear)
       const dontKnow = page.getByRole('button', { name: /Don't Know/i });
-      if (await dontKnow.isVisible()) {
-        await dontKnow.click();
-        await page.waitForTimeout(200);
-      }
-      attempts++;
+      await expect(dontKnow).toBeVisible({ timeout: 3000 });
+      await dontKnow.click();
+
+      // Wait for UI to transition to next card or session end
+      await page.waitForFunction(() => {
+        const text = document.body.textContent ?? '';
+        return (
+          text.includes('Tap to reveal meaning') ||
+          text.includes('Session Complete') ||
+          text.includes('No words due')
+        );
+      }, { timeout: 5000 });
     }
 
     // Should either show session complete or still on last card
@@ -77,26 +85,31 @@ test.describe('Study Flow', () => {
   });
 
   test('"no words due" empty state renders correctly after all words reviewed', async ({ page }) => {
-    // Seed localStorage so all words are already due far in the future (none due today)
-    await page.addInitScript(() => {
-      // Simulate: all words reviewed and next review is in the future
+    // Seed localStorage with ALL real word IDs (FSRS format) set to a future review date.
+    // Using fake IDs (word-1, word-2 …) would not block new words from being queued
+    // because the study page matches against the actual word IDs from words.json.
+    await page.addInitScript((ids: string[]) => {
       const future = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
       const progress: Record<string, unknown> = {};
-      // Create enough fake entries to prevent new words from filling the queue
-      for (let i = 1; i <= 500; i++) {
-        const id = `word-${i}`;
+      for (const id of ids) {
         progress[id] = {
           id,
-          mastery: 4,
-          interval: 30,
-          repetition: 5,
-          efactor: 2.5,
+          // FSRS fields
+          stability: 30,
+          difficulty: 5,
+          elapsed_days: 0,
+          scheduled_days: 30,
+          reps: 5,
+          lapses: 0,
+          state: 2, // Review state
+          last_review: new Date().toISOString(),
           nextReview: future,
           lastReviewed: new Date().toISOString(),
+          mastery: 4,
         };
       }
       localStorage.setItem('harf:v1:word_progress', JSON.stringify(progress));
-    });
+    }, ALL_WORD_IDS);
 
     await page.goto('/study');
     await page.waitForLoadState('networkidle');

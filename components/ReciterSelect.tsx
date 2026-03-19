@@ -55,7 +55,7 @@ export function ReciterSelect({ value, onChange }: ReciterSelectProps) {
         <div
           role="listbox"
           className="absolute top-full left-0 mt-1 w-72 bg-surface border border-border
-            rounded-xl shadow-2xl overflow-y-auto max-h-72 z-[60]"
+            rounded-xl shadow-2xl overflow-y-auto max-h-72 z-dropdown"
         >
           {RECITERS.map(r => {
             const quality = reciterQuality(r.id);

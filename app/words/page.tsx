@@ -35,32 +35,27 @@ export default function WordsPage() {
   }, []);
 
   const filtered = useMemo(() => {
-    let list = [...words];
+    const q = search.toLowerCase();
 
-    // Search
-    if (search) {
-      const q = search.toLowerCase();
-      list = list.filter(w =>
-        w.arabic.includes(search) ||
-        w.transliteration.toLowerCase().includes(q) ||
-        w.root.includes(search) ||
-        w.meanings.some(m => m.toLowerCase().includes(q))
-      );
-    }
+    // Combined search + mastery filter in a single pass (no intermediate spread/filter)
+    const list = words.filter(w => {
+      if (search) {
+        const matched =
+          w.arabic.includes(search) ||
+          w.transliteration.toLowerCase().includes(q) ||
+          w.root.includes(search) ||
+          w.meanings.some(m => m.toLowerCase().includes(q));
+        if (!matched) return false;
+      }
+      if (filter !== 'all') {
+        const mastery = allProgress[w.id]?.mastery ?? 0;
+        if (filter === 'mastered')    return mastery >= 4;
+        if (filter === 'in-progress') return mastery >= 1 && mastery < 4;
+        if (filter === 'not-started') return mastery === 0;
+      }
+      return true;
+    });
 
-    // Filter
-    if (filter !== 'all') {
-      list = list.filter(w => {
-        const p = allProgress[w.id];
-        const mastery = p?.mastery ?? 0;
-        if (filter === 'mastered')     return mastery >= 4;
-        if (filter === 'in-progress')  return mastery >= 1 && mastery < 4;
-        if (filter === 'not-started')  return mastery === 0;
-        return true;
-      });
-    }
-
-    // Sort
     list.sort((a, b) => {
       if (sort === 'frequency')    return b.frequency - a.frequency;
       if (sort === 'alphabetical') return a.transliteration.localeCompare(b.transliteration);

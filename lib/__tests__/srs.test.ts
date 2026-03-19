@@ -5,6 +5,7 @@ import {
   MASTERY_LABELS,
   MASTERY_COLORS,
   buildSessionQueue,
+  getNewWords,
   reviewWord,
   reviewName,
 } from '../srs';
@@ -180,6 +181,47 @@ describe('reviewWord', () => {
   });
 });
 
+// ── getNewWords ───────────────────────────────────────────────
+describe('getNewWords', () => {
+  it('returns all words when none have been reviewed', () => {
+    const words = getNewWords(['x', 'y', 'z'], 10);
+    expect(words).toEqual(['x', 'y', 'z']);
+  });
+
+  it('excludes words that already have progress', () => {
+    reviewWord('reviewed-one', Rating.Good);
+    const words = getNewWords(['reviewed-one', 'fresh-one'], 10);
+    expect(words).not.toContain('reviewed-one');
+    expect(words).toContain('fresh-one');
+  });
+
+  it('respects the limit parameter', () => {
+    const words = getNewWords(['p', 'q', 'r', 's', 't'], 2);
+    expect(words).toHaveLength(2);
+  });
+
+  it('returns empty array when limit is 0', () => {
+    expect(getNewWords(['a', 'b'], 0)).toHaveLength(0);
+  });
+
+  it('returns empty array when all words are already reviewed', () => {
+    reviewWord('done-a', Rating.Good);
+    reviewWord('done-b', Rating.Good);
+    const words = getNewWords(['done-a', 'done-b'], 10);
+    expect(words).toHaveLength(0);
+  });
+
+  it('returns empty array for empty input', () => {
+    expect(getNewWords([], 10)).toHaveLength(0);
+  });
+
+  it('preserves order of unreviewed words', () => {
+    const words = getNewWords(['alpha', 'beta', 'gamma'], 10);
+    expect(words).toEqual(['alpha', 'beta', 'gamma']);
+  });
+});
+
+// ── buildSessionQueue ──────────────────────────────────────────
 describe('buildSessionQueue', () => {
   const allIds = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
 
@@ -205,6 +247,29 @@ describe('buildSessionQueue', () => {
     for (const id of due) {
       expect(queue).toContain(id);
     }
+  });
+
+  it('exact 2:1 interleaving: due, due, new, due, due, new', () => {
+    // With 4 due and 2 new, expect pattern: d1 d2 n1 d3 d4 n2
+    const due = ['d1', 'd2', 'd3', 'd4'];
+    const queue = buildSessionQueue(['n1', 'n2', ...due], due, 2);
+    expect(queue[0]).toBe('d1');
+    expect(queue[1]).toBe('d2');
+    expect(queue[2]).toBe('n1');
+    expect(queue[3]).toBe('d3');
+    expect(queue[4]).toBe('d4');
+    expect(queue[5]).toBe('n2');
+  });
+
+  it('handles only due words (no new)', () => {
+    const due = ['d1', 'd2'];
+    const queue = buildSessionQueue(due, due, 0);
+    expect(queue).toEqual(['d1', 'd2']);
+  });
+
+  it('handles only new words (no due)', () => {
+    const queue = buildSessionQueue(['n1', 'n2', 'n3'], [], 3);
+    expect(queue).toEqual(['n1', 'n2', 'n3']);
   });
 });
 

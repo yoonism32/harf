@@ -172,11 +172,14 @@ export default function SettingsPage() {
         </div>
 
         {importStatus && (
-          <div className={`text-sm px-4 py-2.5 rounded-xl border ${
-            importStatus.ok
-              ? 'bg-green/10 border-green/30 text-green'
-              : 'bg-red-500/10 border-red-500/30 text-red-400'
-          }`}>
+          <div
+            role="alert"
+            className={`text-sm px-4 py-2.5 rounded-xl border ${
+              importStatus.ok
+                ? 'bg-green/10 border-green/30 text-green'
+                : 'bg-red-500/10 border-red-500/30 text-red-400'
+            }`}
+          >
             {importStatus.message}
           </div>
         )}

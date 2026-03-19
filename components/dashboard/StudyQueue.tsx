@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getAllWordProgress, getStreak, getFutureReviews } from '@/lib/storage';
-import wordsData from '@/data/words.json';
 
 export function StudyQueue() {
   const [dueCount, setDueCount] = useState(0);
@@ -18,16 +17,19 @@ export function StudyQueue() {
     const today = new Date().toISOString().slice(0, 10);
 
     const due = Object.values(progress).filter(p => p.nextReview <= today).length;
-    const allIds = (wordsData as Array<{ id: string }>).map(w => w.id);
-    const newWords = allIds.filter(id => !progress[id]).length;
-
     setDueCount(due);
-    setNewCount(Math.min(newWords, 10));
     setStreak(getStreak());
     setForecast(getFutureReviews(7));
+
+    import('@/data/words.json').then(({ default: wordsData }) => {
+      const allIds = (wordsData as Array<{ id: string }>).map(w => w.id);
+      setNewCount(Math.min(allIds.filter(id => !progress[id]).length, 10));
+    });
   }, []);
 
   const total = dueCount + newCount;
+  // Pre-compute once — was recomputed on every bar in the .map() loop
+  const forecastMax = Math.max(1, ...Object.values(forecast));
 
   return (
     <div className="card p-6 flex flex-col gap-4 animate-fade-in">
@@ -37,11 +39,11 @@ export function StudyQueue() {
           <h2 className="text-harf-text font-semibold">Study Queue</h2>
         </div>
         {mounted && streak > 0 && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-950/30 border border-orange-500/20">
-            <svg className="w-3 h-3 text-orange-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gold/10 border border-gold/25">
+            <svg className="w-3 h-3 text-gold" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
             </svg>
-            <span className="text-xs font-semibold text-orange-400">{streak} day streak</span>
+            <span className="text-xs font-semibold text-gold-muted">{streak} day streak</span>
           </div>
         )}
       </div>
@@ -54,12 +56,12 @@ export function StudyQueue() {
             {dueCount > 0 && (
               <div className="flex justify-between items-center">
                 <span className="text-muted text-sm">Due for review</span>
-                <span className="text-orange-400 font-semibold">{dueCount}</span>
+                <span className="text-gold font-semibold">{dueCount}</span>
               </div>
             )}
             <div className="flex justify-between items-center">
               <span className="text-muted text-sm">New words</span>
-              <span className="text-blue-400 font-semibold">{newCount}</span>
+              <span className="text-harf-text font-semibold">{newCount}</span>
             </div>
             <div className="border-t border-border pt-2 flex justify-between items-center">
               <span className="text-harf-text text-sm font-medium">Total today</span>
@@ -80,8 +82,7 @@ export function StudyQueue() {
               {Object.entries(forecast).map(([date, count], i) => {
                 const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'narrow' });
                 const isToday = i === 0;
-                const maxCount = Math.max(1, ...Object.values(forecast));
-                const height = Math.min(100, Math.max(10, (count / maxCount) * 100));
+                const height = Math.min(100, Math.max(10, (count / forecastMax) * 100));
 
                 return (
                   <div key={date} className="flex-1 flex flex-col items-center gap-1.5 group relative">
@@ -93,7 +94,7 @@ export function StudyQueue() {
                       {dayName}
                     </span>
                     {count > 0 && (
-                      <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-bg border border-border px-1.5 py-0.5 rounded text-[9px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                      <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-bg border border-border px-1.5 py-0.5 rounded text-[9px] opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap z-50">
                         {count} cards
                       </div>
                     )}

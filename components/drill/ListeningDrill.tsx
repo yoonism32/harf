@@ -11,7 +11,6 @@ import { fetchAyah, type AyahResponse } from '@/lib/quran-api';
 import { getAllWordProgress } from '@/lib/storage';
 import { reciterQuality } from '@/components/ReciterSelect';
 import surahMetaRaw  from '@/data/quran-surah-meta.json';
-import surahInfoRaw  from '@/data/surah-info.json';
 import wordsRaw      from '@/data/words.json';
 import juzDataRaw    from '@/data/quran-metadata-juz.json';
 
@@ -24,26 +23,68 @@ interface SurahInfo {
   overview?: string[];
 }
 
-interface InfoHint { type: string; text: string; }
+interface InfoHint  { type: string; text: string; }
+interface Override  { blank?: string; blanks?: string[]; remove?: true; }
 
-function buildHintPool(info: SurahInfo): InfoHint[] {
+/**
+ * Enumerate all hint clues for a surah in fixed field order, skipping empty
+ * fields. Clue numbers (1-indexed) match what review-drill-hints.mjs shows.
+ *   1 = themes, 2 = context, 3 = names, 4 = virtue, 5+ = overview items
+ * (exact numbers vary per surah because empty fields are skipped)
+ */
+function enumerateClues(info: SurahInfo): Array<{ field: string; text: string }> {
+  const clues: Array<{ field: string; text: string }> = [];
+  if (info.themes)  clues.push({ field: 'Themes',   text: info.themes });
+  if (info.context) clues.push({ field: 'Context',  text: info.context });
+  if (info.names)   clues.push({ field: 'Names',    text: info.names });
+  if (info.virtue)  clues.push({ field: 'Virtue',   text: info.virtue });
+  for (const item of info.overview ?? []) clues.push({ field: 'Overview', text: item });
+  return clues;
+}
+
+function buildHintPool(
+  info: SurahInfo,
+  surahName: string,
+  overrides: Record<string, Record<string, Override>>,
+): InfoHint[] {
   const place = info.revelationPlace === 'makkah' ? 'Makkah'
     : info.revelationPlace === 'madinah' ? 'Madinah'
     : info.revelationPlace;
+
+  // Fallback name-leak filter for clues with no override entry yet
+  const nameTokens = [surahName.toLowerCase()];
+  const withoutAl  = surahName.toLowerCase().replace(/^al-/, '');
+  if (withoutAl !== surahName.toLowerCase()) nameTokens.push(withoutAl);
+  const leaksName = (text: string) =>
+    nameTokens.some(t => t.length > 2 && text.toLowerCase().includes(t));
+
   const pool: InfoHint[] = [];
-  if (place)        pool.push({ type: 'Revelation', text: `Revealed in ${place}` });
-  if (info.themes)  pool.push({ type: 'Themes',     text: info.themes });
-  if (info.context) pool.push({ type: 'Context',    text: info.context });
-  if (info.names)   pool.push({ type: 'Names',      text: info.names });
-  if (info.virtue)  pool.push({ type: 'Virtue',     text: info.virtue });
-  for (const item of info.overview ?? []) pool.push({ type: 'Overview', text: item });
+  if (place) pool.push({ type: 'Revelation', text: `Revealed in ${place}` });
+
+  const surahOverrides = overrides[String(info.id)] ?? {};
+  const clues = enumerateClues(info);
+
+  for (let i = 0; i < clues.length; i++) {
+    const clue    = clues[i]!;
+    const clueKey = String(i + 1);
+    const override = surahOverrides[clueKey];
+    let text = clue.text;
+
+    if (override?.remove) continue;
+    if (override?.blank)  text = text.replace(override.blank,  '[___]');
+    if (override?.blanks) for (const b of override.blanks) text = text.replace(b, '[___]');
+
+    // Safety fallback: still drop clues that leak the surah name and have no override
+    if (!override && leaksName(text)) continue;
+
+    pool.push({ type: clue.field, text });
+  }
   return pool;
 }
 interface WordEntry  { id: string; example_verse: string; }
 interface JuzEntry   { first_verse_key: string; last_verse_key: string; }
 
 const surahMeta = surahMetaRaw as SurahMeta[];
-const surahInfo = surahInfoRaw as Record<string, SurahInfo>;
 const wordsData = wordsRaw as WordEntry[];
 const juzData   = juzDataRaw as Record<string, JuzEntry>;
 
@@ -153,6 +194,7 @@ function HintPanel({
   onRevealEnglish,
   disabled,
   selectedHint,
+  surahInfo,
 }: {
   target: { surah: number; ayah: number };
   ayahData: AyahResponse | null;
@@ -162,6 +204,7 @@ function HintPanel({
   onRevealEnglish: () => void;
   disabled: boolean;
   selectedHint: InfoHint | null;
+  surahInfo: Record<string, SurahInfo>;
 }) {
   const info = surahInfo[String(target.surah)];
   const juzList  = info?.juz ?? [];
@@ -212,7 +255,26 @@ function HintPanel({
       {hintsRevealed >= 3 && selectedHint && (
         <div className="bg-surface-plus border border-gold/20 rounded-xl p-4 flex flex-col gap-2 text-xs animate-fade-in">
           <span className="text-[10px] font-mono uppercase tracking-wider text-gold/60">{selectedHint.type}</span>
-          <p className="text-muted leading-relaxed">{selectedHint.text}</p>
+          <p className="text-muted leading-relaxed">
+            {selectedHint.text.split('[___]').map((part, i, arr) => (
+              <span key={i}>
+                {part}
+                {i < arr.length - 1 && (
+                  <span
+                    className="inline-block align-middle mx-1 rounded-[3px]"
+                    style={{
+                      width: '4.5rem',
+                      height: '0.8em',
+                      background: 'linear-gradient(to bottom, var(--surface-plus), var(--bg))',
+                      border: '1px solid color-mix(in srgb, var(--gold) 22%, transparent)',
+                      boxShadow: 'inset 0 1px 0 color-mix(in srgb, var(--gold) 12%, transparent)',
+                    }}
+                    aria-label="[redacted]"
+                  />
+                )}
+              </span>
+            ))}
+          </p>
         </div>
       )}
 
@@ -380,10 +442,14 @@ export function ListeningDrill() {
   const audioRef     = useRef<HTMLAudioElement | null>(null);
   const inputRef     = useRef<HTMLInputElement>(null);
   const ayahInputRef = useRef<HTMLInputElement>(null);
+  const surahInfoRef  = useRef<Record<string, SurahInfo>>({});
+  const overridesRef  = useRef<Record<string, Record<string, Override>>>({});
 
   useEffect(() => {
     const stored = localStorage.getItem(RECITER_STORAGE_KEY);
     if (stored && RECITERS.some(r => r.id === stored)) setReciterId(stored);
+    import('@/data/surah-info.json').then(m => { surahInfoRef.current = m.default as Record<string, SurahInfo>; });
+    import('@/data/hint-overrides.json').then(m => { overridesRef.current = m.default as Record<string, Record<string, Override>>; });
   }, []);
 
   const parsedAyatRange = useMemo(() => parseAyatRange(ayatRange), [ayatRange]);
@@ -475,9 +541,9 @@ export function ListeningDrill() {
     if (n > hintsRevealed + 1) return;          // must be sequential
     setHintsRevealed(n);
     if (n === 3) {
-      const info = target ? surahInfo[String(target.surah)] : undefined;
+      const info = target ? surahInfoRef.current[String(target.surah)] : undefined;
       if (info) {
-        const hintPool = buildHintPool(info);
+        const hintPool = buildHintPool(info, surahMeta.find(s => s.id === target?.surah)?.name ?? '', overridesRef.current);
         setSelectedHint(hintPool.length > 0 ? pickRandom(hintPool) : null);
       }
       setHintPenalty(p => p + 1);               // info clue costs 1 pt
@@ -787,6 +853,7 @@ export function ListeningDrill() {
                           onRevealEnglish={handleRevealEnglish}
                           disabled={!isAnswering}
                           selectedHint={selectedHint}
+                          surahInfo={surahInfoRef.current}
                         />
                       </div>
                     )}

@@ -168,7 +168,7 @@ export default function LandingPage() {
   const lastIdx = SEGMENTS.length - 1;
 
   return (
-    <div className="relative min-h-[100dvh] w-full overflow-hidden bg-black flex items-center">
+    <main className="relative min-h-[100dvh] w-full overflow-hidden bg-black flex items-center">
       {/* ── Islamic geometric background ─────────────────────────────── */}
       <svg
         aria-hidden="true"
@@ -197,14 +197,14 @@ export default function LandingPage() {
         <div className="flex flex-col gap-10">
           {/* Wordmark */}
           <div className="flex flex-col gap-2">
-            <div
+            <h1
               lang="ar"
               dir="rtl"
               aria-label="حرف (harf)"
               className="harf-wordmark"
             >
               حرف
-            </div>
+            </h1>
             <div className="font-rubik text-muted text-sm tracking-[0.3em] uppercase">
               Harf — Quranic Arabic Mastery
             </div>
@@ -333,6 +333,6 @@ export default function LandingPage() {
           Harf — a Quranic Arabic learning app. حرف (harf): a word whose meaning does not completely manifest except in the presence of other words.
         </p>
       </div>
-    </div>
+    </main>
   );
 }

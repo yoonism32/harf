@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { fetchPrayerTimesByCity, getNextPrayer, type PrayerTimes } from '@/lib/aladhan-api';
+import { getLocation } from '@/lib/storage';
 
 /** Subtle dot color per prayer — replaces emoji with clean semantic color coding */
 const PRAYER_COLOR: Record<string, string> = {
@@ -22,13 +23,9 @@ export function PrayerTimesWidget() {
   const [reloads, setReloads] = useState(0);
 
   useEffect(() => {
-    const saved = localStorage.getItem('harf-location');
+    const saved = getLocation();
     if (saved) {
-      try {
-        setLocation(JSON.parse(saved));
-      } catch {
-        setLoading(false);
-      }
+      setLocation(saved);
     } else {
       setLoading(false);
     }

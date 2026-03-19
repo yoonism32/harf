@@ -3,12 +3,6 @@
 import { useEffect, useState } from 'react';
 import { calculateCoverage, getRank, rankProgress, formatPct, type WordWithWeight } from '@/lib/coverage';
 import { getAllWordProgress } from '@/lib/storage';
-import wordsData from '@/data/words.json';
-
-const wordsForCoverage: WordWithWeight[] = (wordsData as Array<{ id: string; coverage_weight: number }>).map(w => ({
-  id: w.id,
-  coverage_weight: w.coverage_weight,
-}));
 
 export function CoverageHero() {
   const [coverage, setCoverage] = useState(0);
@@ -19,17 +13,23 @@ export function CoverageHero() {
   useEffect(() => {
     setMounted(true);
     const progress = getAllWordProgress();
-    const result = calculateCoverage(wordsForCoverage, progress);
-    setCoverage(result.percentage);
-    setMasteredCount(result.masteredCount);
-    setTotalWords(result.totalWords);
+    import('@/data/words.json').then(({ default: wordsData }) => {
+      const wordsForCoverage: WordWithWeight[] = (wordsData as Array<{ id: string; coverage_weight: number }>).map(w => ({
+        id: w.id,
+        coverage_weight: w.coverage_weight,
+      }));
+      const result = calculateCoverage(wordsForCoverage, progress);
+      setCoverage(result.percentage);
+      setMasteredCount(result.masteredCount);
+      setTotalWords(result.totalWords);
+    });
   }, []);
 
   const rank = getRank(coverage);
   const progress = rankProgress(coverage);
 
   if (!mounted) {
-    return <div className="card p-8 h-48 animate-pulse" />;
+    return <div className="card p-8 min-h-[260px] animate-pulse" />;
   }
 
   return (
@@ -43,7 +43,7 @@ export function CoverageHero() {
         {/* Left: big percentage */}
         <div className="flex flex-col gap-1">
           <div className="text-muted text-sm uppercase tracking-widest">Quran comprehension</div>
-          <div className="text-gold text-7xl font-bold leading-none">
+          <div className="text-gold text-5xl sm:text-7xl font-bold leading-none tabular-nums">
             {formatPct(coverage)}
           </div>
           <div className="text-harf-text text-lg">
@@ -65,7 +65,6 @@ export function CoverageHero() {
               <div
                 className="font-amiri text-3xl text-gold"
                 lang="ar"
-                style={{ fontFamily: 'Amiri, serif' }}
               >
                 {rank.arabic}
               </div>

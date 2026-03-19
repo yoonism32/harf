@@ -76,19 +76,19 @@ export default function DashboardPage() {
         <CoverageHero />
       </ErrorBoundary>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <ErrorBoundary><StudyQueue /></ErrorBoundary>
         <ErrorBoundary><PrayerTimesWidget /></ErrorBoundary>
         <ErrorBoundary><DailyAyah /></ErrorBoundary>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {QUICK_LINKS.map((link, i) => (
           <Link
             key={link.href}
             href={link.href}
-            className="card card-interactive p-4 flex flex-col gap-3 group"
-            style={{ animationDelay: `${i * 60}ms` }}
+            className="card card-interactive p-4 flex flex-col gap-3 group animate-rise"
+            style={{ animationDelay: `${i * 55}ms` }}
           >
             <span className="text-muted group-hover:text-gold transition-colors duration-200">
               {link.icon}

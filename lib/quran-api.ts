@@ -16,8 +16,11 @@ export interface AyahResponse {
 // Surah names (static — avoids extra fetch)
 import { SURAHS } from './coverage';
 
+// O(1) lookup instead of O(114) linear scan on every fetchAyah() call
+const SURAH_NAME_MAP = new Map(SURAHS.map(s => [s.number, s.name]));
+
 function surahName(n: number): string {
-  return SURAHS.find(s => s.number === n)?.name ?? `Surah ${n}`;
+  return SURAH_NAME_MAP.get(n) ?? `Surah ${n}`;
 }
 
 const ayahCache = new Map<string, AyahResponse>();
@@ -70,7 +73,7 @@ export async function fetchWordVerses(refs: string[]): Promise<AyahResponse[]> {
 /** Deterministic daily ayah — cycles through all 6236 ayahs by day of year */
 export function getDailyAyahRef(): string {
   const now   = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
+  const start = new Date(now.getFullYear(), 0, 1);
   const day   = Math.floor((now.getTime() - start.getTime()) / 86400000);
   const idx   = (day % 6236) + 1;
 

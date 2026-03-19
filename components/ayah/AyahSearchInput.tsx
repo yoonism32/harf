@@ -192,7 +192,7 @@ export function AyahSearchInput() {
       {open && results.length > 0 && (
         <div
           role="listbox"
-          className="absolute top-full right-0 mt-1.5 min-w-[260px] bg-surface border border-border rounded-xl shadow-2xl overflow-hidden z-50"
+          className="absolute top-full right-0 mt-1.5 min-w-[260px] bg-surface border border-border rounded-xl shadow-2xl overflow-hidden z-dropdown"
         >
           {results.map((r, i) => (
             <button

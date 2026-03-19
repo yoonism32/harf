@@ -1,6 +1,6 @@
 'use client';
 
-import morphologyData from '@/data/morphology.json';
+import { useEffect, useState } from 'react';
 
 interface MorphToken {
   w: number;         // word index
@@ -32,10 +32,27 @@ const TYPE_COLORS: Record<string, string> = {
   SUFFIX: 'text-purple-400 bg-purple-400/10',
 };
 
-const data = morphologyData as Record<string, MorphToken[]>;
-
 export function MorphologyTable({ verseRef }: MorphologyTableProps) {
-  const tokens = data[verseRef];
+  const [tokens, setTokens] = useState<MorphToken[] | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    import('@/data/morphology.json').then(mod => {
+      const data = mod.default as Record<string, MorphToken[]>;
+      setTokens(data[verseRef] ?? null);
+      setLoaded(true);
+    });
+  }, [verseRef]);
+
+  if (!loaded) {
+    return (
+      <div className="flex flex-col gap-2 animate-pulse">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="h-16 rounded-xl bg-surface-plus border border-border/40" />
+        ))}
+      </div>
+    );
+  }
 
   if (!tokens || tokens.length === 0) {
     return (

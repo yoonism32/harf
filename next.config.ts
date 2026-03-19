@@ -30,7 +30,7 @@ const securityHeaders = [
       "img-src 'self' data: blob:",
       "connect-src 'self' https://cdn.jsdelivr.net https://api.aladhan.com",
       "media-src 'self' https://audios.quranwbw.com https://everyayah.com",
-      "worker-src blob:",
+      "worker-src 'self' blob:",
       "frame-ancestors 'none'",
       "upgrade-insecure-requests",
     ].join('; '),
@@ -38,6 +38,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   async headers() {
     return [
       {

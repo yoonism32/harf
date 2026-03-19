@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#0b0f1a" rx="96"/>
+  <!-- Gold ring -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#c9a84c" stroke-width="6" opacity="0.4"/>
+  <!-- ح (Ha) — first letter of حرف -->
+  <text
+    x="256"
+    y="330"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="260"
+    fill="#c9a84c"
+    text-anchor="middle"
+    dominant-baseline="auto"
+    direction="rtl"
+  >ح</text>
+</svg>

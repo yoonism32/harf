@@ -4,6 +4,9 @@ import { setWordProgress, setNameProgress, getWordProgress, getNameProgress, get
 
 export type { Rating };
 
+/** 0–5 mastery level as a nominal union — prevents accidental widening to number */
+export type Mastery = 0 | 1 | 2 | 3 | 4 | 5;
+
 /** Map our 4-button UI to FSRS Rating values */
 export const RESPONSE_TO_GRADE = {
   blackout: Rating.Again,  // 1 — complete blackout
@@ -14,13 +17,20 @@ export const RESPONSE_TO_GRADE = {
 
 export type ResponseKey = keyof typeof RESPONSE_TO_GRADE;
 
+type StudyButton = {
+  readonly key: ResponseKey;
+  readonly label: string;
+  readonly color: string;
+  readonly bg: string;
+};
+
 /** Our 4-button labels mapped to grade keys */
 export const STUDY_BUTTONS = [
-  { key: 'blackout' as ResponseKey, label: "Don't Know",  color: 'text-red-400',    bg: 'bg-red-950/60'    },
-  { key: 'hard'     as ResponseKey, label: 'Vague',       color: 'text-orange-400', bg: 'bg-orange-950/60' },
-  { key: 'good'     as ResponseKey, label: 'Got It',      color: 'text-blue-400',   bg: 'bg-blue-950/60'   },
-  { key: 'perfect'  as ResponseKey, label: 'Perfect',     color: 'text-gold',       bg: 'bg-yellow-950/60' },
-] as const;
+  { key: 'blackout', label: "Don't Know",  color: 'text-red-400',    bg: 'bg-red-950/60'    },
+  { key: 'hard',     label: 'Vague',       color: 'text-orange-400', bg: 'bg-orange-950/60' },
+  { key: 'good',     label: 'Got It',      color: 'text-blue-400',   bg: 'bg-blue-950/60'   },
+  { key: 'perfect',  label: 'Perfect',     color: 'text-gold',       bg: 'bg-yellow-950/60' },
+] as const satisfies readonly StudyButton[];
 
 export const MASTERY_LABELS = [
   'Unknown',    // 0
@@ -62,16 +72,16 @@ const f = fsrs(generatorParameters({ enable_fuzz: false }));
 function deriveMastery(
   newState: number,
   stability: number,
-  prevMastery: number,
+  prevMastery: Mastery,
   isFirstReview: boolean,
-): number {
+): Mastery {
   if (newState === State.Learning) {
     // Active learning phase: first review always floors at 1
-    return isFirstReview ? 1 : Math.max(1, prevMastery);
+    return isFirstReview ? 1 : Math.max(1, prevMastery) as Mastery;
   }
   if (newState === State.Relearning) {
     // Forgot a graduated card: drop mastery by 1, floor at 1 (they did know it)
-    return Math.max(1, prevMastery - 1);
+    return Math.max(1, prevMastery - 1) as Mastery;
   }
   if (newState === State.Review) {
     // Graduated: mastery is determined purely by stability
@@ -119,7 +129,7 @@ export function reviewWord(wordId: string, rating: Rating): WordProgress {
   const now = new Date();
 
   const card = existing ? buildCard(existing) : createEmptyCard();
-  const prevMastery = existing?.mastery ?? 0;
+  const prevMastery: Mastery = (existing?.mastery ?? 0) as Mastery;
   const isFirstReview = !existing;
 
   const scheduling = f.repeat(card, now);
@@ -151,7 +161,7 @@ export function reviewName(nameId: number, rating: Rating): NameProgress {
   const now = new Date();
 
   const card = existing ? buildCard(existing) : createEmptyCard();
-  const prevMastery = existing?.mastery ?? 0;
+  const prevMastery: Mastery = (existing?.mastery ?? 0) as Mastery;
   const isFirstReview = !existing;
 
   const scheduling = f.repeat(card, now);

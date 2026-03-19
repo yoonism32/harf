@@ -88,7 +88,7 @@ export function AudioButton({ text, wordKey, verseKey, lang = 'ar-SA', className
       disabled={playing}
       aria-label={playing ? 'Playing pronunciation' : 'Listen to pronunciation'}
       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors
-        focus-visible:ring-2 focus-visible:ring-gold focus-visible:outline-none
+        focus-ring
         ${playing
           ? 'bg-gold/20 text-gold cursor-default'
           : 'bg-surface-plus hover:bg-border text-muted hover:text-harf-text'
@@ -97,10 +97,10 @@ export function AudioButton({ text, wordKey, verseKey, lang = 'ar-SA', className
       {playing ? (
         <>
           <span aria-hidden="true" className="flex gap-0.5 items-end h-4">
-            <span className="w-0.5 bg-gold rounded animate-bounce motion-reduce:animate-none" style={{ height: '60%', animationDelay: '0ms' }} />
-            <span className="w-0.5 bg-gold rounded animate-bounce motion-reduce:animate-none" style={{ height: '100%', animationDelay: '150ms' }} />
-            <span className="w-0.5 bg-gold rounded animate-bounce motion-reduce:animate-none" style={{ height: '70%', animationDelay: '300ms' }} />
-            <span className="w-0.5 bg-gold rounded animate-bounce motion-reduce:animate-none" style={{ height: '90%', animationDelay: '100ms' }} />
+            <span className="w-0.5 bg-gold rounded h-[60%] animate-bounce motion-reduce:animate-none" />
+            <span className="w-0.5 bg-gold rounded h-full animate-bounce motion-reduce:animate-none [animation-delay:150ms]" />
+            <span className="w-0.5 bg-gold rounded h-[70%] animate-bounce motion-reduce:animate-none [animation-delay:300ms]" />
+            <span className="w-0.5 bg-gold rounded h-[90%] animate-bounce motion-reduce:animate-none [animation-delay:100ms]" />
           </span>
           Playing…
         </>

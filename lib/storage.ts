@@ -80,6 +80,31 @@ export interface DailyAyahCache {
   surahName: string;
 }
 
+// ── SM-2 migration ─────────────────────────────────────────────
+
+/** Shape of old SM-2 progress records (written before FSRS migration) */
+interface SM2Record {
+  mastery: number;
+  interval: number;
+  repetition: number;
+  nextReview: string;
+  lastReviewed?: string;
+}
+
+/** Convert SM-2 fields to their FSRS-compatible equivalents */
+function migrateFromSM2(sm2: SM2Record) {
+  return {
+    mastery: sm2.mastery ?? 0,
+    stability: Math.max(1, sm2.interval ?? 1),
+    difficulty: 5.0,
+    state: (sm2.repetition >= 2 ? 2 : sm2.repetition > 0 ? 1 : 0) as 0 | 1 | 2 | 3,
+    lapses: 0,
+    reps: sm2.repetition ?? 0,
+    nextReview: sm2.nextReview,
+    lastReviewed: sm2.lastReviewed,
+  };
+}
+
 // ── Word Progress ──────────────────────────────────────────────
 
 export function getAllWordProgress(): Record<string, WordProgress> {
@@ -91,18 +116,8 @@ export function getAllWordProgress(): Record<string, WordProgress> {
     let migrated = false;
     for (const [id, p] of Object.entries(all)) {
       if (!('stability' in p)) {
-        const sm2 = p as unknown as { id: string; mastery: number; interval: number; repetition: number; efactor: number; nextReview: string; lastReviewed?: string };
-        all[id] = {
-          id: sm2.id as WordId,
-          mastery: sm2.mastery ?? 0,
-          stability: Math.max(1, sm2.interval ?? 1),
-          difficulty: 5.0,
-          state: sm2.repetition >= 2 ? 2 : sm2.repetition > 0 ? 1 : 0,
-          lapses: 0,
-          reps: sm2.repetition ?? 0,
-          nextReview: sm2.nextReview,
-          lastReviewed: sm2.lastReviewed,
-        };
+        const sm2 = p as unknown as { id: string } & SM2Record;
+        all[id] = { id: sm2.id as WordId, ...migrateFromSM2(sm2) };
         migrated = true;
       }
     }
@@ -137,18 +152,8 @@ export function getAllNameProgress(): Record<number, NameProgress> {
     let migrated = false;
     for (const [id, p] of Object.entries(all)) {
       if (!('stability' in p)) {
-        const sm2 = p as unknown as { id: number; mastery: number; interval: number; repetition: number; efactor: number; nextReview: string; lastReviewed?: string };
-        all[Number(id)] = {
-          id: sm2.id,
-          mastery: sm2.mastery ?? 0,
-          stability: Math.max(1, sm2.interval ?? 1),
-          difficulty: 5.0,
-          state: sm2.repetition >= 2 ? 2 : sm2.repetition > 0 ? 1 : 0,
-          lapses: 0,
-          reps: sm2.repetition ?? 0,
-          nextReview: sm2.nextReview,
-          lastReviewed: sm2.lastReviewed,
-        };
+        const sm2 = p as unknown as { id: number } & SM2Record;
+        all[Number(id)] = { id: sm2.id, ...migrateFromSM2(sm2) };
         migrated = true;
       }
     }
@@ -306,11 +311,18 @@ export function getFutureReviews(days: number): Record<string, number> {
   const projection: Record<string, number> = {};
   const today = new Date();
 
+  // Initialize all day buckets to 0
   for (let i = 0; i < days; i++) {
     const date = new Date(today);
     date.setDate(date.getDate() + i);
-    const dateStr = date.toISOString().slice(0, 10);
-    projection[dateStr] = Object.values(all).filter(p => p.nextReview === dateStr).length;
+    projection[date.toISOString().slice(0, 10)] = 0;
+  }
+
+  // Single pass O(n) — was O(days × n) with nested filter per day
+  for (const p of Object.values(all)) {
+    if (p.nextReview in projection) {
+      projection[p.nextReview] = (projection[p.nextReview] ?? 0) + 1;
+    }
   }
 
   return projection;
@@ -351,6 +363,12 @@ export function getLeechIds(): string[] {
   return Object.values(all)
     .filter(p => p.lapses >= 8 && !p.suspended)
     .map(p => p.id);
+}
+
+/** Get saved location from localStorage */
+export function getLocation(): { city: string; country: string } | null {
+  if (typeof window === 'undefined') return null;
+  try { return JSON.parse(localStorage.getItem('harf-location') ?? 'null'); } catch { return null; }
 }
 
 // ── Export / Import ────────────────────────────────────────────

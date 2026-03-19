@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Amiri, Amiri_Quran, Rubik } from 'next/font/google';
 import './globals.css';
 import { LayoutShell } from '@/components/LayoutShell';
+import { PWARegister } from '@/components/PWARegister';
 
 // next/font preconnects to Google Fonts and generates font-face with display:swap automatically
 const amiri = Amiri({
@@ -36,6 +37,7 @@ export const viewport: Viewport = {
   userScalable: true,
   themeColor: '#0b0f1a',
   colorScheme: 'dark',
+  viewportFit: 'cover',
 };
 
 export const metadata: Metadata = {
@@ -55,6 +57,10 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Harf — Quranic Arabic Mastery',
     description: 'Master Quranic Arabic root words. Track what percentage of the Quran you understand.',
+  },
+  icons: {
+    icon: '/icons/icon.svg',
+    apple: '/icons/icon-192.png',
   },
 };
 
@@ -79,6 +85,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
       </head>
       <body className="antialiased min-h-screen">
+        <PWARegister />
         <LayoutShell>{children}</LayoutShell>
         {/* Aria-live announcer for dynamic page updates */}
         <div
