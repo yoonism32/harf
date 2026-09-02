@@ -159,3 +159,13 @@ Unit tests live in `lib/__tests__/`. E2E tests in `e2e/`. CI (`github/workflows/
 3. **IndexedDB / OPFS** — if `words.json` grows beyond ~500 roots and storage limits bite
 
 See `docs/ROADMAP.md` for the full feature-by-feature build status.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

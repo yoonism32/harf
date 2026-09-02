@@ -6,12 +6,12 @@
   <!-- ح (Ha) — first letter of حرف -->
   <text
     x="256"
-    y="330"
+    y="256"
     font-family="Georgia, 'Times New Roman', serif"
     font-size="260"
     fill="#c9a84c"
     text-anchor="middle"
-    dominant-baseline="auto"
+    dominant-baseline="central"
     direction="rtl"
   >ح</text>
 </svg>

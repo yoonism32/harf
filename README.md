@@ -93,7 +93,7 @@ npm run dev        # http://localhost:3000
 ## Routes
 
 | URL | Page |
-|-----|------|
+| ----- | ------ |
 | `/` | Cinematic landing (typewriter) |
 | `/app` | Dashboard |
 | `/study` | SRS flashcard session |
@@ -184,7 +184,7 @@ GitHub Actions — two sequential jobs:
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+| ------- | ----------- |
 | Framework | Next.js 16 (App Router) |
 | UI library | React 19 |
 | Language | TypeScript 5 |
