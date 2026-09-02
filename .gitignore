@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local scratch / research notes / personal data exports — not app code
+harf-backup-*.json
+/1-5.txt
+/inital-qsemantic.txt
