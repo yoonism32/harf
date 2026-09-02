@@ -1,20 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+
+const SEEN_KEY = 'harf:landing-seen';
 
 // ── Typewriter sequence ──────────────────────────────────────────────────────
 const SEGMENTS = [
   {
     id: 'h-ar',
-    typeText: 'أجْزَاءُ الْجُمْلَةِ',
+    typeText: 'أَقْسَامُ الْكَلِمَةِ',
     kind: 'header-ar' as const,
     speed: 55,
     pauseAfter: 350,
   },
   {
     id: 'h-en',
-    typeText: 'The parts of the sentence',
+    typeText: 'The types of words',
     kind: 'header-en' as const,
     speed: 36,
     pauseAfter: 900,
@@ -30,7 +32,8 @@ const SEGMENTS = [
     id: 'ism',
     label: 'اسْم',
     phonetic: 'ism',
-    typeText: '— a word used to name a person, animal, plant, non-living thing or anything else',
+    typeText: '— a word that conveys a meaning in itself without being tied to a particular time',
+    examples: ['كِتَابٌ', 'رَجُلٌ', 'جَمِيلٌ'],
     kind: 'entry' as const,
     speed: 20,
     pauseAfter: 650,
@@ -39,7 +42,8 @@ const SEGMENTS = [
     id: 'fil',
     label: 'فِعْل',
     phonetic: "fi'l",
-    typeText: '— a word that denotes the occurrence of an action in a specific time',
+    typeText: '— a word that conveys a meaning in itself and is associated with a time',
+    examples: ['كَتَبَ', 'يَكْتُبُ', 'اُكْتُبْ'],
     kind: 'entry' as const,
     speed: 20,
     pauseAfter: 650,
@@ -48,7 +52,8 @@ const SEGMENTS = [
     id: 'harf',
     label: 'حَرْف',
     phonetic: 'harf',
-    typeText: '— a word whose meaning does not completely manifest except in the presence of other words.',
+    typeText: '— a word whose meaning is understood through its relationship with other words.',
+    examples: ['فِي', 'مِنْ', 'إِلَى'],
     kind: 'entry-brand' as const,
     speed: 18,
     pauseAfter: 0,
@@ -121,6 +126,8 @@ function Cursor() {
 
 export default function LandingPage() {
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [skipForReturning, setSkipForReturning] = useState(false);
+  const [manualSkip, setManualSkip] = useState(false);
   const [showCTA, setShowCTA] = useState(false);
 
   useEffect(() => {
@@ -136,18 +143,51 @@ export default function LandingPage() {
     };
   }, []);
 
+  // Full cinematic reveal on first visit this session; instant on return.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      if (sessionStorage.getItem(SEEN_KEY) === '1') {
+        setSkipForReturning(true);
+      }
+    } catch {
+      // sessionStorage unavailable (private mode etc.) — fall back to full animation
+    }
+  }, []);
+
+  const skipAnimation = reduceMotion || skipForReturning || manualSkip;
+
   const { step, chars, done } = useTypewriter(SEGMENTS, {
     startDelay: 700,
-    disabled: reduceMotion,
+    disabled: skipAnimation,
   });
+
+  // Once seen, remember it — no replaying the cinematic intro this session.
+  useEffect(() => {
+    if (!done || typeof window === 'undefined') return;
+    try {
+      sessionStorage.setItem(SEEN_KEY, '1');
+    } catch {
+      // ignore
+    }
+  }, [done]);
 
   useEffect(() => {
     if (!done) {
       setShowCTA(false);
       return;
     }
+    // Skip the artificial pacing delay when the animation itself was skipped.
+    if (skipAnimation) {
+      setShowCTA(true);
+      return;
+    }
     const t = setTimeout(() => setShowCTA(true), 500);
     return () => clearTimeout(t);
+  }, [done, skipAnimation]);
+
+  const handleSkipClick = useCallback(() => {
+    if (!done) setManualSkip(true);
   }, [done]);
 
   const isVisible = (idx: number) => step >= idx;
@@ -165,33 +205,13 @@ export default function LandingPage() {
   };
   const hasCursor = (idx: number) => step === idx && !isDone(idx);
 
-  const lastIdx = SEGMENTS.length - 1;
-
   return (
-    <main className="relative min-h-[100dvh] w-full overflow-hidden bg-black flex items-center">
-      {/* ── Islamic geometric background ─────────────────────────────── */}
-      <svg
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full opacity-[0.06] pointer-events-none animate-breathe-bg origin-center"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          <pattern
-            id="geo"
-            x="0"
-            y="0"
-            width="60"
-            height="60"
-            patternUnits="userSpaceOnUse"
-          >
-            <g fill="none" stroke="white" strokeWidth="0.75">
-              <rect x="10" y="10" width="40" height="40" />
-              <rect x="10" y="10" width="40" height="40" transform="rotate(45 30 30)" />
-            </g>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#geo)" />
-      </svg>
+    <main
+      onClick={handleSkipClick}
+      className={`relative min-h-[100dvh] w-full overflow-hidden bg-black flex items-center ${!done ? 'cursor-pointer' : ''}`}
+    >
+      {/* ── Ambient glow — off-center brand + accent light, no tiling ──── */}
+      <div aria-hidden="true" className="landing-atmosphere" />
 
       <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-16">
         <div className="flex flex-col gap-10">
@@ -250,6 +270,7 @@ export default function LandingPage() {
                   label: string;
                   phonetic: string;
                   typeText: string;
+                  examples: readonly string[];
                   kind: 'entry' | 'entry-brand';
                   speed: number;
                   pauseAfter: number;
@@ -295,6 +316,22 @@ export default function LandingPage() {
                       {hasCursor(idx) && <Cursor />}
                     </div>
 
+                    {/* Example words */}
+                    {isDone(idx) && (
+                      <div
+                        lang="ar"
+                        dir="rtl"
+                        className="mt-2 pl-3 inline-flex items-center gap-3 font-amiri text-sm text-muted/80"
+                      >
+                        {entrySeg.examples.map((word, wi) => (
+                          <span key={word} className="flex items-center gap-3">
+                            {wi > 0 && <span aria-hidden="true" className="text-muted/40">·</span>}
+                            {word}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     {/* Motto line under last entry */}
                     {isBrand && isDone(idx) && (
                       <p className="mt-3 text-muted text-sm leading-relaxed">
@@ -328,10 +365,25 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Screen-reader summary */}
-        <p className="sr-only">
-          Harf — a Quranic Arabic learning app. حرف (harf): a word whose meaning does not completely manifest except in the presence of other words.
-        </p>
+        {/* Screen-reader summary — static, complete regardless of animation state */}
+        <div className="sr-only">
+          <h2>أَقْسَامُ الْكَلِمَةِ — The types of words</h2>
+          <p>There are three kinds of words in Arabic:</p>
+          <p>
+            Ism (اسْم): a word that conveys a meaning in itself without being tied to a
+            particular time. Examples: kitābun (book), rajulun (man), jamīlun (beautiful).
+          </p>
+          <p>
+            Fi&apos;l (فِعْل): a word that conveys a meaning in itself and is associated
+            with a time. Examples: kataba (he wrote), yaktubu (he writes), uktub (write!).
+          </p>
+          <p>
+            Harf (حَرْف): a word whose meaning is understood through its relationship with
+            other words — the idea behind this app&apos;s name. Examples: fī (in), min
+            (from), ilā (to).
+          </p>
+          <p>Harf is a Quranic Arabic vocabulary-mastery app. Select Begin to continue to the app.</p>
+        </div>
       </div>
     </main>
   );

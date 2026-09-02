@@ -1,0 +1,20 @@
+[
+  {
+    "date": "2026-09-02",
+    "scope": "app",
+    "macrostructure": "Workbench (audit only)",
+    "theme": "custom",
+    "theme_axes": "dark / roman-serif+geometric-sans pairing / warm (burgundy+gold)",
+    "enrichment": "none — audited, already conformant",
+    "brief": "Remaining 12 app/tool routes audited against design.md; no decorative enrichment or raw-hex violations found, no changes needed"
+  },
+  {
+    "date": "2026-09-02",
+    "scope": "app",
+    "macrostructure": "Marquee Hero (typewriter reveal, kept from existing implementation)",
+    "theme": "custom",
+    "theme_axes": "dark / roman-serif+geometric-sans pairing / warm (burgundy+gold)",
+    "enrichment": "Tier-A CSS art — off-center dual radial glow, replaces tiled isometric-square SVG",
+    "brief": "Harf landing page — remove isometric background pattern, first page of a whole-app redesign under design.md"
+  }
+]
