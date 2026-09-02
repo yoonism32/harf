@@ -6,7 +6,7 @@ Harf (`حرف`) is a Quranic Arabic SRS (spaced-repetition) learning app. Users 
 
 **Stack**: Next.js 16+ App Router · React 19 · TypeScript strict · Tailwind v4 · Vitest (unit) · Playwright (e2e) · FSRS-6 (SRS algorithm via `ts-fsrs` npm package)
 
-**No backend, no auth, no database** — all user data lives in `localStorage` via `lib/storage.ts`.
+**No auth, no database** — all user data lives in `localStorage` via `lib/storage.ts`. One exception to "no backend": `app/api/tafsir/route.ts` is a small server route serving static tafsir text from a local JSON file (validated `ref` param, no external calls, no user data).
 
 ---
 
@@ -154,6 +154,8 @@ Unit tests live in `lib/__tests__/`. E2E tests in `e2e/`. CI (`github/workflows/
 
 ## Future Architecture (Planned)
 
-1. **Export/Import JSON** in Settings — protect localStorage data without auth (Phase 1)
-2. **Supabase hybrid sync** — localStorage-first, background sync to cloud, cross-device (Phase 2, requires auth)
+1. ~~Export/Import JSON in Settings~~ — **shipped**, see Settings page
+2. **Supabase hybrid sync** — localStorage-first, background sync to cloud, cross-device (requires auth)
 3. **IndexedDB / OPFS** — if `words.json` grows beyond ~500 roots and storage limits bite
+
+See `docs/ROADMAP.md` for the full feature-by-feature build status.

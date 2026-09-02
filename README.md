@@ -18,6 +18,8 @@ Harf is a client-side Progressive Web App for mastering Quranic Arabic vocabular
 - **Prayer times widget** via Aladhan API
 - All data stored client-side (localStorage, no backend, no login)
 
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) for what's shipped vs. planned.
+
 ---
 
 ## Design Language
@@ -64,7 +66,7 @@ harf/
 │   ├── audio.ts              # verseAudioUrl, wordAudioUrl, RECITERS
 │   ├── arabic.ts             # tokenContainsRoot — Arabic morphological root matching
 │   ├── english-search.ts     # stemWord, isStopword, searchEnglish — WBW reverse lookup
-│   └── __tests__/            # Vitest unit tests — 133 tests total
+│   └── __tests__/            # Vitest unit tests — 184 tests total
 ├── e2e/
 │   ├── dashboard.spec.ts     # Landing page + /app dashboard
 │   ├── study.spec.ts         # SRS session flow
@@ -99,13 +101,21 @@ npm run dev        # http://localhost:3000
 | `/word/[id]` | Word detail |
 | `/coverage` | Surah coverage map |
 | `/names` | 99 Names |
+| `/quiz` | Morphology quiz (word → root/pattern/meaning MCQ) |
+| `/drill` | Listening drill (recitation clip → guess surah:ayah) |
+| `/search` | Transliteration search across 83k WBW glosses |
+| `/settings` | Reciter, prayer-time location, export/import data |
+| `/tadabbur`, `/tadabbur/[surah]`, `/tadabbur/[surah]/[ayah]` | Thematic verse reflection mode |
+| `/mutashabihat` | Similar/confusable verse SRS deck |
+| `/verse/[surah]/[ayah]` | Individual verse page |
+| `/api/tafsir` | The one server route in an otherwise client-only app — serves Ibn Kathir tafsir text by verse ref, no external calls |
 
 ---
 
 ## Testing
 
 ```bash
-npm test                  # Vitest unit tests (133 tests)
+npm test                  # Vitest unit tests (184 tests)
 npm run test:coverage     # + v8 coverage report (lib/)
 npm run test:e2e          # Playwright E2E (chromium + mobile)
 npm run test:e2e:ui       # Playwright UI mode
