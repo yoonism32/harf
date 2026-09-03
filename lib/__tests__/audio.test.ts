@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import recitersRaw from '@/data/ea_reciters.json';
 import {
   RECITERS,
   DEFAULT_RECITER_ID,
@@ -39,6 +40,19 @@ describe('RECITERS', () => {
 
   it('DEFAULT_RECITER_ID exists in RECITERS', () => {
     expect(RECITERS.some(r => r.id === DEFAULT_RECITER_ID)).toBe(true);
+  });
+
+  it('preserves every source entry when building RECITERS', () => {
+    expect(RECITERS).toEqual(
+      (recitersRaw as Array<{ id: string; label: string }>).map(reciter => ({
+        ...reciter,
+        url: `https://everyayah.com/data/${reciter.id}`,
+      }))
+    );
+  });
+
+  it('matches the complete source data set', () => {
+    expect(recitersRaw).toMatchSnapshot();
   });
 
   it('all ids are unique', () => {
