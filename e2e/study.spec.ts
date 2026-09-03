@@ -17,7 +17,7 @@ test.describe('Study Flow', () => {
 
     // Fresh session: new words should be queued (up to 10)
     // Either shows a flashcard or the "no words" message
-    const hasCard = await page.locator('button').filter({ hasText: /Tap to reveal/ }).count();
+    const hasCard = await page.getByRole('button', { name: /Tap to reveal meaning/i }).count();
     const noReview = await page.getByText(/No words due/i).count();
 
     // One of these must be true
@@ -29,10 +29,10 @@ test.describe('Study Flow', () => {
     await page.waitForLoadState('networkidle');
 
     // If there's a flashcard, click it to flip
-    const tapHint = page.getByText(/Tap to reveal meaning/i);
-    if (await tapHint.isVisible()) {
+    const card = page.getByRole('button', { name: /Tap to reveal meaning/i });
+    if (await card.isVisible().catch(() => false)) {
       // The card button — click it to flip
-      await page.locator('button').filter({ hasText: /Tap to reveal/ }).click();
+      await card.click();
 
       // After flip, mastery buttons should appear
       await expect(page.getByText(/How well did you know it/i)).toBeVisible();
@@ -45,11 +45,11 @@ test.describe('Study Flow', () => {
 
     // Click through all cards using "Don't Know"
     for (let attempts = 0; attempts < 15; attempts++) {
-      const tapHint = page.getByText(/Tap to reveal meaning/i);
-      if (!(await tapHint.isVisible({ timeout: 500 }).catch(() => false))) break;
+      const card = page.getByRole('button', { name: /Tap to reveal meaning/i });
+      if (!(await card.isVisible({ timeout: 500 }).catch(() => false))) break;
 
       // Flip the card
-      await page.locator('button').filter({ hasText: /Tap to reveal/ }).click();
+      await card.click();
 
       // Wait for flip to complete (mastery buttons appear)
       const dontKnow = page.getByRole('button', { name: /Don't Know/i });
@@ -60,15 +60,15 @@ test.describe('Study Flow', () => {
       await page.waitForFunction(() => {
         const text = document.body.textContent ?? '';
         return (
-          text.includes('Tap to reveal meaning') ||
-          text.includes('Session Complete') ||
+          !!document.querySelector('[aria-label="Tap to reveal meaning"]') ||
+          text.includes('Well done!') ||
           text.includes('No words due')
         );
       }, { timeout: 5000 });
     }
 
     // Should either show session complete or still on last card
-    const sessionComplete = await page.getByText(/Session Complete/i).count();
+    const sessionComplete = await page.getByText(/Well done!/i).count();
     const stillStudying = await page.getByText(/Study Session/i).count();
     const noWords = await page.getByText(/No words due/i).count();
 

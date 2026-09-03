@@ -9,17 +9,17 @@ test.describe('Landing Page', () => {
     await expect(hero).toBeAttached();
   });
 
-  test('has skip-to-content link for accessibility', async ({ page }) => {
-    await page.goto('/');
+  test('has skip-to-content link for accessibility on app pages', async ({ page }) => {
+    await page.goto('/app');
     await expect(page.getByRole('link', { name: /Skip to content/i })).toBeAttached();
   });
 
-  test('Begin button links to /study', async ({ page }) => {
+  test('Begin button links to /app', async ({ page }) => {
     await page.goto('/');
     // Wait for typewriter to finish and CTA to appear (generous timeout for CI)
     const beginBtn = page.getByRole('link', { name: /Begin/i });
     await expect(beginBtn).toBeVisible({ timeout: 30_000 });
-    await expect(beginBtn).toHaveAttribute('href', '/study');
+    await expect(beginBtn).toHaveAttribute('href', '/app');
   });
 
   test('no console errors on load', async ({ page }) => {
@@ -37,10 +37,10 @@ test.describe('Dashboard', () => {
     await page.waitForLoadState('networkidle');
 
     // Quick links are present
-    await expect(page.getByRole('link', { name: /Word Library/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Study Now/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Quran Coverage/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /99 Names/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /^Word Library 300 roots$/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /^Study Now SRS flashcards$/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /^Quran Coverage 114 surahs$/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /^99 Names Asmā al-Ḥusnā$/i })).toBeVisible();
   });
 
   test('quick links navigate to correct pages', async ({ page }) => {
@@ -53,9 +53,13 @@ test.describe('Dashboard', () => {
     await page.goto('/words');
     await page.waitForLoadState('networkidle');
 
+    const mobileMenuButton = page.getByRole('button', { name: /Open menu/i });
+    if (await mobileMenuButton.isVisible()) {
+      await mobileMenuButton.click();
+    }
+
     // The "Words" nav link should be marked as the current page
-    const wordsNavLink = page.getByRole('navigation', { name: 'Main navigation' })
-      .getByRole('link', { name: 'Words', exact: true });
+    const wordsNavLink = page.getByRole('link', { name: 'Words', exact: true }).first();
     await expect(wordsNavLink).toHaveAttribute('aria-current', 'page');
   });
 });

@@ -253,6 +253,16 @@ export default function StudyPage() {
     setSessionId(id => id + 1);
   }, []);
 
+  const currentWordId = queue[currentIndex] ?? '';
+
+  // Memoised so localStorage is re-parsed only when the current word changes,
+  // not on every re-render (e.g. when the verse state updates).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const progress = useMemo(
+    () => currentWordId ? (getAllWordProgress()[currentWordId] ?? null) : null,
+    [currentWordId],
+  );
+
   if (!loaded) {
     return (
       <div className="flex flex-col gap-6 py-8">
@@ -295,17 +305,8 @@ export default function StudyPage() {
     );
   }
 
-  const currentWordId = queue[currentIndex] ?? '';
   const currentWord = wordsMap[currentWordId];
   if (!currentWord) return null;
-
-  // Memoised so localStorage is re-parsed only when the current word changes,
-  // not on every re-render (e.g. when the verse state updates).
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const progress = useMemo(
-    () => currentWordId ? (getAllWordProgress()[currentWordId] ?? null) : null,
-    [currentWordId],
-  );
 
   return (
     <div className="flex flex-col gap-6 py-8">
