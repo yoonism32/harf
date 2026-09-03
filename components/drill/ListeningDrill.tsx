@@ -416,6 +416,7 @@ export function ListeningDrill() {
   const [ayahOk,     setAyahOk]     = useState<boolean | null>(null);
   const [ayahData,   setAyahData]   = useState<AyahResponse | null>(null);
   const [playCount,  setPlayCount]  = useState(0);
+  const [audioError, setAudioError] = useState(false);
 
   // Session score
   const [score,     setScore]     = useState(0);
@@ -502,6 +503,7 @@ export function ListeningDrill() {
     setAyahOk(null);
     setAyahData(null);
     setPlayCount(0);
+    setAudioError(false);
     setRoundPts(null);
     setHintsRevealed(0);
     setEnglishRevealed(false);
@@ -516,6 +518,7 @@ export function ListeningDrill() {
   const playAudio = useCallback(() => {
     if (!target) return;
     audioRef.current?.pause();
+    setAudioError(false);
     const reciter = RECITERS.find(r => r.id === reciterId);
     const base = reciter?.url ?? `https://everyayah.com/data/${reciterId}`;
     const file = `${String(target.surah).padStart(3, '0')}${String(target.ayah).padStart(3, '0')}.mp3`;
@@ -525,8 +528,8 @@ export function ListeningDrill() {
     setDrillState('playing');
     setPlayCount(c => c + 1);
     audio.onended = () => setDrillState('answering');
-    audio.onerror = () => setDrillState('answering');
-    audio.play().catch(() => setDrillState('answering'));
+    audio.onerror = () => { setAudioError(true); setDrillState('answering'); };
+    audio.play().catch(() => { setAudioError(true); setDrillState('answering'); });
   }, [target, speed, reciterId]);
 
   // Prefetch ayah data once answering starts (needed for English hint)
@@ -699,6 +702,16 @@ export function ListeningDrill() {
                   </svg>
                   Replay
                 </button>
+              )}
+
+              {/* Audio load/playback failure */}
+              {audioError && (
+                <div className="flex items-center gap-2 text-xs text-red-400">
+                  <span>Couldn&apos;t load audio — check your connection</span>
+                  <button onClick={playAudio} className="underline hover:text-gold transition-colors">
+                    Retry
+                  </button>
+                </div>
               )}
 
               {/* Settings panel */}

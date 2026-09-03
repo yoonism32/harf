@@ -28,7 +28,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self' data:",
       "img-src 'self' data: blob:",
-      "connect-src 'self' https://cdn.jsdelivr.net https://api.aladhan.com",
+      "connect-src 'self' https://cdn.jsdelivr.net https://api.aladhan.com https://audios.quranwbw.com https://everyayah.com",
       "media-src 'self' https://audios.quranwbw.com https://everyayah.com",
       "worker-src 'self' blob:",
       "frame-ancestors 'none'",

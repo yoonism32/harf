@@ -1,5 +1,5 @@
 // Harf PWA Service Worker — network-first navigation with offline fallback
-const CACHE_NAME = 'harf-v1';
+const CACHE_NAME = 'harf-v2';
 const OFFLINE_URL = '/offline.html';
 
 // Static assets that are safe to cache on install
