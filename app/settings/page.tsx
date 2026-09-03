@@ -68,7 +68,7 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-8 py-8 max-w-lg">
       <div>
-        <h1 className="text-xl font-semibold text-harf-text">Settings</h1>
+        <h1 className="text-2xl font-semibold text-harf-text">Settings</h1>
         <p className="text-muted text-sm mt-1">Saved locally on this device.</p>
       </div>
 

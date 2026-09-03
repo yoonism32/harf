@@ -93,10 +93,7 @@ export function QuranSearch() {
     <div className="w-full max-w-2xl mx-auto px-4 py-8 animate-fade-in">
       {/* Title */}
       <div className="text-center mb-8">
-        <h1
-          className="text-4xl text-gold mb-2"
-          style={{ fontFamily: 'Amiri, serif' }}
-        >
+        <h1 className="font-amiri text-2xl font-semibold text-harf-text mb-2">
           قرآن · Search
         </h1>
         <p className="text-muted text-sm">

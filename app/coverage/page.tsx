@@ -43,11 +43,31 @@ export default function CoveragePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
-      <div className="card p-6">
-        <div className="flex flex-col gap-2">
+      {/* Page heading */}
+      <div>
+        <h1 className="text-2xl font-semibold text-harf-text">Quran Coverage</h1>
+        <p className="text-muted text-sm mt-1">Comprehension across all 114 surahs.</p>
+      </div>
+
+      {/* Stat hero */}
+      <div className="card p-6 flex flex-col sm:flex-row items-center gap-6">
+        <div className="relative w-32 h-32 shrink-0">
+          <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90" aria-hidden="true">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border)" strokeWidth="8" />
+            <circle
+              cx="50" cy="50" r="42" fill="none"
+              stroke="var(--gold)" strokeWidth="8" strokeLinecap="round"
+              strokeDasharray={2 * Math.PI * 42}
+              strokeDashoffset={2 * Math.PI * 42 * (1 - displayPct / 100)}
+              className="transition-[stroke-dashoffset] duration-700 ease-out"
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-gold text-2xl font-bold tabular-nums">{formatPct(displayPct)}</span>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2 text-center sm:text-left">
           <div className="text-muted text-sm uppercase tracking-wider">Overall Quran Coverage</div>
-          <div className="text-gold text-5xl font-bold">{formatPct(displayPct)}</div>
           <p className="text-muted text-sm max-w-lg">
             As you master more root words, your coverage of each surah increases.
             The color of each surah reflects how many of its key words you know.

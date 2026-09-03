@@ -125,7 +125,7 @@ export function MorphologyQuiz() {
     <div className="w-full max-w-xl mx-auto px-4 py-8 animate-fade-in">
       {/* Title */}
       <div className="text-center mb-8">
-        <h1 className="text-4xl text-gold mb-2" style={{ fontFamily: 'Amiri, serif' }}>
+        <h1 className="font-amiri text-2xl font-semibold text-harf-text mb-2">
           تصريف · Quiz
         </h1>
         <p className="text-muted text-sm">Identify the root or meaning of each word</p>

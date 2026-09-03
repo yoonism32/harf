@@ -68,8 +68,8 @@ export default function TadabburIndexPage() {
         aria-label="Filter surahs"
       />
 
-      {/* Surah list */}
-      <div className="flex flex-col gap-2">
+      {/* Surah grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {filtered.map(surah => {
           const meta = surahNameMeta[String(surah.id)];
           const info = surahInfo[String(surah.id)];
@@ -79,45 +79,37 @@ export default function TadabburIndexPage() {
             <Link
               key={surah.id}
               href={`/tadabbur/${surah.id}`}
-              className="card card-interactive p-4 flex items-start gap-4 group"
+              className="card card-interactive p-4 flex flex-col gap-2 group"
             >
-              {/* Number */}
-              <span className="shrink-0 w-9 h-9 rounded-full bg-surface-plus flex items-center justify-center text-xs font-mono text-muted group-hover:text-gold transition-colors">
-                {surah.id}
-              </span>
-
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline justify-between gap-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-medium text-harf-text group-hover:text-gold transition-colors">
-                      {surah.name}
-                    </span>
-                    <span
-                      className="font-amiri text-lg text-muted"
-                      style={{ fontFamily: 'Amiri, serif' }}
-                      dir="rtl"
-                    >
-                      {surah.arabic}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs text-muted/70 border border-border/60 rounded-full px-2 py-0.5">
-                      {place}
-                    </span>
-                    <span className="text-xs text-muted">{surah.verses} verses</span>
-                  </div>
-                </div>
-                {info?.summary && (
-                  <p className="text-xs text-muted mt-1 line-clamp-2">{info.summary}</p>
-                )}
+              <div className="flex items-center justify-between">
+                <span className="shrink-0 w-8 h-8 rounded-full bg-surface-plus flex items-center justify-center text-xs font-mono text-muted group-hover:text-gold transition-colors">
+                  {surah.id}
+                </span>
+                <span className="text-xs text-muted/70 border border-border/60 rounded-full px-2 py-0.5">
+                  {place}
+                </span>
               </div>
+
+              <div className="flex items-baseline gap-2">
+                <span className="font-medium text-harf-text group-hover:text-gold transition-colors">
+                  {surah.name}
+                </span>
+                <span className="font-amiri text-lg text-muted" dir="rtl">
+                  {surah.arabic}
+                </span>
+              </div>
+
+              <span className="text-xs text-muted">{surah.verses} verses</span>
+
+              {info?.summary && (
+                <p className="text-xs text-muted line-clamp-2">{info.summary}</p>
+              )}
             </Link>
           );
         })}
 
         {filtered.length === 0 && (
-          <p className="text-center text-muted py-8 text-sm">No surahs match &ldquo;{query}&rdquo;</p>
+          <p className="col-span-full text-center text-muted py-8 text-sm">No surahs match &ldquo;{query}&rdquo;</p>
         )}
       </div>
     </div>

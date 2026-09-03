@@ -81,7 +81,7 @@ harf/
 
 ## Getting Started
 
-Node.js ≥ 20 required.
+Node.js ≥ 26 required.
 
 ```bash
 npm install

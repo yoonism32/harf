@@ -11,6 +11,7 @@
   --brand: #c41e3a;
   --text: #ddd6c8;
   --muted: #7a7d8a;
+  --verse-muted: #a09890;
   --border: #252b3e;
 }
 
@@ -26,6 +27,7 @@
   --color-brand: var(--brand);
   --color-harf-text: var(--text);
   --color-muted: var(--muted);
+  --color-verse-muted: var(--verse-muted);
   --color-border: var(--border);
 
   /* Font families */

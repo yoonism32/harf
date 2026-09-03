@@ -1,12 +1,30 @@
 [
   {
+    "date": "2026-09-03",
+    "scope": "app",
+    "macrostructure": "Workbench",
+    "theme": "custom",
+    "theme_axes": "dark / roman-serif+geometric-sans pairing / warm (burgundy+gold)",
+    "enrichment": "none — real layout upgrades on 3 pages: Coverage's stat replaced with radial progress ring, Words header gained a mastered/in-progress stat pair, Tadabbur's 114-item list became a card grid",
+    "brief": "Third pass on app routes, following user request to stop doing typography-only consistency fixes and find genuine structural improvements. See design.md's Log for detail."
+  },
+  {
+    "date": "2026-09-03",
+    "scope": "app",
+    "macrostructure": "Workbench",
+    "theme": "custom",
+    "theme_axes": "dark / roman-serif+geometric-sans pairing / warm (burgundy+gold)",
+    "enrichment": "none — header voice unified across all 12 routes, dashboard quick-links row given real hierarchy (featured Study Now tile), 5 raw-hex values on landing page routed through existing/new tokens",
+    "brief": "Second-pass revisit of the 12 app/tool routes: prior audit call ('already conform') missed real inconsistencies — 3 different h1 sizes across 6 routes, Drill/Quiz/Search using a divergent centered-gold-4xl header voice with inline font-family, Coverage missing an h1, Dashboard's orphan sr-only h2, and dashboard's quick-links row being 6 undifferentiated uniform tiles. All fixed; see design.md's Log for detail."
+  },
+  {
     "date": "2026-09-02",
     "scope": "app",
     "macrostructure": "Workbench (audit only)",
     "theme": "custom",
     "theme_axes": "dark / roman-serif+geometric-sans pairing / warm (burgundy+gold)",
     "enrichment": "none — audited, already conformant",
-    "brief": "Remaining 12 app/tool routes audited against design.md; no decorative enrichment or raw-hex violations found, no changes needed"
+    "brief": "Remaining 12 app/tool routes audited against design.md; no decorative enrichment or raw-hex violations found, no changes needed (superseded by the 2026-09-03 entry above — this audit missed real issues)"
   },
   {
     "date": "2026-09-02",

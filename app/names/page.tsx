@@ -220,7 +220,7 @@ export default function NamesPage() {
       {/* Header */}
       <div className="card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-harf-text">أسماء الله الحسنى</h1>
+          <h1 className="text-2xl font-semibold text-harf-text">أسماء الله الحسنى</h1>
           <p className="text-muted text-sm mt-1">The 99 Beautiful Names of Allah</p>
           {mounted && (
             <p className="text-muted text-sm mt-1">

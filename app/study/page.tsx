@@ -313,7 +313,7 @@ export default function StudyPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <h1 className="text-xl font-semibold text-harf-text">Study Session</h1>
+          <h1 className="text-2xl font-semibold text-harf-text">Study Session</h1>
           <div className="text-muted text-sm">
             {currentIndex + 1} / {queue.length}
           </div>

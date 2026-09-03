@@ -136,10 +136,77 @@ new work.
 ## Log
 
 Redesign progress tracked in `.hallmark/log.json` with `"scope": "app"`
-entries. Landing page redesigned first (isometric background removed). The
-remaining 12 app/tool routes were audited against the Workbench allowances
-above (no decorative enrichment, tokens-only color) and already conform —
-no structural changes were needed. `layout.tsx`'s `themeColor` meta and
-`global-error.tsx`'s inline-styled error boundary keep literal hex values
-intentionally (metadata and the error fallback can't rely on `globals.css`
-being loaded), not a token violation.
+entries. Landing page redesigned first (isometric background removed).
+
+The remaining 12 app/tool routes were revisited a second time — a prior pass
+had audited them as "already conform, no changes needed," but a concrete
+code-level pass found real, fixable inconsistencies that audit missed:
+
+- **Header sizes were accidental, not deliberate.** Six routes used three
+  different `<h1>` sizes with no logic behind the split (`text-lg` on
+  Mutashabihat, `text-xl` on Study/Settings, `text-2xl` elsewhere). All page
+  `<h1>`s are now `text-2xl font-semibold text-harf-text` — one voice.
+- **Drill, Quiz, and Search used a different genre entirely** — centered,
+  `text-4xl`, gold-colored, with an inline `style={{ fontFamily: 'Amiri,
+  serif' }}` instead of the existing `.font-amiri` utility. Brought in line
+  with every other route's header voice (still centered, since that's a
+  legitimate layout choice for a focused single-task screen — just no
+  longer visually a different app).
+- **Coverage had no `<h1>` at all** — opened straight into a stat card. Added
+  one above it, matching the rest of the app.
+- **Dashboard had an orphan `<h2>`** (`sr-only`, no `<h1>` before it on the
+  page) — promoted to `<h1>` for correct heading hierarchy.
+- **Landing page had 5 raw hex values** duplicating existing tokens — routed
+  through `text-harf-text` / `text-brand` / `bg-brand` / `border-brand`
+  (all pre-existing utilities from `--color-brand` already being in
+  `@theme`). One value (`#a09890`, a warmer verse-text shade distinct from
+  `--muted`) didn't map to an existing token, so it was promoted to a new
+  named one: `--color-verse-muted`.
+- **Dashboard's quick-links row was six identical uniform tiles** — no
+  hierarchy, everything equal weight regardless of importance. Pulled Study
+  Now (the one time-sensitive primary action) into its own featured,
+  gold-tinted tile paired with Continue Reading, leaving the four remaining
+  destinations (Word Library, Coverage, 99 Names, Tadabbur) as a clean,
+  *deliberately* uniform row — uniform because they're genuinely equal
+  destinations, not because nobody thought about it. This is the one
+  layout-level (not just typographic) change in this pass — still no
+  decorative enrichment, purely information hierarchy expressed through
+  grid composition, which the Workbench family's "internal section layout
+  may differ" clause allows.
+
+`layout.tsx`'s `themeColor` meta and `global-error.tsx`'s inline-styled error
+boundary keep literal hex values intentionally (metadata and the error
+fallback can't rely on `globals.css` being loaded), not a token violation.
+
+### Third pass — real layout upgrades, not just typographic consistency
+
+The first two passes fixed accidental inconsistency (header sizes, tokens).
+This pass targeted three pages where the *layout itself* was flatter than
+the content deserved — genuine structural changes, still within Workbench
+(no decorative enrichment, function drives the change):
+
+- **Coverage's stat hero was a plain number.** A single percentage in text
+  says less than a radial progress ring at the same information density —
+  the ring's fill *is* the number, legible at a glance before the label
+  even renders. Replaced the `text-5xl` figure with an SVG radial gauge
+  (`--gold` stroke over `--border` track, percentage centered inside).
+- **Words page header had no data, unlike every other library-style page.**
+  Names' header shows "N of 99 mastered" inline; Words' header was bare
+  title + count. Wrapped it in a `card` and added a mastered/in-progress
+  stat pair, reusing the exact `text-gold font-bold text-lg tabular-nums`
+  idiom Settings' "Your Data" block already established — not a new
+  pattern, just applying an existing one where it was missing.
+- **Tadabbur was the one single-column list among grid-based library
+  pages.** 114 surahs in one vertical column is a lot of scroll for a
+  page that's functionally a library browser, same as Words/Names.
+  Converted to a `sm:2 / lg:3` column card grid — same information per
+  card, denser layout, consistent grain with the rest of the app. Also
+  dropped a redundant inline `fontFamily: 'Amiri, serif'` style that
+  duplicated the existing `.font-amiri` utility (same category of fix as
+  the earlier Drill/Quiz/Search cleanup).
+
+Settings, Study, the 99 Names study mode, and Mutashabihat were reviewed
+and left alone — their current layouts (sequential setting groups, a
+single focused card, a focused drill loop) are already the correct
+structure for what they do, not undifferentiated defaults standing in for
+one. Restructuring them would have been change for its own sake.

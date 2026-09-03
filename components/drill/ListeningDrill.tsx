@@ -636,7 +636,7 @@ export function ListeningDrill() {
 
           {/* Title + score */}
           <div className="text-center mb-10 relative">
-            <h1 className="text-4xl text-gold mb-2" style={{ fontFamily: 'Amiri, serif' }}>
+            <h1 className="font-amiri text-2xl font-semibold text-harf-text mb-2">
               سماع · Drill
             </h1>
             <p className="text-muted text-sm">Listen to the recitation — name the verse</p>

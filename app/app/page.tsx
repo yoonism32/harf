@@ -48,16 +48,6 @@ const QUICK_LINKS = [
     ),
   },
   {
-    href: '/study',
-    label: 'Study Now',
-    sub: 'SRS flashcards',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-      </svg>
-    ),
-  },
-  {
     href: '/tadabbur',
     label: 'Tadabbur',
     sub: 'Deep reflection · themes',
@@ -82,7 +72,41 @@ export default function DashboardPage() {
         <ErrorBoundary><DailyAyah /></ErrorBoundary>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      {/* Resume actions — Study Now leads with deliberately unequal weight;
+          the rest is a repeating list of equal destinations, so a uniform
+          grid is the right call there, not here. */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Link
+          href="/study"
+          className="card card-interactive sm:col-span-2 p-6 flex items-center gap-4 group relative overflow-hidden bg-gold/5 border-gold/20"
+        >
+          <span
+            aria-hidden="true"
+            className="absolute -right-6 -bottom-8 w-32 h-32 rounded-full bg-gold/10 blur-2xl"
+          />
+          <span className="relative text-gold shrink-0">
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+          </span>
+          <div className="relative flex flex-col gap-0.5">
+            <div className="text-harf-text text-lg font-semibold group-hover:text-gold transition-colors duration-200">
+              Study Now
+            </div>
+            <div className="text-muted text-sm">Review due words with SRS flashcards</div>
+          </div>
+          <svg
+            aria-hidden="true"
+            className="relative w-5 h-5 text-muted group-hover:text-gold group-hover:translate-x-0.5 transition-all duration-200 ml-auto shrink-0"
+            fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+          </svg>
+        </Link>
+        <ErrorBoundary><ContinueReading /></ErrorBoundary>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {QUICK_LINKS.map((link, i) => (
           <Link
             key={link.href}
@@ -101,7 +125,6 @@ export default function DashboardPage() {
             </div>
           </Link>
         ))}
-        <ErrorBoundary><ContinueReading /></ErrorBoundary>
       </div>
     </div>
   );

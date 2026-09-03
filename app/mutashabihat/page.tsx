@@ -297,7 +297,7 @@ export default function MutashabihatPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-0.5">
-          <h1 className="text-lg font-semibold text-harf-text">Mutashabihat Drill</h1>
+          <h1 className="text-2xl font-semibold text-harf-text">Mutashabihat Drill</h1>
           <p className="text-xs text-muted">Near-identical verses — spot the difference</p>
         </div>
         <span className="text-xs text-muted font-mono">{currentIdx + 1} / {queue.length}</span>

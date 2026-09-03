@@ -98,11 +98,26 @@ export default function WordsPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-harf-text">Word Library</h1>
-        <p className="text-muted text-sm mt-1">
-          {words.length} Quranic root words — sorted by frequency in the Quran
-        </p>
+      <div className="card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-harf-text">Word Library</h1>
+          <p className="text-muted text-sm mt-1">
+            {words.length} Quranic root words — sorted by frequency in the Quran
+          </p>
+        </div>
+        {mounted && (
+          <div className="flex gap-4 text-sm">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-gold font-bold text-lg tabular-nums">{filterCounts.mastered}</span>
+              <span className="text-muted text-xs">mastered</span>
+            </div>
+            <div className="w-px bg-border" />
+            <div className="flex flex-col gap-0.5">
+              <span className="text-gold font-bold text-lg tabular-nums">{filterCounts['in-progress']}</span>
+              <span className="text-muted text-xs">in progress</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Controls */}

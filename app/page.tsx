@@ -237,7 +237,7 @@ export default function LandingPage() {
               <p
                 lang="ar"
                 dir="rtl"
-                className="font-amiri text-[clamp(1.15rem,2.6vw,1.6rem)] text-[#ddd6c8] leading-relaxed"
+                className="font-amiri text-[clamp(1.15rem,2.6vw,1.6rem)] text-harf-text leading-relaxed"
               >
                 {getText(0)}
                 {hasCursor(0) && <Cursor />}
@@ -283,7 +283,7 @@ export default function LandingPage() {
                     key={seg.id}
                     className={`
                       animate-slide-up animate-fade-in
-                      ${isBrand ? 'relative p-4 -mx-4 rounded-2xl bg-[#C41E3A]/5 border border-[#C41E3A]/10 shadow-[0_0_40px_rgba(196,30,58,0.05)]' : ''}
+                      ${isBrand ? 'relative p-4 -mx-4 rounded-2xl bg-brand/5 border border-brand/10 shadow-[0_0_40px_rgba(196,30,58,0.05)]' : ''}
                     `}
                   >
                     {/* Arabic term + phonetic */}
@@ -293,7 +293,7 @@ export default function LandingPage() {
                         dir="rtl"
                         className={
                           isBrand
-                            ? 'font-amiri text-[clamp(2rem,5vw,2.8rem)] font-bold text-[#C41E3A] harf-glow'
+                            ? 'font-amiri text-[clamp(2rem,5vw,2.8rem)] font-bold text-brand harf-glow'
                             : 'font-amiri text-[clamp(2rem,5vw,2.8rem)] text-gold'
                         }
                       >
@@ -308,8 +308,8 @@ export default function LandingPage() {
                     <div
                       className={
                         isBrand
-                          ? 'mt-2 pl-3 border-l border-[#C41E3A]/40 text-harf-text font-semibold leading-relaxed'
-                          : 'mt-2 pl-3 border-l border-gold/30 text-[#a09890] leading-relaxed'
+                          ? 'mt-2 pl-3 border-l border-brand/40 text-harf-text font-semibold leading-relaxed'
+                          : 'mt-2 pl-3 border-l border-gold/30 text-verse-muted leading-relaxed'
                       }
                     >
                       {getText(idx)}
