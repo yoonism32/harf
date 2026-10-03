@@ -1,0 +1,111 @@
+.shell {
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+.modeGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.modeChoice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 12px;
+  align-items: start;
+  min-height: 88px;
+  padding: 16px;
+  border: 1px solid var(--control-line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.modeChoice:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--selection);
+}
+
+.modeChoice input {
+  grid-row: span 2;
+  margin-top: 2px;
+}
+
+.modeChoice small {
+  color: var(--muted);
+}
+
+.roundHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.prompt {
+  text-align: center;
+}
+
+.promptArabic {
+  display: block;
+  margin-block: 8px;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.choice {
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 16px;
+  border: 1px solid var(--control-line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+  text-align: start;
+}
+
+.choice:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--selection);
+}
+
+.choice:disabled {
+  opacity: 1;
+}
+
+.choiceCorrect {
+  border-color: var(--primary);
+  background: var(--selection);
+}
+
+.choiceWrong {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.result {
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.result .quran {
+  max-width: none;
+  text-align: start;
+}
+
+@media (min-width: 560px) {
+  .choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 720px) {
+  .modeGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

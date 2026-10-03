@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "app/globals.css"
+        ],
+        "createdAt": "2026-09-23T19:01:18.233Z",
+        "reason": "Codex review: the 3px accent marks the active navigation item, not a card; visual inspection confirms it is a persistent wayfinding state."
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "app/globals.css"
+        ],
+        "createdAt": "2026-09-23T19:01:19.225Z",
+        "reason": "Codex review: the flagged accent belongs to square navigation state styling; the rounded content cards use neutral 1px borders."
+      }
+    ]
+  }
+}

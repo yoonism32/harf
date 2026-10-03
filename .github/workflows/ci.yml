@@ -8,7 +8,7 @@ on:
 
 jobs:
   quality:
-    name: Type-check, Lint & Unit Tests
+    name: Validate, Type-check & Unit Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -25,14 +25,17 @@ jobs:
       - name: Security audit
         run: npm audit --audit-level=high
 
+      - name: Validate compiled content
+        run: npm run validate-data
+
       - name: Type-check
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       - name: Run unit tests
         run: npm test
 
-      - name: Build
-        run: npm run build
+      - name: Build application
+        run: npm run build:app
         env:
           NODE_ENV: production
 
@@ -40,6 +43,10 @@ jobs:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
     needs: quality
+    env:
+      # Account browser tests intercept all Supabase requests; no CI credentials.
+      NEXT_PUBLIC_SUPABASE_URL: https://yudbwuaurqhgtkewiwjh.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_browser_tests_only
 
     steps:
       - uses: actions/checkout@v4
@@ -53,10 +60,10 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npx playwright install chromium --with-deps
+        run: npx playwright install chromium webkit --with-deps
 
-      - name: Build app
-        run: npm run build
+      - name: Build application
+        run: npm run build:app
         env:
           NODE_ENV: production
 
@@ -65,10 +72,24 @@ jobs:
         env:
           CI: true
 
+      - name: Check performance budgets
+        run: npm run check:budgets
+
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
           path: playwright-report/
+          retention-days: 14
+
+      - name: Upload content validation reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: content-validation-reports
+          path: |
+            public/content/*/alignment-report.json
+            public/content/manifest.json
+            lib/content/version.json
           retention-days: 14

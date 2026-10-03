@@ -1,100 +1,11 @@
 import type { Metadata, Viewport } from 'next';
-import { Amiri, Amiri_Quran, Rubik } from 'next/font/google';
+import localFont from 'next/font/local';
+import {headers} from 'next/headers';
 import './globals.css';
-import { LayoutShell } from '@/components/LayoutShell';
 import { PWARegister } from '@/components/PWARegister';
-
-// next/font preconnects to Google Fonts and generates font-face with display:swap automatically
-const amiri = Amiri({
-  subsets: ['arabic', 'latin'],
-  weight: ['400', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-amiri',
-  display: 'swap',
-});
-
-// Amiri Quran: extended variant with full Uthmanic Unicode (U+06D6–06ED annotation marks)
-// Used for verse/ayah text so characters like إِسْرَٰٓءِيلَ render correctly
-const amiriQuran = Amiri_Quran({
-  subsets: ['arabic'],
-  weight: ['400'],
-  variable: '--font-amiri-quran',
-  display: 'swap',
-});
-
-const rubik = Rubik({
-  subsets: ['latin', 'arabic'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-rubik',
-  display: 'swap',
-});
-
-// Viewport must be a separate export (Next.js 14+)
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 5,
-  userScalable: true,
-  themeColor: '#0b0f1a',
-  colorScheme: 'dark',
-  viewportFit: 'cover',
-};
-
-export const metadata: Metadata = {
-  metadataBase: new URL('https://harf.app'),
-  title: {
-    default: 'حرف — Harf | Quranic Arabic Mastery',
-    template: '%s | Harf',
-  },
-  description: 'Master Quranic Arabic root words. Track what percentage of the Quran you understand.',
-  keywords: ['Quran', 'Arabic', 'vocabulary', 'learning', 'Islamic', 'SRS'],
-  openGraph: {
-    title: 'Harf — Quranic Arabic Mastery',
-    description: 'Master Quranic Arabic root words and track your Quran comprehension.',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Harf — Quranic Arabic Mastery',
-    description: 'Master Quranic Arabic root words. Track what percentage of the Quran you understand.',
-  },
-  icons: {
-    icon: '/icons/icon.svg',
-    apple: '/icons/icon-192.png',
-  },
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html
-      lang="en"
-      dir="ltr"
-      className={`${amiri.variable} ${amiriQuran.variable} ${rubik.variable}`}
-    >
-      <head>
-        {/* DNS-prefetch for CDN resources used at runtime */}
-        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-        <link rel="dns-prefetch" href="https://api.aladhan.com" />
-        <link rel="dns-prefetch" href="https://everyayah.com" />
-        <link rel="dns-prefetch" href="https://audios.quranwbw.com" />
-        {/* Preconnect for primary CDN (Quran text data) */}
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
-      </head>
-      <body className="antialiased min-h-screen">
-        <PWARegister />
-        <LayoutShell>{children}</LayoutShell>
-        {/* Aria-live announcer for dynamic page updates */}
-        <div
-          id="aria-announcer"
-          aria-live="polite"
-          aria-atomic="true"
-          className="sr-only"
-        />
-      </body>
-    </html>
-  );
-}
+const source = localFont({ src:[{path:'../public/fonts/source-sans-3-regular.woff2',weight:'400'},{path:'../public/fonts/source-sans-3-semibold.woff2',weight:'600'}],variable:'--font-source',display:'swap' });
+const amiri = localFont({ src:[{path:'../public/fonts/amiri-regular.woff2',weight:'400'},{path:'../public/fonts/amiri-bold.woff2',weight:'700'}],variable:'--font-amiri',display:'swap' });
+const quran = localFont({ src:'../public/fonts/amiri-quran.woff2',weight:'400',variable:'--font-amiri-quran',display:'swap' });
+export const viewport: Viewport = { width:'device-width',initialScale:1,themeColor:'#F6F3EC',viewportFit:'cover' };
+export const metadata: Metadata = { metadataBase:new URL('https://harf.app'),title:{default:'Harf — Quranic vocabulary, in context',template:'%s | Harf'},description:'Learn Quranic vocabulary through short reviews, then see the words in context.',icons:{icon:'/icons/icon.svg',apple:'/icons/icon-192.png'} };
+export default async function RootLayout({ children }: { children: React.ReactNode }) {const nonce=(await headers()).get('x-nonce')??undefined;return <html lang="en" dir="ltr" suppressHydrationWarning className={`${source.variable} ${amiri.variable} ${quran.variable}`}><head><script nonce={nonce} src="/theme.js"/></head><body><PWARegister/>{children}</body></html>; }

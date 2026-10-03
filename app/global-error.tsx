@@ -4,20 +4,14 @@
  * Global error boundary — catches errors in the root layout.
  * Must include its own <html>/<body> since the layout is broken.
  */
-export default function GlobalError({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
-    <html lang="ar" dir="rtl" style={{ colorScheme: 'dark' }}>
+    <html lang="en" dir="ltr" style={{ colorScheme: 'light' }}>
       <body
         style={{
-          background: '#0b0f1a',
-          color: '#ddd6c8',
-          fontFamily: 'Rubik, system-ui, sans-serif',
+          background: '#F6F3EC',
+          color: '#182A27',
+          fontFamily: 'system-ui, sans-serif',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -29,46 +23,18 @@ export default function GlobalError({
           margin: 0,
         }}
       >
-        <div
-          style={{
-            fontFamily: 'Amiri, Georgia, serif',
-            fontSize: '2.5rem',
-            color: '#c9a84c',
-            lineHeight: 1.3,
-          }}
-          lang="ar"
-        >
-          حدث خطأ فادح
-        </div>
         <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
-          A critical error occurred
+          Harf could not open
         </div>
-        {process.env.NODE_ENV === 'development' && error.message && (
-          <pre
-            style={{
-              background: '#141929',
-              padding: '1rem',
-              borderRadius: '0.5rem',
-              fontSize: '0.75rem',
-              maxWidth: '40rem',
-              overflow: 'auto',
-              textAlign: 'left',
-              color: '#7a7d8a',
-              border: '1px solid #252b3e',
-            }}
-          >
-            {error.message}
-            {error.digest && `\n\nDigest: ${error.digest}`}
-          </pre>
-        )}
+        <p>Your saved progress has not been reset. Try loading the app again.</p>
         <button
           onClick={reset}
           style={{
             padding: '0.75rem 1.5rem',
-            background: '#c9a84c',
-            color: '#0b0f1a',
+            background: '#155A4A',
+            color: '#FFFDF8',
             border: 'none',
-            borderRadius: '0.75rem',
+            borderRadius: '0.5rem',
             fontWeight: 700,
             fontSize: '1rem',
             cursor: 'pointer',

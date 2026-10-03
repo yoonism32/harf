@@ -1,0 +1,1 @@
+export function Skeleton({ height = 120, label = 'Loading' }: { height?: number; label?: string }) { return <div role="status" className="skeleton" style={{ minHeight: height }}><span className="sr-only">{label}</span></div>; }

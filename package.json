@@ -7,7 +7,9 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run validate:release && npm run build:app",
+    "build:app": "next build --webpack",
+    "build:release": "npm run build",
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -15,22 +17,34 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
-    "validate-data": "npx tsx scripts/validate-data.ts"
+    "validate-data": "node --import tsx scripts/validate-data.ts",
+    "build:content": "node --import tsx scripts/build-content.ts",
+    "validate:release": "npm run build:content -- --release && npm run validate-data -- --release",
+    "typecheck": "tsc --noEmit",
+    "check:budgets": "node scripts/check-budgets.mjs",
+    "icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
-    "next": "^16.3.4",
+    "@supabase/supabase-js": "2.117.2",
+    "idb": "^8.0.3",
+    "next": "16.3.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "ts-fsrs": "^5.4.2"
+    "ts-fsrs": "^5.4.2",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.4.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitest/coverage-v8": "^5.0.0",
+    "fake-indexeddb": "^6.2.5",
+    "parse5": "^8.0.1",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   }

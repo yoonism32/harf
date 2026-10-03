@@ -1,258 +1,61 @@
-/**
- * validate-data.ts
- *
- * Cross-references words.json, wbw-morphology.json, and english-wbw.json to
- * catch data integrity issues before they silently produce wrong UI.
- *
- * Run:  npx tsx scripts/validate-data.ts
- * Or:   npm run validate-data
- *
- * Exit codes:
- *   0 — all checks passed (warnings are printed but do not fail)
- *   1 — one or more ERROR-level issues found
- */
-
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname  = path.dirname(__filename);
-const DATA_DIR   = path.resolve(__dirname, '../data');
-
-// ── Types ──────────────────────────────────────────────────────────────────
-
-interface Word {
-  id: string;
-  root: string;
-  arabic: string;
-  transliteration: string;
-  frequency: number;
-  tier: number;
-  example_verse?: string;
-  coverage_weight: number;
+import {morphologySchema,rootFamilySchema} from '../lib/content/morphology-schema';
+import {comparableArabic} from '../lib/content/alignment';
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { join } from 'node:path';
+import { z } from 'zod';
+import { ayahSchema, catalogSchema, entryPayloadSchema, nameEntrySchema, overlapSchema, searchIndexSchema } from '../lib/content/schema';
+const read=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
+const json=(path:string)=>JSON.parse(read(path));
+const assert=(condition:unknown,message:string)=>{if(!condition)throw new Error(message);};
+const pointer=z.object({contentVersion:z.string().regex(/^[a-f0-9]{16}$/),releaseReady:z.boolean()}).parse(json('public/content/manifest.json'));
+const base=`public/content/${pointer.contentVersion}`;
+const manifest=z.object({contentVersion:z.string(),files:z.record(z.string(),z.string())}).parse(json(`${base}/manifest.json`));
+for(const [path,hash] of Object.entries(manifest.files)){assert(!path.includes('..')&&!path.startsWith('/'),'Unsafe generated manifest path');assert(createHash('sha256').update(read(`${base}/${path}`)).digest('hex')===hash,`Output checksum mismatch: ${path}`);}
+const catalog=catalogSchema.parse(json(`${base}/catalog.json`));
+assert(manifest.contentVersion===pointer.contentVersion&&catalog.contentVersion===pointer.contentVersion,'Content version mismatch');
+assert(pointer.releaseReady===catalog.releaseReady,'Release status mismatch');
+assert(catalog.releaseReady===(catalog.blockers.length===0),'Release blockers disagree with release status');
+const requiredFiles=['sources.json','catalog.json','names.json','overlap.json','alignment-report.json',...catalog.surahs.map(s=>`surahs/${s.number}.json`),...catalog.surahs.map(s=>`morphology/${s.number}.json`),'source-notices.txt',...catalog.entries.map(e=>`entries/${e.id}.json`),...['arabic','english','transliteration'].map(m=>`search/${m}.json`)];
+for(const path of requiredFiles)assert(Object.hasOwn(manifest.files,path),`Missing output checksum: ${path}`);
+assert(catalog.surahs.every((s,i)=>s.number===i+1),'Surah catalog order mismatch');
+assert(catalog.entries.length===300,'Course must contain 300 entries');
+assert(new Set(catalog.entries.map(e=>e.id)).size===300,'Duplicate course IDs');
+const tokens=new Map<string,z.infer<typeof ayahSchema>['tokens'][number]>();
+let verseCount=0,wordCount=0;const counts:Record<string,number>={};
+for(const surah of catalog.surahs){const ayahs=z.array(ayahSchema).parse(json(`${base}/surahs/${surah.number}.json`));assert(ayahs.length===surah.ayahCount,`Missing ayahs ${surah.number}`);counts[surah.number]=0;ayahs.forEach((a,i)=>{assert(a.ref===`${surah.number}:${i+1}`,'Ayah order mismatch');verseCount++;a.tokens.forEach((t,j)=>{assert(t.key===`${a.ref}:${j+1}`&&t.position===j+1,'Token position mismatch');assert(!tokens.has(t.key),'Duplicate token');tokens.set(t.key,t);if(t.kind==='word'){wordCount++;counts[surah.number]=(counts[surah.number]??0)+1;}});});}
+assert(verseCount===6236,'Incomplete verse corpus');
+const overlap=overlapSchema.parse(json(`${base}/overlap.json`));assert(overlap.totalWords===wordCount,'Incorrect total word denominator');
+for(const [s,n]of Object.entries(counts))assert(overlap.surahs[s]===n,`Incorrect surah denominator ${s}`);
+for(const entry of catalog.entries){const payload=entryPayloadSchema.parse(json(`${base}/entries/${entry.id}.json`));assert(JSON.stringify(payload.entry)===JSON.stringify(entry),'Entry/catalog disagreement');assert(payload.examples.length===entry.exampleKeys.length,'Example count mismatch');assert(entry.representativeKey===entry.exampleKeys[0],'Representative mismatch');assert(new Set(entry.exampleKeys.map(k=>k.split(':').slice(0,2).join(':'))).size===entry.exampleKeys.length,'Repeated example verse');const occurrences=overlap.entries[entry.id]!;assert(Array.isArray(occurrences),'Missing entry occurrences');assert(new Set(occurrences).size===entry.occurrenceCount,'Duplicate or missing entry occurrences');for(const key of occurrences){const t=tokens.get(key);assert(t&&t.kind==='word'&&t.entryId===entry.id&&t.lemma===entry.lemma&&t.root===entry.root,'Misgrouped occurrence');}for(const [exampleIndex,example] of payload.examples.entries()){assert(example.targetKey===entry.exampleKeys[exampleIndex],'Example selection mismatch');assert(example.ref===example.targetKey.split(':').slice(0,2).join(':'),'Example verse mismatch');for(const token of example.tokens)assert(JSON.stringify(token)===JSON.stringify(tokens.get(token.key)),'Example differs from canonical text');const t=tokens.get(example.targetKey);assert(t&&t.entryId===entry.id&&t.gloss===example.targetGloss&&t.transliteration===example.targetTransliteration,'Unaligned answer');assert(example.tokens.some(token=>token.key===t!.key),'Missing target token');}}
+for(const token of tokens.values())if(token.entryId)assert(overlap.entries[token.entryId]?.includes(token.key),'Assigned token missing from overlap');
+assert(z.array(nameEntrySchema).parse(json(`${base}/names.json`)).length===99,'Missing Names');
+for(const mode of ['arabic','english','transliteration'])assert(searchIndexSchema.parse(json(`${base}/search/${mode}.json`)).length===6236,`Incomplete ${mode} search`);
+const expectedRoots=new Map<string,string[]>();
+for(const token of tokens.values())if(token.kind==='word'&&token.root){const id=`r-${createHash('sha256').update(token.root.normalize('NFC')).digest('hex').slice(0,16)}`;expectedRoots.set(id,[...(expectedRoots.get(id)??[]),token.key]);}
+let detailedWords=0;
+for(const surah of catalog.surahs){
+ const details=morphologySchema.parse(json(`${base}/morphology/${surah.number}.json`));
+ for(const [key,detail] of Object.entries(details)){
+  const token=tokens.get(key);assert(token?.kind==='word'&&key===detail.key&&key.startsWith(`${surah.number}:`),'Invalid morphology target');
+  assert(detail.canonicalKeys.includes(key)&&new Set(detail.canonicalKeys).size===detail.canonicalKeys.length,'Invalid morphology span');
+  const ref=key.split(':').slice(0,2).join(':');assert(detail.sourceKey.startsWith(`${ref}:`),'Morphology crosses ayah');
+  for(const target of detail.canonicalKeys)assert(target.startsWith(`${ref}:`)&&tokens.get(target)?.kind==='word','Invalid span target');
+  assert(detail.canonicalKeys.map(k=>tokens.get(k)!.arabic.replace(/\s/g,'')).join('')===detail.sourceArabic.replace(/\s/g,''),'Misaligned source surface');
+  assert(comparableArabic(detail.segments.map(s=>s.arabic).join(''))===comparableArabic(detail.sourceArabic),'Misaligned grammar');
+  if(detail.audioPath){const parts=detail.audioPath.slice(4,-4).split('_').map(Number);assert(`${parts[0]}:${parts[1]}`===ref,'Audio crosses ayah');}
+  assert(detail.rootId===(token!.root?`r-${createHash('sha256').update(token!.root.normalize('NFC')).digest('hex').slice(0,16)}`:null),'Mismatched word/root link');
+  if(detail.canonicalKeys.length>1)assert(JSON.stringify(token!.meaningScope?.keys)===JSON.stringify(detail.canonicalKeys),'Shared phrase meaning is not labeled');
+  detailedWords++;
+ }
 }
-
-interface MorphEntry {
-  wordId: string;
-  rootArabic: string;
-  summary: string;
-  rootFamily: string[];
-  rootFamilyCount: number;
-  rootFamilyWords: Array<{ key: string; uthmani: string; english: string }>;
+assert(detailedWords===wordCount,'Missing word analyses');
+for(const [id,keys] of expectedRoots){
+ const path=`roots/${id}.json`;assert(Object.hasOwn(manifest.files,path),'Missing root checksum');
+ const family=rootFamilySchema.parse(json(`${base}/${path}`));assert(family.id===id,'Root identity mismatch');
+ assert(JSON.stringify(family.occurrences.map(o=>o.key))===JSON.stringify(keys),'Incomplete or unordered root family');
+ for(const word of family.occurrences){const token=tokens.get(word.key)!;assert(token.root===family.root&&word.arabic===token.arabic&&word.gloss===token.gloss&&word.entryId===token.entryId&&word.lemma===token.lemma,'Misaligned root occurrence');}
+ for(const note of family.notes)for(const key of note.summaryKeys)assert(tokens.get(key)?.kind==='word','Invalid original summary link');
 }
-
-// ── Load files ─────────────────────────────────────────────────────────────
-
-function load<T>(filename: string): T {
-  const fullPath = path.join(DATA_DIR, filename);
-  return JSON.parse(fs.readFileSync(fullPath, 'utf-8')) as T;
-}
-
-const words      = load<Word[]>('words.json');
-const morphology = load<Record<string, MorphEntry>>('wbw-morphology.json');
-const englishWbw = load<Record<string, string>>('english-wbw.json');
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-
-const VERSE_KEY_RE = /^\d+:\d+:\d+$/;
-
-type Severity = 'ERROR' | 'WARN' | 'INFO';
-
-interface Issue {
-  severity: Severity;
-  check: string;
-  detail: string;
-}
-
-const issues: Issue[] = [];
-
-function error(check: string, detail: string) {
-  issues.push({ severity: 'ERROR', check, detail });
-}
-function warn(check: string, detail: string) {
-  issues.push({ severity: 'WARN', check, detail });
-}
-
-// ── Check 1: words.json ↔ wbw-morphology.json key parity ──────────────────
-
-const wordIds   = new Set(words.map(w => w.id));
-const morphKeys = new Set(Object.keys(morphology));
-
-for (const id of wordIds) {
-  if (!morphKeys.has(id)) {
-    error('missing_morphology', `"${id}" is in words.json but has no entry in wbw-morphology.json`);
-  }
-}
-for (const key of morphKeys) {
-  if (!wordIds.has(key)) {
-    warn('orphaned_morphology', `"${key}" is in wbw-morphology.json but not in words.json`);
-  }
-}
-
-// ── Check 2: rootArabic in morphology matches root in words.json ───────────
-
-const wordMap = new Map(words.map(w => [w.id, w]));
-
-for (const [id, morph] of Object.entries(morphology)) {
-  const word = wordMap.get(id);
-  if (!word) continue;
-
-  const normMorph = morph.rootArabic.replace(/\s+/g, ' ').trim();
-  const normWord  = word.root.replace(/\s+/g, ' ').trim();
-
-  if (normMorph !== normWord) {
-    error(
-      'root_arabic_mismatch',
-      `"${id}" — words.json root: "${normWord}" | morphology rootArabic: "${normMorph}"`
-    );
-  }
-}
-
-// ── Check 3: wordId field inside morphology entry matches its key ──────────
-
-for (const [key, morph] of Object.entries(morphology)) {
-  if (morph.wordId !== key) {
-    error(
-      'wordid_key_mismatch',
-      `Morphology key "${key}" but entry.wordId is "${morph.wordId}"`
-    );
-  }
-}
-
-// ── Check 4: rootFamilyCount matches actual rootFamily array length ────────
-
-for (const [id, morph] of Object.entries(morphology)) {
-  const actual = morph.rootFamily?.length ?? 0;
-  if (morph.rootFamilyCount !== actual) {
-    warn(
-      'count_mismatch',
-      `"${id}" declares rootFamilyCount=${morph.rootFamilyCount} but rootFamily has ${actual} entries`
-    );
-  }
-}
-
-// ── Check 5: rootFamily verse key format and surah range ──────────────────
-
-for (const [id, morph] of Object.entries(morphology)) {
-  for (const key of morph.rootFamily ?? []) {
-    if (!VERSE_KEY_RE.test(key)) {
-      error('malformed_verse_key', `"${id}" rootFamily contains malformed key "${key}"`);
-      continue;
-    }
-    const parts = key.split(':').map(Number);
-    const s = parts[0]!;
-    const a = parts[1]!;
-    const w = parts[2]!;
-    if (s < 1 || s > 114) {
-      error('surah_out_of_range', `"${id}" rootFamily key "${key}" has surah ${s} (valid: 1–114)`);
-    }
-    if (a < 1) {
-      error('ayah_zero', `"${id}" rootFamily key "${key}" has ayah ${a}`);
-    }
-    if (w < 1) {
-      error('word_zero', `"${id}" rootFamily key "${key}" has word position ${w}`);
-    }
-  }
-}
-
-// ── Check 6: example_verse format in words.json ───────────────────────────
-
-for (const word of words) {
-  if (!word.example_verse) continue;
-  const parts = word.example_verse.split(':');
-  if (
-    parts.length !== 2 ||
-    isNaN(Number(parts[0])) ||
-    isNaN(Number(parts[1]))
-  ) {
-    error('bad_example_verse', `"${word.id}" example_verse "${word.example_verse}" is not "surah:ayah" format`);
-  }
-}
-
-// ── Check 7: rootFamilyWords keys present in english-wbw.json ─────────────
-//
-// NOTE: A tokenization difference exists between two upstream sources:
-//   • english-wbw.json  — from quran.com word-by-word data
-//   • wbw-morphology.json — from Quranic Arabic Corpus (QAC)
-//
-// In most verses both sources use the same word positions. However, QAC
-// occasionally joins particles differently (e.g. بَعْدَمَا as one token
-// at 2:181:3, leaving سَمِعَهُۥ at 2:181:4), while the quran.com dataset
-// may have a gap at that position. These mismatches are WARNINGS, not errors,
-// because they reflect upstream tokenization choices, not bugs in Harf code.
-//
-// Known gaps: 2:181:4 (samiʿahu — QAC pos 4 after combined baʿdamā token)
-
-const missingGlossSamples: string[] = [];
-let   missingGlossTotal = 0;
-
-for (const [id, morph] of Object.entries(morphology)) {
-  for (const fw of morph.rootFamilyWords ?? []) {
-    if (!englishWbw[fw.key]) {
-      missingGlossTotal++;
-      if (missingGlossSamples.length < 10) {
-        missingGlossSamples.push(`  "${id}" → ${fw.key} (${fw.uthmani})`);
-      }
-    }
-  }
-}
-
-if (missingGlossTotal > 0) {
-  warn(
-    'rootFamilyWords_missing_english_gloss',
-    `${missingGlossTotal} rootFamilyWords keys have no entry in english-wbw.json ` +
-    `(likely tokenization gap between QAC and quran.com datasets):\n` +
-    missingGlossSamples.join('\n') +
-    (missingGlossTotal > 10 ? `\n  … and ${missingGlossTotal - 10} more` : '')
-  );
-}
-
-// ── Check 8: coverage_weight sanity (high-frequency words should have > 0) ─
-
-for (const word of words) {
-  if (word.frequency > 100 && word.coverage_weight <= 0) {
-    warn(
-      'zero_coverage_weight',
-      `"${word.id}" has frequency=${word.frequency} but coverage_weight=${word.coverage_weight}`
-    );
-  }
-}
-
-// ── Report ─────────────────────────────────────────────────────────────────
-
-const errors   = issues.filter(i => i.severity === 'ERROR');
-const warnings = issues.filter(i => i.severity === 'WARN');
-
-const totalVerseKeys = Object.values(morphology).flatMap(m => m.rootFamily ?? []).length;
-
-console.log('\n=== Harf Data Validation ===\n');
-console.log(`  words.json             ${words.length} words`);
-console.log(`  wbw-morphology.json    ${Object.keys(morphology).length} entries`);
-console.log(`  english-wbw.json       ${Object.keys(englishWbw).length} glosses`);
-console.log(`  rootFamily verse keys  ${totalVerseKeys} total\n`);
-
-if (errors.length === 0 && warnings.length === 0) {
-  console.log('  ✓ All checks passed.\n');
-  process.exit(0);
-}
-
-if (errors.length > 0) {
-  console.log(`  ERRORS (${errors.length}):\n`);
-  for (const e of errors) {
-    console.log(`  [${e.check}]\n  ${e.detail}\n`);
-  }
-}
-
-if (warnings.length > 0) {
-  console.log(`  WARNINGS (${warnings.length}):\n`);
-  for (const w of warnings) {
-    console.log(`  [${w.check}]\n  ${w.detail}\n`);
-  }
-}
-
-console.log(`  Summary: ${errors.length} error(s), ${warnings.length} warning(s)\n`);
-
-if (errors.length > 0) {
-  process.exit(1);
-}
+console.log(`Validated ${verseCount} ayahs, ${wordCount} canonical words, 300 lemma entries, output hashes and answer alignment.`);
+if(process.argv.includes('--release')&&!catalog.releaseReady){console.error(catalog.blockers.join('\n'));process.exitCode=1;}

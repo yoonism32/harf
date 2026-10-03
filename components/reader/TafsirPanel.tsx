@@ -1,0 +1,13 @@
+'use client';
+import {useEffect,useRef,useState} from 'react';
+import {z} from 'zod';
+
+const responseSchema=z.object({page:z.number().int().positive(),pages:z.number().int().positive(),blocks:z.array(z.object({kind:z.enum(['heading','paragraph','arabic']),text:z.string()})),sourceStatus:z.string()});
+type Response=z.infer<typeof responseSchema>;
+export function TafsirPanel({reference}:{reference:string}){
+ const [open,setOpen]=useState(false),[data,setData]=useState<Response|null>(null),[page,setPage]=useState(1),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ const revision=useRef(0);
+ useEffect(()=>{revision.current++;setOpen(false);setData(null);setPage(1);setError('');setBusy(false);},[reference]);
+ async function load(next=1){const request=revision.current;setBusy(true);setError('');try{const response=await fetch(`/api/tafsir?ref=${encodeURIComponent(reference)}&page=${next}`);if(!response.ok)throw Error('Commentary could not be loaded.');const value=responseSchema.parse(await response.json());if(request===revision.current){setData(value);setPage(next);}}catch(cause){if(request===revision.current)setError(cause instanceof Error?cause.message:'Commentary could not be loaded.');}finally{if(request===revision.current)setBusy(false);}}
+ return <details open={open} onToggle={event=>{const value=event.currentTarget.open;setOpen(value);if(value&&!data&&!busy)void load();}}><summary>Read Ibn Kathir commentary</summary><div className="tafsir-panel stack" aria-live="polite">{busy&&!data&&<p role="status">Opening commentary…</p>}{error&&<div role="alert" className="status-message"><p>{error}</p><button className="button button-secondary" onClick={()=>void load(page)}>Retry</button></div>}{data&&<><p className="muted">Commentary is interpretation, separate from the Quran translation. {data.sourceStatus}</p>{data.blocks.map((block,index)=>block.kind==='heading'?<h3 key={index}>{block.text}</h3>:<p key={index} className={block.kind==='arabic'?'arabic-text':''} lang={block.kind==='arabic'?'ar':undefined} dir={block.kind==='arabic'?'rtl':undefined}>{block.text}</p>)}<nav className="row between" aria-label="Commentary pages"><button className="button button-secondary" disabled={busy||page===1} onClick={()=>void load(page-1)}>Previous commentary page</button><span>Page {page} of {data.pages}</span><button className="button button-secondary" disabled={busy||page===data.pages} onClick={()=>void load(page+1)}>Next commentary page</button></nav></>}<a href={`https://quran.com/${reference}/tafsirs/en-tafisr-ibn-kathir`} target="_blank" rel="noopener noreferrer">Open Quran.com tafsir in a new tab ↗</a></div></details>;
+}

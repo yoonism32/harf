@@ -1,34 +1,5 @@
-// Web Worker: Quran verse transliteration search
-// Runs off the main thread so the UI stays responsive during the ~50ms scan.
-// Streams partial results after every 2,000 verses so the first hits appear fast.
-
-import translitDataRaw from '@/data/transliteration.json';
-import { searchVersesStreaming, type TranslitSearchResult } from '@/lib/transliteration-search';
-
-const translitData = translitDataRaw as Record<string, string>;
-
-export interface SearchWorkerRequest {
-  id:         number;   // monotonic request ID — stale responses are ignored by main thread
-  query:      string;
-  maxResults: number;
-}
-
-export interface SearchWorkerResponse {
-  id:      number;
-  type:    'partial' | 'done';
-  results: TranslitSearchResult[];
-}
-
-self.onmessage = (e: MessageEvent<SearchWorkerRequest>) => {
-  const { id, query, maxResults } = e.data;
-
-  let lastPartial: TranslitSearchResult[] = [];
-
-  for (const batch of searchVersesStreaming(query, translitData, 2000, maxResults)) {
-    lastPartial = batch;
-    self.postMessage({ id, type: 'partial', results: batch } satisfies SearchWorkerResponse);
-  }
-
-  // Signal completion (main thread uses this to clear the spinner)
-  self.postMessage({ id, type: 'done', results: lastPartial } satisfies SearchWorkerResponse);
-};
+import {getSearchIndex} from '../content/client';
+import {search} from '../search/match';
+import type {SearchMode,SearchIndex} from '../content/schema';
+const indexes=new Map<SearchMode,Promise<SearchIndex>>();
+self.onmessage=async(e:MessageEvent<{id:number;mode:SearchMode;query:string}>)=>{const {id,mode,query}=e.data;try{if(!indexes.has(mode))indexes.set(mode,getSearchIndex(mode).catch(error=>{indexes.delete(mode);throw error;}));const index=await indexes.get(mode)!;self.postMessage({id,results:search(index,mode,query)});}catch(error){self.postMessage({id,error:error instanceof Error?error.message:'Search could not load. Try again.'});}};

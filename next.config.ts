@@ -1,52 +1,18 @@
-import type { NextConfig } from "next";
-
-const securityHeaders = [
-  { key: 'X-Content-Type-Options',        value: 'nosniff' },
-  { key: 'X-Frame-Options',               value: 'DENY' },
-  { key: 'X-XSS-Protection',              value: '1; mode=block' },
-  { key: 'X-DNS-Prefetch-Control',        value: 'on' },
-  { key: 'Referrer-Policy',               value: 'strict-origin-when-cross-origin' },
-  // HSTS: 1 year, include subdomains, eligible for preload list
-  {
-    key: 'Strict-Transport-Security',
-    value: 'max-age=31536000; includeSubDomains; preload',
-  },
-  {
-    key: 'Permissions-Policy',
-    // Allow geolocation for prayer times; block everything else
-    value: 'geolocation=(self), camera=(), microphone=(), payment=()',
-  },
-  {
-    key: 'Content-Security-Policy',
-    // Next.js requires unsafe-inline/unsafe-eval for hydration scripts.
-    // Fonts served locally by next/font (no external font CDN needed).
-    // External API calls: cdn.jsdelivr.net (Quran data) + aladhan.com (prayer times).
-    value: [
-      "default-src 'self'",
-      "base-uri 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
-      "font-src 'self' data:",
-      "img-src 'self' data: blob:",
-      "connect-src 'self' https://cdn.jsdelivr.net https://api.aladhan.com https://audios.quranwbw.com https://everyayah.com",
-      "media-src 'self' https://audios.quranwbw.com https://everyayah.com",
-      "worker-src 'self' blob:",
-      "frame-ancestors 'none'",
-      "upgrade-insecure-requests",
-    ].join('; '),
-  },
-];
-
-const nextConfig: NextConfig = {
-  poweredByHeader: false,
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: securityHeaders,
-      },
-    ];
-  },
+import type {NextConfig} from 'next';
+import mapping from './data/legacy-entry-map.json';
+const nextConfig:NextConfig={
+ poweredByHeader:false,
+ turbopack:{root:process.cwd()},
+ async headers(){return [{source:'/(.*)',headers:[
+ {key:'X-Content-Type-Options',value:'nosniff'},{key:'X-Frame-Options',value:'DENY'},
+ {key:'Referrer-Policy',value:'strict-origin-when-cross-origin'},
+ {key:'Strict-Transport-Security',value:'max-age=31536000; includeSubDomains; preload'},
+ {key:'Permissions-Policy',value:'geolocation=(), camera=(), microphone=(), payment=()'}]},
+ {source:'/content/:version([a-f0-9]{16})/:path*',headers:[{key:'Cache-Control',value:'public, max-age=31536000, immutable'}]},
+ {source:'/sw.js',headers:[{key:'Cache-Control',value:'no-cache'}]},
+ ...['/today','/study','/progress','/settings','/start'].map(source=>({source,headers:[{key:'X-Robots-Tag',value:'noindex, nofollow'}]}))];},
+ async redirects(){return [
+ ...Object.entries(mapping).map(([oldId,newId])=>({source:`/word/${oldId}`,destination:`/learn/${newId}`,permanent:true})),
+ ...[['/app','/today'],['/words','/learn'],['/coverage','/progress'],['/names','/collections/names'],['/verse/:surah/:ayah','/read/:surah/:ayah'],['/search','/read?mode=transliteration'],['/tadabbur/:surah/:ayah','/insights/:surah/:ayah'],['/tadabbur/:surah','/insights/:surah'],['/tadabbur','/insights'],['/word/:id','/learn?notice=legacy-entry'],['/drill','/practice?mode=listening'],['/quiz','/practice?mode=meaning'],['/mutashabihat','/insights/practice']].map(([source,destination])=>({source:source!,destination:destination!,permanent:true}))];}
 };
-
 export default nextConfig;

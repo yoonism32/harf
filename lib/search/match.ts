@@ -1,0 +1,6 @@
+import {normalizeInput} from '../transliteration-search';
+import type {SearchIndex,SearchMode} from '../content/schema';
+export function normalizeArabic(s:string){return s.normalize('NFC').replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/\s+/g,' ').trim();}
+function latin(s:string){return s.toLowerCase().normalize('NFD').replace(/\p{M}/gu,'').replace(/[^\p{L}\p{N}\s]/gu,' ').replace(/\s+/g,' ').trim();}
+function stem(s:string){return s.length>4?s.replace(/(?:ing|ed|es|s)$/,''):s;}
+export function search(index:SearchIndex,mode:SearchMode,query:string){const norm=mode==='arabic'?normalizeArabic:mode==='transliteration'?normalizeInput:latin;if(query.length>200)return [];const q=norm(query);if(q.length<(mode==='arabic'?2:3))return [];const tokens=q.split(' ');return index.map((item,order)=>{const text=norm(item.text),words=text.split(' ');const phrase=mode==='english'?` ${text} `.includes(` ${q} `):text.includes(q);const exact=tokens.every(t=>words.includes(t));const loose=mode==='english'?tokens.every(t=>words.some(w=>stem(w)===stem(t))):tokens.every(t=>words.some(w=>w.includes(t)));return {...item,order,score:phrase?3:exact?2:loose?1:0};}).filter(r=>r.score>0).sort((a,b)=>b.score-a.score||a.order-b.order).slice(0,30);}

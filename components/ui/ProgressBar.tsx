@@ -1,0 +1,1 @@
+export function ProgressBar({ value, max = 100, label }: { value: number; max?: number; label: string }) { return <progress aria-label={label} max={max} value={Math.max(0, Math.min(max, value))} />; }
