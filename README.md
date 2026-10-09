@@ -42,18 +42,16 @@ Keep the server stopped while regenerating/rebuilding. Generated content has ver
 
 ## Accounts
 
-The existing Harf project is `yudbwuaurqhgtkewiwjh` in YN-LabsOS (eu-west-2). ReadSync is separate.
-
 Set these **public** build-time variables in `.env.local` and your host, then rebuild:
 
 ```dotenv
-NEXT_PUBLIC_SUPABASE_URL=https://yudbwuaurqhgtkewiwjh.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<Harf publishable key from Supabase>
 ```
 
 Never put a service-role key or database password in a `NEXT_PUBLIC_` variable. Without these variables, guest study still works and sign-in shows an unavailable message.
 
-In Supabase Authentication → URL Configuration, set the Site URL to `https://harf-gkfk.onrender.com` and allow `https://harf-gkfk.onrender.com/auth/callback` (for local use, `http://localhost:3000/auth/callback`). Email sign-in must be enabled. The default email sender restricts recipients and sending rate; configure your own SMTP before inviting other people. Open each magic link in the browser/device where you requested it. PKCE verification happens at `/auth/callback`; the root also forwards a returned code when Supabase uses the Site URL fallback.
+In Supabase Authentication → URL Configuration, set the Site URL to `https://<your-domain>` and allow `https://<your-domain>/auth/callback` (for local use, `http://localhost:3000/auth/callback`). Email sign-in must be enabled. The default email sender restricts recipients and sending rate; configure your own SMTP before inviting other people. Open each magic link in the browser/device where you requested it. PKCE verification happens at `/auth/callback`; the root also forwards a returned code when Supabase uses the Site URL fallback.
 
 Use `/profile` to check sync, resolve conflicts or sign out. Each account gets an independent IndexedDB cache; no guest import runs. The first load on a device needs a connection. Subsequent loaded study can save offline, with sync after reconnecting. Offline caches are not encrypted; clear site data after syncing/signing out on shared devices.
 
@@ -65,7 +63,7 @@ One atomic upload is limited to 1,000 changed records and about 2 MiB. A larger 
 
 ### Render deployment
 
-The Render service is `https://harf-gkfk.onrender.com`. In Render, set the two public variables above, use Node 26+, build with `npm ci && npm run build:app`, and start with `npm start` for this owner-approved personal deployment. Include the current generated content in the checkout. `npm run build` remains the separate editorial publication gate and will fail while approvals are pending.
+On Render, set the two public variables above, use Node 26+, build with `npm ci && npm run build:app`, and start with `npm start` for this owner-approved personal deployment. Include the current generated content in the checkout. `npm run build` remains the separate editorial publication gate and will fail while approvals are pending.
 
 After deployment, verify a real email sign-in, one saved review, a second-device sync and sign-out. Automated account browser tests intercept Supabase calls; live database isolation/version checks are tested separately and do not prove email delivery.
 
@@ -73,7 +71,7 @@ After deployment, verify a real email sign-in, one saved review, a second-device
 
 Progress, notes, bookmarks and learning history live in IndexedDB. Theme uses localStorage; temporary note drafts use sessionStorage. When signed in, progress also syncs to your Supabase account. Guest progress stays separate; first sign-in does not import it.
 
-Use one browser profile and address consistently. `http://localhost:3000` and a LAN address such as `http://192.168.0.13:3000` have separate storage, as do different browsers, ports and domains. Guest progress is separate on each device. Sign into the same account and sync to continue account progress elsewhere.
+Use one browser profile and address consistently. `http://localhost:3000` and a LAN address such as `http://<lan-ip>:3000` have separate storage, as do different browsers, ports and domains. Guest progress is separate on each device. Sign into the same account and sync to continue account progress elsewhere.
 
 In Settings, choose **Export progress** about weekly and before clearing site data or changing devices/addresses. Keep all parts and the manifest of a multipart backup together. Keep a copy outside the browser and preferably off the device. Today reminds after seven distinct practice days since the last recorded export.
 
