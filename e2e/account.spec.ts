@@ -1,7 +1,9 @@
 import {test,expect} from '@playwright/test';
+import { loadEnvConfig } from '@next/env';
 test.use({serviceWorkers:'block'});
 test.beforeEach(async({context})=>{await context.route('https://*.supabase.co/**',route=>route.abort());});
-const project='yudbwuaurqhgtkewiwjh';
+loadEnvConfig(process.cwd());
+const project=new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://placeholder.supabase.co').hostname.split('.')[0];
 test('guest profile links to accessible email sign-in and handles a sent link',async({page})=>{
  await page.goto('/profile');
  await expect(page.getByText('You are studying as a guest.')).toBeVisible();

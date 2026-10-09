@@ -45,7 +45,7 @@ jobs:
     needs: quality
     env:
       # Account browser tests intercept all Supabase requests; no CI credentials.
-      NEXT_PUBLIC_SUPABASE_URL: https://yudbwuaurqhgtkewiwjh.supabase.co
+      NEXT_PUBLIC_SUPABASE_URL: https://ciplaceholder.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_browser_tests_only
 
     steps:
