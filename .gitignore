@@ -50,14 +50,3 @@ harf-backup-*.json
 
 # Supabase CLI local cache
 /supabase/.temp/
-
-# Internal notes — kept locally, not published
-/CLAUDE.md
-/AGENTS.md
-/todo.md
-/recently-fixed.md
-/HARF_REDESIGN_PLAN.md
-/design.md
-/docs/ROADMAP.md
-/docs/SOURCE_AUDIT_*.md
-*.local.md
