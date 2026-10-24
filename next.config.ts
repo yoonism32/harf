@@ -3,6 +3,7 @@ import mapping from './data/legacy-entry-map.json';
 const nextConfig:NextConfig={
  poweredByHeader:false,
  turbopack:{root:process.cwd()},
+ experimental:{agentUpgrade:'security'},
  async headers(){return [{source:'/(.*)',headers:[
  {key:'X-Content-Type-Options',value:'nosniff'},{key:'X-Frame-Options',value:'DENY'},
  {key:'Referrer-Policy',value:'strict-origin-when-cross-origin'},
