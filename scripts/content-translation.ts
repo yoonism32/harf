@@ -9,7 +9,7 @@ export function parseTranslation(raw:string,ref:string,counts:ReadonlyMap<number
   const flush=()=>{if(runs.some(r=>r.text.trim()))result.push(runs);runs=[];};
   function text(value:string,emphasis?:'italic'|'bold'|'both'){
    const normalized=value.replace(/\s+/g,' ');
-   const pattern=/see\s+(?:the\s+)?footnote\s+of\s*\(?\s*v\.?\s*\d+\s*:\s*\d+\s*\)?|\b(?:V\.|Verse\s+)\s*\d+\s*:\s*\d+/gi;
+   const pattern=/see\s+(?:the\s+)?footnote\s+of\s*\(?\s*v\.?\s*\d+\s*:\s*\d+\s*\)?|\b(?:V\.?|Verses?)\s*(?:\(\s*\d+\s*:\s*\d+\s*\)|\d+\s*:\s*\d+)/gi;
    let start=0;
    for(const match of normalized.matchAll(pattern)){
     if(match.index>start)runs.push({kind:'text',text:normalized.slice(start,match.index),...(emphasis?{emphasis}:{})});

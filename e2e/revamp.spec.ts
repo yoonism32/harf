@@ -65,7 +65,8 @@ test('one-ayah listening range is explicitly unscored',async({page})=>{
 test('translation reference preview closes with focus and reader position preserved',async({page})=>{
  await page.goto('/read/2/21');
  const trigger=page.getByRole('button',{name:'Preview ayah 2:2',exact:true});
- await trigger.scrollIntoViewIfNeeded();
+ // Centre it so the click needs no scroll (on mobile the fixed bottom nav covers the bottom edge).
+ await trigger.evaluate(e=>e.scrollIntoView({block:'center'}));
  await trigger.focus();
  const before=await page.evaluate(()=>scrollY);
  await trigger.click();

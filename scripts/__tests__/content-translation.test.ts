@@ -29,4 +29,11 @@ describe('structured translation compilation',()=>{
   expect(a.paragraphs).toHaveLength(2);expect(a.paragraphs.flat()).toContainEqual({kind:'text',text:'italic',emphasis:'italic'});
   expect(a.translation).toBe('Hello italic bold V.999:1 safe');expect(a.paragraphs.flat().some(r=>r.kind==='reference')).toBe(false);
  });
+ it.each([['21:100','21:100'],['17:45','17:45'],['33:4','58:3'],['6:121','9:31']])('links footnote citation formats in %s to %s',(ref,target)=>{
+  expect(parse(ref).notes.flatMap(n=>n.paragraphs!.flat())).toContainEqual(expect.objectContaining({kind:'reference',target:{kind:'ayah',ref:target}}));
+ });
+ it('keeps a closing bracket with a bracketed citation',()=>{
+  const runs=parseTranslation('<p>See Verse (21:100).</p>','1:1',counts).paragraphs.flat();
+  expect(runs).toContainEqual({kind:'reference',text:'Verse (21:100)',target:{kind:'ayah',ref:'21:100'}});
+ });
 });
