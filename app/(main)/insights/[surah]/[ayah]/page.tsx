@@ -50,7 +50,7 @@ export default async function AyahInsightsPage({ params }: { params: Promise<{ s
       <article className="sheet stack">
         <p className="quran-text" dir="rtl" lang="ar">{ayah.tokens.map(token => token.arabic).join(' ')}</p>
         <p className="translation">{ayah.translation}</p>
-        <p className="muted">{ayah.translationSource}</p>
+        
         <Link className="button button-primary" href={`/read/${parsed.surah}/${parsed.ayah}`}>Open in the Quran reader</Link>
       </article>
 

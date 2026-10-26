@@ -106,8 +106,8 @@ test('optional prayer location persists without precise geolocation',async({page
 });
 
 test('core pages meet automated accessibility checks', async ({ page }, testInfo) => {
-  test.setTimeout(60_000); // Fifteen full-page axe scans, including slower WebKit.
-  for (const path of ['/', '/start', '/today', '/learn', '/read', '/practice', '/insights', '/insights/1/1', '/insights/practice', '/collections/names', '/progress', '/settings', '/sources', '/profile', '/login']) {
+  test.setTimeout(60_000); // Eighteen full-page axe scans, including slower WebKit.
+  for (const path of ['/', '/start', '/today', '/learn', '/read', '/practice', '/insights', '/insights/1/1', '/insights/practice', '/collections/names', '/progress', '/settings', '/sources', '/profile', '/login', '/signup', '/forgot-password', '/account/password']) {
     await page.goto(path);
     await page.waitForLoadState('networkidle');
     const result = await new AxeBuilder({ page }).analyze();

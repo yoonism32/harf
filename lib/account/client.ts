@@ -4,7 +4,7 @@ let client:SupabaseClient|undefined;
 export function accountClient(){
  if(!accountConfigured)throw Error('Account connection is not configured.');
  return client??=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,{
-  auth:{flowType:'pkce',detectSessionInUrl:false},
+  auth:{flowType:'pkce',detectSessionInUrl:false,persistSession:true,autoRefreshToken:true},
   global:{fetch:(input,init)=>fetch(input,{...init,signal:init?.signal?AbortSignal.any([init.signal,AbortSignal.timeout(15000)]):AbortSignal.timeout(15000)})},
  });
 }
@@ -20,11 +20,14 @@ export function ensureIdentity(){
   const {data,error}=await client.auth.getSession();
   if(error)throw error;
   owner=data.session?{id:data.session.user.id,email:data.session.user.email??''}:null;
-  client.auth.onAuthStateChange((_event,session)=>{
+  client.auth.onAuthStateChange((event,session)=>{
    if((session?.user.id??null)!==(owner?.id??null)){
     changed=true;
     // Reload makes every mounted view and pending command release the old identity.
-    window.location.replace('/profile');
+    // Auth forms own their final redirect; recovery must reach password setup.
+    const completingAuth = (event==='SIGNED_IN'||event==='PASSWORD_RECOVERY') &&
+      ['/login','/signup','/auth/callback'].includes(window.location.pathname);
+    if(!completingAuth)window.location.replace('/profile');
    }
   });
   return owner;

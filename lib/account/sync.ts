@@ -22,9 +22,12 @@ export function scheduleSync(){
  if(status.kind!=='conflict')emit({kind:'idle',message:'Saved on this device. Waiting to sync.'});
  timer=setTimeout(()=>{void syncAccount();},1200);
 }
+export let passageSyncAvailable=false;
 async function rpc(since:number,expected:number|null=null,changes=delta({},{})){
- const {data,error}=await accountClient().rpc('harf_sync',{since_version:since,expected_version:expected,changes});
- if(error)throw Error(error.message);
+ let {data,error}=await accountClient().rpc('harf_sync_v3',{since_version:since,expected_version:expected,changes});
+ passageSyncAvailable=!error;
+ if(error && (error.code==='PGRST202'||error.code==='42883') && !changes.some(c=>c.collection==='passageCards'||c.collection==='passageReviews')){const legacy=await accountClient().rpc('harf_sync',{since_version:since,expected_version:expected,changes});data=legacy.data;error=legacy.error;}
+ if(error)throw Error('Account sync requires the passage-practice database update. Local progress is kept. '+error.message);
  return responseSchema.parse(data);
 }
 function validated(records:RecordMap,local:Awaited<ReturnType<typeof readData>>){

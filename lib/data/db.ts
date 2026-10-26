@@ -6,11 +6,14 @@ export async function getDB() {
   const identity = await databaseIdentity();
   return (opening ??= new Promise<IDBPDatabase>((resolve, reject) => {
     let blockedTimer: ReturnType<typeof setTimeout> | undefined;
-    openDB(identity ? `harf-account-${identity.id}` : "harf", 2, {
+    openDB(identity ? `harf-account-${identity.id}` : "harf", 3, {
       upgrade(db, oldVersion, _newVersion, tx) {
         for (const name of [...stores, "recovery", "sync"]) {
           if (db.objectStoreNames.contains(name)) continue;
           const store = db.createObjectStore(name);
+          if (name === "passageReviews") {
+            store.createIndex("attemptId", "attemptId", { unique: true });
+          }
           if (name === "reviews") {
             store.createIndex("attemptId", "attemptId", { unique: true });
             store.createIndex("cardId", "cardId");

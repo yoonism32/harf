@@ -1,6 +1,6 @@
 import {NextRequest,NextResponse} from 'next/server';
 export function proxy(request:NextRequest){
- if(request.nextUrl.pathname==='/' && request.nextUrl.searchParams.has('code')) {
+ if(request.nextUrl.pathname==='/' && ['code','error','error_code'].some(key=>request.nextUrl.searchParams.has(key))) {
   const callback=request.nextUrl.clone();callback.pathname='/auth/callback';return NextResponse.redirect(callback);
  }
  const nonce=btoa(crypto.randomUUID());

@@ -1,6 +1,6 @@
 import {morphologySchema,rootFamilySchema} from './morphology-schema';
 import { z } from 'zod';
-import { ayahSchema, catalogSchema, entryPayloadSchema, nameEntrySchema, overlapSchema, searchIndexSchema, type SearchMode } from './schema';
+import { ayahSchema, catalogSchema, entryPayloadSchema, nameEntrySchema, overlapSchema, searchIndexSchema, listeningManifestSchema, type SearchMode } from './schema';
 import { parseRef } from './refs';
 import version from './version.json';
 export const CONTENT_VERSION = version.contentVersion;
@@ -26,6 +26,7 @@ async function request<T>(path: string, schema: z.ZodType<T>): Promise<T> {
   try{return await task;}finally{pending.delete(path);}
 }
 export const getCatalog=()=>request('catalog.json',catalogSchema);
+export const getListeningManifest=()=>request('practice/listening.json',listeningManifestSchema);
 export function getSurah(number:number) { if(!Number.isInteger(number)||number<1||number>114)throw new Error('Invalid surah'); return request(`surahs/${number}.json`,z.array(ayahSchema)); }
 export async function getAyah(ref:string) { const parsed=parseRef(ref);if(!parsed)throw new Error('Invalid ayah reference');const ayah=(await getSurah(parsed.surah)).find(a=>a.ref===ref);if(!ayah)throw new Error('Ayah unavailable');return ayah; }
 export function getEntry(id:string) {if(!/^l-[a-f0-9]{16}$/.test(id))throw new Error('Invalid vocabulary entry');return request(`entries/${id}.json`,entryPayloadSchema);}

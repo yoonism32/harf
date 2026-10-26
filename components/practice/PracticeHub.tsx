@@ -1,26 +1,23 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { AudioControl } from '@/components/reader/AudioControl';
+import { ListeningRecall } from './ListeningRecall';
 import { ResourceMessage, useResource } from '@/components/learning/useResource';
 import { ArabicText, Button, StatusMessage } from '@/components/ui';
-import { getAyah, getCatalog, getEntry } from '@/lib/content/client';
-import { stopAudio, verseAudioUrl } from '@/lib/audio';
+import { getCatalog, getEntry } from '@/lib/content/client';
 import { useHarfStore } from '@/lib/data/store';
 import {
-  buildListeningQuestion,
   buildWordQuestion,
   nextRoundHref,
-  type ListeningQuestion,
   type PracticeMode,
   type WordQuestion,
 } from '@/lib/practice/questions';
 import styles from './Practice.module.css';
 
 const modes: Array<{ id: PracticeMode; title: string; description: string }> = [
-  { id: 'listening', title: 'Listening', description: 'Hear an ayah, identify its surah, then read it in context.' },
+  { id: 'listening', title: 'Listening', description: 'Hear an ayah and recall its exact surah and ayah number.' },
   { id: 'meaning', title: 'Word meaning', description: 'Match a Quranic word to its recorded word-level meaning.' },
   { id: 'root', title: 'Root family', description: 'Recognize the recorded Arabic root without treating related words as synonyms.' },
 ];
@@ -150,51 +147,6 @@ function WordRound({ question, mode, seed, round, answer }: {
   </RoundFrame>;
 }
 
-function ListeningRound({ question, seed, round, answer,reciter }: {
-  question: ListeningQuestion;
-  seed: number;
-  round: number;
-  answer: string | null;
-  reciter:string;
-}) {
-  const router = useRouter();
-  const load = useCallback(() => getAyah(question.ref), [question.ref]);
-  const ayah = useResource(load);
-  useEffect(() => () => stopAudio(), [question.ref]);
-  const selectedNumber = numberParam(answer, 114);
-  const selected = question.choices.some((choice) => choice.number === selectedNumber) ? selectedNumber : null;
-  const selectedSurah = question.choices.find((choice) => choice.number === selected);
-  const selectedLabel = selectedSurah ? `${selectedSurah.number}. ${selectedSurah.englishName}` : null;
-  const correct = selected === question.surah.number;
-  const [surah, verse] = question.ref.split(':') as [string, string];
-  return <RoundFrame mode="listening" round={round}>
-    {!ayah.data ? <ResourceMessage error={ayah.error} retry={ayah.retry} /> : <section className="sheet stack">
-      <div className={styles.prompt}>
-        <h2>Which surah is this ayah from?</h2>
-        <p className="muted">Listen as often as you need. The text appears after you answer.</p>
-      </div>
-      <AudioControl url={verseAudioUrl(surah, verse,reciter)} label="Play ayah" />
-      <ChoiceButtons
-        choices={question.choices.map((choice) => `${choice.number}. ${choice.englishName}`)}
-        correct={`${question.surah.number}. ${question.surah.englishName}`}
-        selected={selectedLabel}
-        label="Choose a surah"
-        onSelect={(choice) => router.replace(answerHref('listening', seed, round, choice.split('.')[0]!), { scroll: false })}
-      />
-      {selected !== null && <div className={`${styles.result} stack`} aria-live="polite">
-        <StatusMessage error={!correct}>{correct ? 'Correct.' : `This is from ${question.surah.englishName}.`}</StatusMessage>
-        <p><strong>{question.surah.number}. {question.surah.englishName}</strong> · Ayah {verse}</p>
-        <p className={`quran-text ${styles.quran}`} dir="rtl" lang="ar">{ayah.data.tokens.map((token) => `${token.arabic} `)}</p>
-        <p className="translation">{ayah.data.translation}</p>
-        <div className="actions">
-          <Link href={`/read/${surah}/${verse}`}>Open in Read</Link>
-          <Link className="button button-primary" href={nextRoundHref('listening', seed, round)}>Next round</Link>
-        </div>
-      </div>}
-    </section>}
-  </RoundFrame>;
-}
-
 export function PracticeHub() {
   const params = useSearchParams();
   const store=useHarfStore();
@@ -205,11 +157,9 @@ export function PracticeHub() {
   const answer = params.get('answer');
   const active = validMode(mode) && seed !== null && round !== null;
   const question = useMemo(() => {
-    if (!active || !catalog.data) return null;
+    if (!active || !catalog.data || mode === 'listening') return null;
     try {
-      return mode === 'listening'
-        ? buildListeningQuestion(catalog.data, seed, round)
-        : buildWordQuestion(catalog.data.entries, mode, seed, round);
+      return buildWordQuestion(catalog.data.entries, mode, seed, round);
     } catch (cause) {
       return cause instanceof Error ? cause : new Error('Practice could not start.');
     }
@@ -217,8 +167,7 @@ export function PracticeHub() {
   if (!active) return <StartPractice initialMode={validMode(mode)?mode:'listening'} />;
   if (!catalog.data) return <div className={styles.shell}><ResourceMessage error={catalog.error} retry={catalog.retry} /></div>;
   if (question instanceof Error) return <div className={`${styles.shell} stack`}><StatusMessage error>{question.message}</StatusMessage><Link href="/practice">Choose another activity</Link></div>;
+  if (mode === 'listening') return <ListeningRecall key={seed} seed={seed} initialRound={round} reciter={store.settings.reciter} surahs={catalog.data.surahs}/>;
   if (!question) return null;
-  return mode === 'listening'
-    ? <ListeningRound question={question as ListeningQuestion} seed={seed} round={round} answer={answer} reciter={store.settings.reciter} />
-    : <WordRound question={question as WordQuestion} mode={mode} seed={seed} round={round} answer={answer} />;
+  return <WordRound question={question as WordQuestion} mode={mode} seed={seed} round={round} answer={answer} />;
 }

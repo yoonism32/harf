@@ -1,6 +1,7 @@
+import {passageCardSchema,passageReviewSchema} from "../practice/passage-model";
 import {z} from 'zod';
 import {emptyData,cardSchema,reviewSchema,sessionSchema,noteSchema,bookmarkSchema,settingsSchema,type DataSnapshot} from '@/lib/data/schema';
-export const cloudStores=['meta','cards','reviews','sessions','notes','bookmarks'] as const;
+export const cloudStores=['meta','cards','reviews','sessions','notes','bookmarks','passageCards','passageReviews'] as const;
 export const cloudMeta=['settings','activeSessionId','priorityEntries','lastVerse'] as const;
 const recordSchema=z.object({collection:z.enum(cloudStores),key:z.string().min(1).max(120).refine(k=>!['__proto__','constructor','prototype'].includes(k)),value:z.unknown()});
 export type CloudRecord=z.infer<typeof recordSchema>;
@@ -35,7 +36,7 @@ export function applyRecords(base:RecordMap,changes:CloudRecord[]):RecordMap{
    else if(key==='lastVerse')z.string().regex(/^\d{1,3}:\d{1,3}$/).parse(value);
    else z.string().min(1).max(100).parse(value);
   }else{
-   const parsed={cards:cardSchema,reviews:reviewSchema,sessions:sessionSchema,notes:noteSchema,bookmarks:bookmarkSchema}[collection].parse(value);
+   const parsed={passageCards:passageCardSchema,passageReviews:passageReviewSchema,cards:cardSchema,reviews:reviewSchema,sessions:sessionSchema,notes:noteSchema,bookmarks:bookmarkSchema}[collection].parse(value);
    if(parsed.id!==key)throw Error('Cloud record ID does not match');
   }
   next[`${collection}/${key}`]=record;

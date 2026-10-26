@@ -1,3 +1,4 @@
+import {passageCardSchema,passageReviewSchema} from "../practice/passage-model";
 import { z } from "zod";
 import { openDB, deleteDB } from "idb";
 import { getDB, readData, writeData } from "./db";
@@ -21,6 +22,8 @@ export const MAX_PART_BYTES = 20 * 1024 * 1024;
 export const MAX_IMPORT_BYTES = 128 * 1024 * 1024;
 export const MAX_IMPORT_PARTS = 64;
 const dataSchema = z.object({
+  passageCards:z.array(passageCardSchema).max(100000).default([]),
+  passageReviews:z.array(passageReviewSchema).max(2000000).default([]),
   meta: z.record(z.string(), z.unknown()),
   cards: z.array(cardSchema).max(100000),
   reviews: z.array(reviewSchema).max(2000000),
@@ -31,7 +34,7 @@ const dataSchema = z.object({
 });
 const backupSchema = z.object({
   app: z.literal("harf"),
-  schemaVersion: z.literal(2),
+  schemaVersion: z.union([z.literal(2),z.literal(3)]),
   contentVersion: z.string().max(100),
   exportedAt: instant,
   data: dataSchema,
@@ -85,6 +88,8 @@ export function validateBackup(value: unknown): Backup {
     "sessions",
     "notes",
     "bookmarks",
+    "passageCards",
+    "passageReviews",
   ] as const) {
     const keys = data[name].map((v) => v.id);
     if (new Set(keys).size !== keys.length)
@@ -94,6 +99,8 @@ export function validateBackup(value: unknown): Backup {
     if (!validReference(bookmark.id)) throw Error("Invalid bookmark reference");
   if (data.meta.lastVerse && !validReference(data.meta.lastVerse))
     throw Error("Invalid reading position");
+  const passageAttempts=data.passageReviews.map(e=>e.attemptId);
+  if(new Set(passageAttempts).size!==passageAttempts.length)throw Error("Duplicate passage attempt");
   const attempts = data.reviews.map((e) => e.attemptId);
   if (new Set(attempts).size !== attempts.length)
     throw Error("Duplicate review attempt");
@@ -129,7 +136,7 @@ export async function exportBackup(
   data.meta.lastExportAt = exportedAt;
   const backup: Backup = {
     app: "harf",
-    schemaVersion: 2,
+    schemaVersion: 3,
     contentVersion,
     exportedAt,
     data,
@@ -174,7 +181,7 @@ export async function exportBackup(
       name: `${prefix}-${backupId}-part-${index + 1}.json`,
       text: JSON.stringify({
         app: "harf",
-        schemaVersion: 2,
+        schemaVersion: 3,
         backupId,
         partIndex: index + 1,
         partCount: groups.length,
@@ -189,7 +196,7 @@ export async function exportBackup(
       name: `${prefix}-${backupId}-manifest.json`,
       text: JSON.stringify({
         app: "harf",
-        schemaVersion: 2,
+        schemaVersion: 3,
         type: "multipart-manifest",
         backupId,
         partCount: groups.length,
@@ -272,7 +279,7 @@ export async function parseImport(
     return {
       backup: {
         app: "harf",
-        schemaVersion: 2,
+        schemaVersion: 3,
         contentVersion: "legacy",
         exportedAt: new Date().toISOString(),
         data: convertLegacy(raw, legacyMapping),
@@ -312,7 +319,7 @@ export async function parseImport(
       const {value,text}=await readObject(parts[i]!.file);
       if (
         value.app !== "harf" ||
-        value.schemaVersion !== 2 ||
+        ![2,3].includes(Number(value.schemaVersion)) ||
         value.backupId !== manifest.backupId ||
         value.partIndex !== i + 1 ||
         value.partCount !== parts.length ||
@@ -348,7 +355,7 @@ export async function parseImport(
     return {
       backup: validateBackup({
         app: "harf",
-        schemaVersion: 2,
+        schemaVersion: 3,
         contentVersion: first.contentVersion,
         exportedAt: first.exportedAt,
         data,
@@ -425,10 +432,10 @@ export async function recoverPrevious() {
   for (const name of stores) {
     await tx.objectStore(name).clear();
     if (name === "meta" || name === "legacy")
-      for (const [key, value] of Object.entries(snapshot.data[name]))
+      for (const [key, value] of Object.entries((snapshot.data[name] ?? [])))
         await tx.objectStore(name).put(value, key);
     else
-      for (const value of snapshot.data[name])
+      for (const value of (snapshot.data[name] ?? []))
         await tx.objectStore(name).put(value, value.id);
   }
   await tx.objectStore("meta").put(currentRevision + 1, "revision");

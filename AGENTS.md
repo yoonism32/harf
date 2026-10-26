@@ -6,7 +6,7 @@ Verified against the working tree on 1 October 2026. This guide replaces the old
 
 Harf (حرف) helps an English-speaking learner who can read Arabic script recognise Quranic vocabulary through spaced recall and ayah context. Vocabulary familiarity is not Quran comprehension or a religious rank.
 
-The owner chose optional email login, `/profile`, and Supabase account sync on 2 October 2026. Guest study and portable backups remain. First login starts fresh; never import guest data automatically. Payments remain out of scope. See README for account configuration and sync limitations.
+The owner chose optional email login, `/profile`, and Supabase account sync on 2 October 2026. On 4 October, the owner chose email/password as the main sign-in method, with signup confirmation, password recovery, and password setup for existing email-link accounts. Guest study and portable backups remain. New accounts start fresh; existing accounts load their synced progress. Never import guest data automatically. Payments remain out of scope. See README for account configuration and sync limitations.
 
 The September redesign prompt called for deliberate product and architecture decisions rather than incremental decoration. Its plan was subsequently implemented and amended: Practice, Insights, Daily Ayah, prayer times, and local tafsir were restored. Do not remove these because the original plan said to retire them.
 
@@ -113,7 +113,7 @@ On 1 October 2026, 43 unit tests, typecheck and content validation passed. Full 
 
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 

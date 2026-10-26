@@ -1,4 +1,5 @@
 "use client";
+import {passageCardSchema,passageReviewSchema} from "../practice/passage-model";
 import { useSyncExternalStore } from "react";
 import { readData, getDB } from "./db";
 import {
@@ -48,6 +49,8 @@ export async function refreshStore() {
       ...defaultSettings,
       ...(data.meta.settings as Partial<Settings> | undefined),
     });
+    data.passageCards.forEach(card=>passageCardSchema.parse(card));
+    data.passageReviews.forEach(review=>passageReviewSchema.parse(review));
     data.cards.forEach((card) => cardSchema.parse(card));
     data.reviews.forEach((review) => reviewSchema.parse(review));
     data.sessions.forEach((session) => sessionSchema.parse(session));

@@ -1,3 +1,4 @@
+import {parseTranslation,resolveTranslationNotes} from './content-translation';
 import {buildMorphology,rootId} from './content-morphology';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -5,7 +6,7 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { parseFragment, type DefaultTreeAdapterMap } from 'parse5';
 import { z } from 'zod';
-import { ayahSchema, catalogSchema, entryPayloadSchema, nameEntrySchema, type Ayah, type Token, type VocabularyEntry, type TranslationNote } from '../lib/content/schema';
+import { listeningManifestSchema, ayahSchema, catalogSchema, entryPayloadSchema, nameEntrySchema, type Ayah, type Token, type VocabularyEntry, type TranslationNote } from '../lib/content/schema';
 const root = process.cwd();
 const read = (path: string) => readFileSync(join(root, path), 'utf8');
 const json = (path: string) => JSON.parse(read(path));
@@ -26,7 +27,7 @@ for(let n=1;n<=114;n++){const path=`surah-${n}.json`;if(previewManifest[path]!==
 const approval = z.object({ status: z.enum(['pending','approved']), reviewer:z.string().optional(), reviewedAt:z.string().optional(), evidence:z.string().optional() });
 const overrides = z.object({ entries: z.record(z.string(), z.object({ exampleKeys: z.array(z.string()).min(1).max(3).optional(), approval: approval.optional() })), legacyMappings: z.record(z.string().regex(/^[a-z0-9-]+$/),z.string().regex(/^l-[a-f0-9]{16}$/)), namesApproved:z.boolean() }).parse(json('data/course-overrides.json'));
 const alignment = z.object({ exceptions:z.record(z.string(),z.object({ sourceKeys:z.array(z.string()).min(1), evidence:z.string().min(10) })) }).parse(json('data/token-alignment.json'));
-const contentVersion = hash(JSON.stringify({files:sources.files.map(s=>s.sha256),sources,overrides,alignment,compiler:hash(read('scripts/build-content.ts')+read('scripts/content-morphology.ts')+read('lib/content/alignment.ts')+read('lib/content/morphology-schema.ts')),schema:hash(read('lib/content/schema.ts')),metadata:hash(read('data/quran-surah-meta.json'))})).slice(0,16);
+const contentVersion = hash(JSON.stringify({files:sources.files.map(s=>s.sha256),sources,overrides,alignment,compiler:hash(read('scripts/build-content.ts')+read('scripts/content-morphology.ts')+read('scripts/content-translation.ts')+read('lib/content/alignment.ts')+read('lib/content/morphology-schema.ts')),schema:hash(read('lib/content/schema.ts')),metadata:hash(read('data/quran-surah-meta.json'))})).slice(0,16);
 const contentRoot=join(root,'public/content');
 const previousPointer=existsSync(join(contentRoot,'manifest.json'))?z.object({contentVersion:z.string().regex(/^[a-f0-9]{16}$/),releaseReady:z.boolean()}).parse(json('public/content/manifest.json')):null;
 const existingVersions=existsSync(contentRoot)?readdirSync(contentRoot,{withFileTypes:true}).filter(entry=>entry.isDirectory()&&/^[a-f0-9]{16}$/.test(entry.name)).map(entry=>entry.name):[];
@@ -45,17 +46,6 @@ function plain(html:string):string {
   return 'tagName' in node && ['p','div','br','li'].includes(node.tagName) ? ` ${text} ` : text;
  };
  return walk(parseFragment(html)).replace(/\s+/g,' ').trim();
-}
-function splitFootnotes(raw:string):{translation:string,notes:TranslationNote[]} {
- const notes:TranslationNote[]=[];
- const withoutNotes=raw.replace(/\[\[([\s\S]*?)\]\]/g,(_,inner:string)=>{
-  const text=plain(inner);
-  if(!text) return '';
-  const refMatch=/see\s+(?:the\s+)?footnote\s+of\s*\(?\s*v\.?\s*(\d+)\s*:\s*(\d+)\s*\)?/i.exec(text);
-  notes.push({text,ref:refMatch?{surah:Number(refMatch[1]),ayah:Number(refMatch[2])}:null});
-  return '';
- });
- return {translation:plain(withoutNotes),notes};
 }
 let qulWords!:Record<string,{text:string}>,qulGlosses:Record<string,string>,qulTranslit:Record<string,string>,qulTranslation:Record<string,{t:string}>;
 const qulLemma=new Map<string,string>(),qulRoot=new Map<string,string>();
@@ -99,8 +89,8 @@ for(const surah of surahs) {
    if(!wordKeys.length) throw new Error(`Missing words for ayah ${ref}`);
    const lastPosition=Number(wordKeys[wordKeys.length-1]!.split(':')[2]);
    const rawTranslation=qulTranslation[ref]?.t; if(!rawTranslation) throw new Error(`Missing translation for ayah ${ref}`);
-   const {translation,notes}=splitFootnotes(rawTranslation);
-   return {ref,translation,translationSource:'qul-301-hilali-khan',notes,tokens:wordKeys.map(key=>{
+   const {translation,notes,paragraphs}=parseTranslation(rawTranslation,ref,new Map(surahs.map(s=>[s.number,s.ayahCount])));
+   return {ref,translation,paragraphs,translationSource:'qul-301-hilali-khan',notes,tokens:wordKeys.map(key=>{
     const position=Number(key.split(':')[2]); const marker=position===lastPosition;
     return {key,position,arabic:qulWords[key]!.text,kind:marker?'end-marker' as const:'word' as const,gloss:marker?'':plain(qulGlosses[key]??''),transliteration:marker?'':plain(qulTranslit[key]??''),lemma:marker?null:qulLemma.get(key)??null,root:marker?null:qulRoot.get(key)??null,entryId:null};
    })};
@@ -119,6 +109,7 @@ for(const surah of surahs) {
  if(rows.length!==surah.ayahCount)throw new Error(`Missing verses in surah ${surah.number}`);
  rows.forEach((a,i)=>{ayahSchema.parse(a);if(a.ref!==`${surah.number}:${i+1}`)throw new Error(`Verse order ${a.ref}`);a.tokens.forEach((t,index)=>{if(t.position!==index+1||t.key!==`${a.ref}:${index+1}`)throw new Error(`Token order ${t.key}`);if(t.kind==='word'&&t.lemma){const id=`l-${hash(t.lemma.normalize('NFC')+'\0'+(t.root??'').normalize('NFC')).slice(0,16)}`;const group=groups.get(id)??[];if(group[0]&&(group[0].lemma!==t.lemma||group[0].root!==t.root))throw new Error('ID collision');group.push(t);groups.set(id,group);}});});ayahs.push(...rows);
 }
+resolveTranslationNotes(ayahs);
 const morphology=buildMorphology(ayahs,plain);
 const byRef=new Map(ayahs.map(a=>[a.ref,a]));
 const reference=(key:string)=>key.split(':').slice(0,2).join(':');
@@ -153,6 +144,10 @@ names.forEach((name,index)=>{if(name.id!==index+1)throw new Error('Names source 
 blockers.push('The 99 original Names are selected for personal use; independent editorial review is not recorded.');
 const catalog=catalogSchema.parse({contentVersion,entries,surahs,releaseReady:blockers.length===0,blockers});
 write(`${out}/catalog.json`,catalog);
+const listeningRows=surahs.flatMap(s=>z.object({verses:z.array(z.object({verse_key:z.string(),juz_number:z.number().int().min(1).max(30)}))}).parse(json(`data/source/preview/surah-${s.number}.json`)).verses.map(v=>({ref:v.verse_key,juz:v.juz_number})));
+const listeningManifest=listeningManifestSchema.parse(listeningRows);
+if(listeningManifest.some((v,i)=>v.ref!==ayahs[i]?.ref))throw Error('Listening manifest references differ from canonical ayahs');
+write(`${out}/practice/listening.json`,listeningManifest);
 writeFileSync(join(root,out,'source-notices.txt'),read('data/source/preview/qac-morphology-0.4.txt').split('LOCATION')[0]!);
 write(`${out}/sources.json`,json('data/sources.json'));
 for(const s of surahs)write(`${out}/surahs/${s.number}.json`,ayahs.filter(a=>a.ref.startsWith(`${s.number}:`)));
@@ -170,7 +165,7 @@ write(`${out}/overlap.json`,{totalWords:words.length,surahs:Object.fromEntries(s
 for(const mode of ['arabic','english','transliteration'] as const)write(`${out}/search/${mode}.json`,ayahs.map(a=>({ref:a.ref,text:mode==='arabic'?a.tokens.map(t=>t.arabic).join(' '):mode==='english'?a.translation+' '+a.tokens.filter(t=>t.kind==='word').map(t=>t.gloss).join(' '):a.tokens.filter(t=>t.kind==='word').map(t=>t.transliteration).join(' ')})));
 const report={mode:sources.mode,contentVersion,verseCount:ayahs.length,wordCount:words.length,entryCount:entries.length,unalignedMorphology:unaligned,restoredMorphology:morphology.report,morphologyCounts:{withLemma:words.filter(t=>t.lemma!==null).length,withoutLemma:words.filter(t=>t.lemma===null).length,inCourse:words.filter(t=>t.entryId!==null).length},excludedGroups:excluded.map(id=>({id,reason:'No aligned gloss and transliteration example'})),blockers};write(`${out}/alignment-report.json`,report);
 write('data/legacy-entry-map.json',overrides.legacyMappings);
-const paths=['source-notices.txt','sources.json','catalog.json','names.json','overlap.json','alignment-report.json',...surahs.map(s=>`surahs/${s.number}.json`),...surahs.map(s=>`morphology/${s.number}.json`),...[...morphology.roots.keys()].map(id=>`roots/${id}.json`),...entries.map(e=>`entries/${e.id}.json`),...['arabic','english','transliteration'].map(m=>`search/${m}.json`)];
+const paths=['practice/listening.json','source-notices.txt','sources.json','catalog.json','names.json','overlap.json','alignment-report.json',...surahs.map(s=>`surahs/${s.number}.json`),...surahs.map(s=>`morphology/${s.number}.json`),...[...morphology.roots.keys()].map(id=>`roots/${id}.json`),...entries.map(e=>`entries/${e.id}.json`),...['arabic','english','transliteration'].map(m=>`search/${m}.json`)];
 write(`${out}/manifest.json`,{contentVersion,files:Object.fromEntries(paths.map(p=>[p,hash(read(`${out}/${p}`))]))});write('public/content/manifest.json',{contentVersion,releaseReady:catalog.releaseReady});
 write('lib/content/version.json',{contentVersion});
 for(const entry of readdirSync(contentRoot,{withFileTypes:true}))if(entry.isDirectory()&&/^[a-f0-9]{16}$/.test(entry.name)&&entry.name!==contentVersion&&entry.name!==previousContentVersion)rmSync(join(contentRoot,entry.name),{recursive:true,force:true});

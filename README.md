@@ -51,7 +51,13 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<Harf publishable key from Supabase>
 
 Never put a service-role key or database password in a `NEXT_PUBLIC_` variable. Without these variables, guest study still works and sign-in shows an unavailable message.
 
-In Supabase Authentication → URL Configuration, set the Site URL to `https://<your-domain>` and allow `https://<your-domain>/auth/callback` (for local use, `http://localhost:3000/auth/callback`). Email sign-in must be enabled. The default email sender restricts recipients and sending rate; configure your own SMTP before inviting other people. Open each magic link in the browser/device where you requested it. PKCE verification happens at `/auth/callback`; the root also forwards a returned code when Supabase uses the Site URL fallback.
+Sign in at `/login` with an email and password. New users register at `/signup` and confirm their email. Sessions persist and refresh automatically in each browser, so ordinary return visits do not need another email. A new browser/device needs its own sign-in to the same account. Passwords go directly to Supabase Auth and are never included in Harf progress or backups.
+
+Existing email-link accounts keep their user ID and progress: on a device already signed in, open Profile → **Set or change password**. Otherwise use `/forgot-password` to request a recovery email and set a password for the existing account. Do not register a replacement account. `/account/password` requires an authenticated session; Supabase authorizes the update. Harf asks for matching passwords of 12–128 characters, and Supabase applies its configured password policy.
+
+In Supabase Authentication → URL Configuration, set the Site URL to `https://<your-domain>` and allow `https://<your-domain>/auth/callback` (for local use, `http://localhost:3000/auth/callback`). Keep email authentication and email confirmations enabled. Both signup confirmation and password recovery reuse this callback; no additional redirect URL is needed. Open verification/recovery links in the browser where you requested them. Recovery opens password setup instead of Profile. The root forwards callback codes and query errors when Supabase uses the Site URL fallback. Expired links offer sign-in and recovery rather than trying to exchange an invalid code.
+
+The default email sender restricts recipients and sending rate; configure your own SMTP before inviting other people. Password sign-in does not send email or consume that email quota. Confirmation and recovery still do. Browser tests intercept every Supabase request and do not send real emails or change real passwords.
 
 Use `/profile` to check sync, resolve conflicts or sign out. Each account gets an independent IndexedDB cache; no guest import runs. The first load on a device needs a connection. Subsequent loaded study can save offline, with sync after reconnecting. Offline caches are not encrypted; clear site data after syncing/signing out on shared devices.
 
@@ -65,7 +71,7 @@ One atomic upload is limited to 1,000 changed records and about 2 MiB. A larger 
 
 On Render, set the two public variables above, use Node 26+, build with `npm ci && npm run build:app`, and start with `npm start` for this owner-approved personal deployment. Include the current generated content in the checkout. `npm run build` remains the separate editorial publication gate and will fail while approvals are pending.
 
-After deployment, verify a real email sign-in, one saved review, a second-device sync and sign-out. Automated account browser tests intercept Supabase calls; live database isolation/version checks are tested separately and do not prove email delivery.
+After deployment, set a password on the existing account, verify password sign-in on another device, reload persistence, one saved review, second-device sync, recovery and sign-out. Automated account browser tests intercept Supabase calls; live database isolation/version checks are tested separately and do not prove email delivery.
 
 ## Keep your progress
 

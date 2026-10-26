@@ -21,7 +21,7 @@ export function DailyAyah({surahs,reciter}:{surahs:Surah[];reciter:string}) {
     {!ayah?resource.error?<div role="alert"><p>{resource.error}</p><button className="button button-secondary" onClick={resource.retry}>Try again</button></div>:<Skeleton height={220} label="Loading daily ayah"/>:<>
       <p className="quran-text" dir="rtl" lang="ar">{ayah.tokens.map(token=>token.arabic).join(' ')}</p>
       <p className="translation">{ayah.translation}</p>
-      <p className="muted">{surah?.englishName??`Surah ${reference.split(':')[0]}`} · {reference}<br/>Translation: {ayah.translationSource==='qul-301-hilali-khan'?'Hilali–Khan, Quranic Universal Library resource 301':ayah.translationSource}</p>
+      <p className="muted">{surah?.englishName??`Surah ${reference.split(':')[0]}`} · {reference}</p>
       <div className="row">
         <AudioControl url={verseAudioUrl(...reference.split(':') as [string,string],reciter)} label="Listen to ayah"/>
         <Link className="button button-secondary" href={`/read/${reference.replace(':','/')}`}>Read in context</Link>

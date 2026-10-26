@@ -1,8 +1,17 @@
 import { z } from 'zod';
 export const surahSchema = z.object({ number: z.number().int().min(1).max(114), arabicName: z.string().min(1), englishName: z.string().min(1), ayahCount: z.number().int().positive() });
 export const tokenSchema = z.object({ key: z.string().regex(/^\d+:\d+:\d+$/), position: z.number().int().positive(), arabic: z.string().min(1), kind: z.enum(['word', 'end-marker']), gloss: z.string(), transliteration: z.string(), lemma: z.string().nullable(), root: z.string().nullable(), entryId: z.string().nullable(), meaningScope: z.object({keys:z.array(z.string()).min(2),arabic:z.string()}).optional() });
-export const translationNoteSchema = z.object({ text: z.string().min(1), ref: z.object({ surah: z.number().int().min(1).max(114), ayah: z.number().int().min(1) }).nullable() });
-export const ayahSchema = z.object({ ref: z.string().regex(/^\d+:\d+$/), tokens: z.array(tokenSchema).min(1), translation: z.string().min(1), translationSource: z.string().min(1), notes: z.array(translationNoteSchema).default([]) });
+export const translationTargetSchema = z.object({kind:z.enum(['ayah','note']),ref:z.string().regex(/^\d+:\d+$/),noteId:z.string().optional()});
+export const translationRunSchema = z.discriminatedUnion('kind',[
+ z.object({kind:z.literal('text'),text:z.string(),emphasis:z.enum(['italic','bold','both']).optional()}),
+ z.object({kind:z.literal('reference'),text:z.string(),target:translationTargetSchema}),
+]);
+export const translationParagraphsSchema=z.array(z.array(translationRunSchema));
+export type TranslationTarget=z.infer<typeof translationTargetSchema>;
+export type TranslationRun=z.infer<typeof translationRunSchema>;
+export type TranslationParagraphs=z.infer<typeof translationParagraphsSchema>;
+export const translationNoteSchema = z.object({ id:z.string().optional(), paragraphs:translationParagraphsSchema.optional(), text: z.string().min(1), ref: z.object({ surah: z.number().int().min(1).max(114), ayah: z.number().int().min(1) }).nullable() });
+export const ayahSchema = z.object({ ref: z.string().regex(/^\d+:\d+$/), tokens: z.array(tokenSchema).min(1), translation: z.string().min(1), paragraphs:translationParagraphsSchema.optional(), translationSource: z.string().min(1), notes: z.array(translationNoteSchema).default([]) });
 export const approvalSchema = z.object({ status: z.enum(['pending', 'approved']), reviewer: z.string().optional(), reviewedAt: z.string().optional(), evidence: z.string().optional() });
 export const vocabularyEntrySchema = z.object({ id: z.string().regex(/^l-[a-f0-9]{16}$/), lemma: z.string().min(1), root: z.string().nullable(), arabic: z.string().min(1), gloss: z.string().min(1), transliteration: z.string().min(1), representativeKey: z.string(), exampleKeys: z.array(z.string()).min(1).max(3), occurrenceCount: z.number().int().positive(), courseOrder: z.number().int().positive(), sourceIds: z.array(z.string()), rootId: z.string().regex(/^r-[a-f0-9]{16}$/).nullable().optional(), approval: approvalSchema });
 export const studyExampleSchema = ayahSchema.extend({ targetKey: z.string(), targetGloss: z.string().min(1), targetTransliteration: z.string().min(1), sourceIds: z.array(z.string()) });
@@ -23,3 +32,5 @@ export type EntryPayload = z.infer<typeof entryPayloadSchema>;
 export type Overlap = z.infer<typeof overlapSchema>;
 export type SearchIndex = z.infer<typeof searchIndexSchema>;
 export type SearchMode = 'arabic' | 'english' | 'transliteration';
+
+export const listeningManifestSchema=z.array(z.object({ref:z.string().regex(/^\d+:\d+$/),juz:z.number().int().min(1).max(30)})).length(6236);

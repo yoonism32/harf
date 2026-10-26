@@ -1,3 +1,4 @@
+import type {PassageCard,PassageReview} from "../practice/passage-model";
 import { z } from "zod";
 import reciters from "@/data/ea_reciters.json";
 export const instant = z.string().datetime({ offset: true });
@@ -123,9 +124,13 @@ export const stores = [
   "notes",
   "bookmarks",
   "legacy",
+  "passageCards",
+  "passageReviews",
 ] as const;
 export type StoreName = (typeof stores)[number];
 export type DataSnapshot = {
+  passageCards: PassageCard[];
+  passageReviews: PassageReview[];
   meta: Record<string, unknown>;
   cards: CardRecord[];
   reviews: ReviewEvent[];
@@ -142,6 +147,8 @@ export function emptyData(): DataSnapshot {
       revision: 0,
       migrationComplete: true,
     },
+    passageCards: [],
+    passageReviews: [],
     cards: [],
     reviews: [],
     sessions: [],
