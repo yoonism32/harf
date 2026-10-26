@@ -4,6 +4,17 @@ export const DEFAULT_RECITER_ID = 'Alafasy_128kbps';
 export const RECITER_STORAGE_KEY = 'harf-reciter';
 export const RECITERS = recitersRaw.map(r => ({ ...r, url: `https://everyayah.com/data/${r.id}` }));
 export type ReciterId = string;
+/** "Alafasy · 128 kbps"; bitrate only when the recording id states it. */
+export function reciterDetail(id: string): string {
+  const reciter = RECITERS.find(r => r.id === id); const kbps = id.match(/(\d+)kbps/i)?.[1];
+  return [reciter?.label ?? 'Unknown reciter', kbps && `${kbps} kbps`].filter(Boolean).join(' · ');
+}
+/** Short source note for a playable URL: the ayah reciter, or the fixed word-recording voice. */
+export function audioSourceDetail(url: string): string | null {
+  const ayah = url.match(/^https:\/\/everyayah\.com\/data\/(.+)\/\d{6}\.mp3$/)?.[1];
+  if (ayah) return reciterDetail(ayah);
+  return /^https:\/\/audio\.qurancdn\.com\/wbw\//.test(url) ? 'Word recording (fixed voice)' : null;
+}
 export function getReciterUrl(id = DEFAULT_RECITER_ID): string { return RECITERS.find(r => r.id === id)?.url ?? `https://everyayah.com/data/${DEFAULT_RECITER_ID}`; }
 function validate(ch: string, vs: string) {
   if (!/^\d+$/.test(ch) || !/^\d+$/.test(vs) || +ch < 1 || +ch > 114 || +vs < 1 || +vs > surahs[+ch - 1]!.verses) throw new Error('Invalid ayah reference');
@@ -38,7 +49,7 @@ export function stopAudio() {
   publish(idle);
 }
 export async function playAudio(url: string, playbackRate = 1) {
-  if (![0.75, 1, 1.25].includes(playbackRate)) throw new Error('Unsupported playback speed');
+  if (![0.5, 0.75, 1, 1.25, 1.5].includes(playbackRate)) throw new Error('Unsupported playback speed');
   const parsed = new URL(url);
   if (parsed.protocol !== 'https:' || !['everyayah.com', 'audios.quranwbw.com', 'audio.qurancdn.com'].includes(parsed.hostname)) throw new Error('Unsupported audio source');
   // Assigning src resets playbackRate to defaultPlaybackRate, so set both on every play.

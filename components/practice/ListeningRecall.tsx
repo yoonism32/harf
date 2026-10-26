@@ -53,7 +53,7 @@ export function ListeningRecall({seed,initialRound,reciter,surahs}:{seed:number;
    <label className="field">From (optional)<input placeholder="2:1" value={draft.from??''} onChange={e=>setDraft({...draft,from:e.target.value.trim()})}/></label>
    <label className="field">To (optional)<input placeholder="2:20" value={draft.to??''} onChange={e=>setDraft({...draft,to:e.target.value.trim()})}/></label>
    <button className="button button-secondary">Apply range and restart</button>
-  </form><label className="field">Playback speed<select value={speed} onChange={e=>{stopAudio();setSpeed(Number(e.target.value));}}>{[0.75,1,1.25].map(n=><option key={n} value={n}>{n}×</option>)}</select></label></details>
+  </form><label className="field">Playback speed<select value={speed} onChange={e=>{stopAudio();setSpeed(Number(e.target.value));}}>{[0.5,0.75,1,1.25,1.5].map(n=><option key={n} value={n}>{n}×</option>)}</select></label></details>
   {!manifest.data?<ResourceMessage error={manifest.error} retry={manifest.retry}/>:!selected.target?<p role="alert">{selected.error||'No ayahs match these filters. Adjust the range.'}</p>:<><p className="muted">{selected.pool.length} ayahs in this range. No repeats until the range is exhausted. Range settings last for this visit.</p><RecallRound key={`${round}:${JSON.stringify(filters)}`} target={selected.target} pool={selected.pool} reciter={reciter} speed={speed} next={()=>{stopAudio();setRound(n=>n+1);}}/></>}
  </div>;
 }

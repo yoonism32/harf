@@ -43,13 +43,14 @@ test('listening speed applies to each play and does not leak into reader audio',
  const rates=()=>page.evaluate(()=>(window as unknown as {rates:number[]}).rates);
  await page.goto('/practice?mode=listening&seed=42&round=0');
  await page.getByText('Range and playback options',{exact:true}).click();
- await page.getByLabel('Playback speed').selectOption('0.75');
+ await page.getByLabel('Playback speed').selectOption('1.5');
  await page.getByRole('button',{name:'Play ayah'}).click();
- await expect.poll(rates).toEqual([0.75]);
+ await expect.poll(rates).toEqual([1.5]);
  await page.getByRole('button',{name:'Reveal answer (0 points)'}).click();
  await page.getByRole('link',{name:'Open in Read'}).click();
  await page.getByRole('button',{name:'Listen to ayah'}).click();
- await expect.poll(rates).toEqual([0.75,1]);
+ await expect.poll(rates).toEqual([1.5,1]);
+ await expect(page.getByText(/ · \d+ kbps$/).first()).toBeVisible();
 });
 
 test('one-ayah listening range is explicitly unscored',async({page})=>{
@@ -103,4 +104,21 @@ test('desktop reference preview preserves selected word',async({page})=>{
  await page.keyboard.press('Escape');
  await expect(page.locator('.selected-token')).toHaveCount(1);
  await expect(page).toHaveURL(/word=1/);
+});
+
+test('ayah jump works from any page and rejects missing ayahs',async({page})=>{
+ await page.goto('/today');
+ const jump=page.getByLabel('Go to ayah (surah:ayah)').filter({visible:true});
+ await jump.fill('2:999');await jump.press('Enter');
+ await expect(page).toHaveURL(/\/today$/);
+ expect(await jump.evaluate(e=>(e as HTMLInputElement).validationMessage)).toContain('2:255');
+ await jump.fill('2 : 255');await jump.press('Enter');
+ await expect(page).toHaveURL(/\/read\/2\/255$/);
+});
+
+test('mobile bottom navigation includes Insights',async({page},info)=>{
+ test.skip(info.project.name!=='Mobile Chrome','bottom navigation is mobile only');
+ await page.goto('/today');
+ await page.locator('.bottom-nav').getByRole('link',{name:'Insights'}).click();
+ await expect(page).toHaveURL(/\/insights$/);
 });

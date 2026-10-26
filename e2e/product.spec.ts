@@ -128,7 +128,8 @@ test('restored grammar, split phrases, and full root families stay aligned', asy
   await audioRequest;
   await page.goto('/read/1/1?word=1');
   await page.getByText('Grammar and word parts',{exact:true}).click();
-  await expect(page.getByText('Prefix · Preposition',{exact:true})).toBeVisible();
+  const preposition=page.getByRole('listitem').filter({has:page.getByText('Preposition',{exact:true})});
+  await expect(preposition.getByRole('listitem').filter({hasText:/^Prefix$/})).toBeVisible();
   await expect(page.getByText('Genitive',{exact:true})).toBeVisible();
   await page.goto('/read/1/1?word=3');
   await page.getByRole('button',{name:'Explore full root family'}).click();
