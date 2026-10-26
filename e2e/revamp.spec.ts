@@ -1,14 +1,20 @@
 import {test,expect} from '@playwright/test';
 import {listeningTarget} from '../lib/practice/listening';
 
-for(const [query,ref] of [["fa inna ma'al 'usri yusran",'94:5'],["inna lil-laahi wa inna ilayhi raji'un ()",'2:156']]){
- test(`natural search finds ${ref} first`,async({page})=>{
+for(const [query,ref] of [["fa inna ma'al 'usri yusran",'94:5'],["inna lil-laahi wa inna ilayhi raji'un ()",'2:156'],['allahu la ilaha illa huwa al hayyul qayyum','2:255'],['انا لله وانا اليه راجعون','2:156']]){
+ test(`natural search "${query}" finds ${ref} first`,async({page})=>{
   await page.goto(`/read?mode=all&q=${encodeURIComponent(query!)}`);
   const results=page.locator('.search-result');
   await expect(results.first()).toHaveAttribute('href',`/read/${ref!.replace(':','/')}`);
   await expect(results.first().locator('mark').first()).toBeVisible();
  });
 }
+
+test('two-letter Arabic searches in All mode',async({page})=>{
+ await page.goto(`/read?mode=all&q=${encodeURIComponent('رب')}`);
+ await expect(page.locator('.search-result').first()).toBeVisible();
+ await expect(page.getByText('Enter more characters to search.')).toHaveCount(0);
+});
 
 test('single-surah listening accepts typed ayah retry and adapts hints',async({page})=>{
  await page.goto('/practice?mode=listening&seed=42&round=0');

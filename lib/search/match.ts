@@ -8,11 +8,12 @@ function form(source:string, mode:SearchMode, compact=false):Form {
  for(let i=0;i<source.length;i++){
   let part=mode==='arabic'?( /\s/.test(source[i]!)?' ':normalizeArabic(source[i]!)):source[i]!.toLowerCase().normalize('NFD').replace(/\p{M}/gu,'');
   if(mode==='transliteration')part=part.replace(/[ʿʾ‘’'`]/g,'');
+  if(compact&&mode==='arabic')part=part.replace(/[اء]/g,''); // alif/hamza spellings vary (رَٰجِعُون vs راجعون)
   part=part.replace(mode==='arabic'?/[^\p{L}\p{N}]/gu:/[^a-z0-9]/g,' ');
   for(const c of part){
    if(compact&&c===' ')continue;
    if(c===' '&&(!text||text.endsWith(' ')))continue;
-   if(compact&&/[aiu]/.test(c)&&text.endsWith(c))continue;
+   if(compact&&mode==='transliteration'&&/[a-df-np-z]/.test(c)&&text.endsWith(c))continue; // doubled letters (hayyul/ḥayu); oo/ee handled below
    text+=c;offsets.push(i);
   }
  }
@@ -40,10 +41,10 @@ export function search(index:SearchIndex,mode:SearchMode,query:string):SearchRes
  const tokens=q.split(' '),results:SearchResult[]=[];
  for(const row of prepare(index,mode)){
   const {normal,compact}=row;let score=0,matchType='',ranges:[number,number][]=[];
-  const at=normal.text.indexOf(q);
-  const boundary=at>=0&&(mode!=='english'||((at===0||normal.text[at-1]===' ')&&(at+q.length===normal.text.length||normal.text[at+q.length]===' ')));
-  if(boundary){score=400;matchType='Phrase';ranges=[range(normal,at,q.length)];}
-  else if(mode==='transliteration'){
+  const t=normal.text,isBoundary=(p:number)=>mode!=='english'||((p===0||t[p-1]===' ')&&(p+q.length===t.length||t[p+q.length]===' '));
+  let at=t.indexOf(q);while(at>=0&&!isBoundary(at))at=t.indexOf(q,at+1);
+  if(at>=0){score=400;matchType='Phrase';ranges=[range(normal,at,q.length)];}
+  else if((mode==='transliteration'||mode==='arabic')&&cq.length>=4){
    const pos=compact.text.indexOf(cq);
    if(pos>=0){score=300;matchType='Spelling variant';ranges=[range(compact,pos,cq.length)];}
   }
@@ -61,9 +62,15 @@ export function search(index:SearchIndex,mode:SearchMode,query:string):SearchRes
    }
   }
   if(!score&&mode==='transliteration'&&tokens.length<=12){
-   const words=[...normal.text.matchAll(/\S+/g)];let cursor=0;const hits:number[]=[];let approximate=0;
-   for(const token of tokens){let found=-1;for(let i=cursor;i<Math.min(words.length,cursor+40);i++){const word=words[i]![0];if(word===token||oneEdit(token,word)){found=i;if(word!==token)approximate++;break;}}if(found<0){hits.length=0;break;}hits.push(found);cursor=found+1;}
-   if(hits.length===tokens.length&&approximate>0&&approximate<=Math.max(1,Math.floor(tokens.length/3))){score=50;matchType='Approximate wording';ranges=hits.map(i=>range(normal,words[i]!.index!,words[i]![0].length));}
+   const all=[...normal.text.matchAll(/\S+/g)],words=all.map(w=>w[0]),allowed=Math.max(1,Math.floor(tokens.length/3));
+   const near=(token:string,word:string)=>word===token||oneEdit(token,word);
+   // Try every start word, then look at most 40 words ahead per token, so late phrases are found with bounded work.
+   for(let start=0;start<words.length&&!score;start++){
+    if(!near(tokens[0]!,words[start]!))continue;
+    const hits=[start];let approximate=words[start]===tokens[0]?0:1;
+    for(const token of tokens.slice(1)){const cursor=hits.at(-1)!+1;let found=-1;for(let i=cursor;i<Math.min(words.length,cursor+40);i++)if(near(token,words[i]!)){found=i;if(words[i]!==token)approximate++;break;}if(found<0)break;hits.push(found);}
+    if(hits.length===tokens.length&&approximate>0&&approximate<=allowed){score=50;matchType='Approximate wording';ranges=hits.map(i=>range(normal,all[i]!.index!,all[i]![0].length));}
+   }
   }
   if(score)results.push({...row.item,order:row.order,score,mode,matchType,ranges});
  }

@@ -22,7 +22,7 @@ describe('Natural transliteration retrieval',()=>{
  it('ranks ordered words above reversed words and marks approximation',()=>{
   const rows=[{ref:'1:1',text:'yusran inna'},{ref:'1:2',text:'inna yusran'}];
   expect(search(rows,'transliteration','inna yusran')[0]?.ref).toBe('1:2');
-  expect(search(rows,'transliteration','inna yusrann')[0]?.matchType).toBe('Approximate wording');
+  expect(search(rows,'transliteration','inna yusrab')[0]?.matchType).toBe('Approximate wording');
   expect(search(rows,'transliteration','zxqvxx zzzzz')).toEqual([]);
  });
  it('preserves original display text and locates a phrase after a long introduction',()=>{

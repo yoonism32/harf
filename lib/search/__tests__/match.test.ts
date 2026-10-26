@@ -17,4 +17,13 @@ describe('Search boundaries',()=>{
   expect(search([{ref:'1:1',text:'a'.repeat(201)}],'english','a'.repeat(201))).toEqual([]);
   expect(search(Array.from({length:35},(_,i)=>({ref:`2:${i+1}`,text:'believe'})),'english','believe')).toHaveLength(30);
  });
+ it('finds a later exact word after an earlier substring miss',()=>{
+  const [row]=search([{ref:'1:1',text:'the other her'}],'english','her');
+  expect(row?.matchType).toBe('Phrase');expect(row?.ranges).toEqual([[10,13]]);
+ });
+ it('finds an approximate phrase late in a long ayah',()=>{
+  const text='opening '.repeat(45)+'inna yusran';
+  const [row]=search([{ref:'1:1',text}],'transliteration','inna yusrab');
+  expect(row?.matchType).toBe('Approximate wording');expect(row?.ranges[0]![0]).toBe(360);
+ });
 });
