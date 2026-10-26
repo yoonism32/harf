@@ -27,7 +27,8 @@ async function rpc(since:number,expected:number|null=null,changes=delta({},{})){
  let {data,error}=await accountClient().rpc('harf_sync_v3',{since_version:since,expected_version:expected,changes});
  passageSyncAvailable=!error;
  if(error && (error.code==='PGRST202'||error.code==='42883') && !changes.some(c=>c.collection==='passageCards'||c.collection==='passageReviews')){const legacy=await accountClient().rpc('harf_sync',{since_version:since,expected_version:expected,changes});data=legacy.data;error=legacy.error;}
- if(error)throw Error('Account sync requires the passage-practice database update. Local progress is kept. '+error.message);
+ // Only a missing v3 function means the database needs the passage update; network/auth failures keep their own message.
+ if(error)throw Error(error.code==='PGRST202'||error.code==='42883'?'Account sync requires the passage-practice database update. Local progress is kept.':`Account sync failed. Local progress is kept. ${error.message}`);
  return responseSchema.parse(data);
 }
 function validated(records:RecordMap,local:Awaited<ReturnType<typeof readData>>){

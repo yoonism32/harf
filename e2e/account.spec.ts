@@ -18,6 +18,8 @@ async function mockAccount(context:BrowserContext) {
  await context.route('**/auth/v1/user',route=>route.fulfill({json:{user:session().user}}));
  let version=0;
  const records=new Map<string,{collection:string;key:string;value:unknown;version:number}>();
+ // The deployed database has no passage-capable v3 RPC yet; clients must fall back to harf_sync.
+ await context.route('**/rest/v1/rpc/harf_sync_v3',route=>route.fulfill({status:404,json:{code:'PGRST202',message:'Could not find the function public.harf_sync_v3'}}));
  await context.route('**/rest/v1/rpc/harf_sync',async route=>{
   const body=route.request().postDataJSON();
   if(body.expected_version!==null&&body.expected_version!==version){await route.fulfill({json:{conflict:true,version,changes:[]}});return;}
@@ -61,13 +63,13 @@ test('password sign-in survives reload, a new tab, and an expired access token w
  expect(signIns).toBe(1);expect(refreshes).toBeGreaterThan(0);expect(emailRequests).toBe(0);
 });
 
-test('new account validates passwords and completes email confirmation',async({page,context})=>{
+test('new account validates passwords and completes email confirmation',async({page,context,baseURL})=>{
  await mockAccount(context);
  let registrations=0;
  await context.route('**/auth/v1/signup**',async route=>{
   registrations++;
   expect(route.request().postDataJSON()).toMatchObject({email,password});
-  expect(new URL(route.request().url()).searchParams.get('redirect_to')).toBe('http://localhost:3000/auth/callback');
+  expect(new URL(route.request().url()).searchParams.get('redirect_to')).toBe(new URL('/auth/callback',baseURL).href);
   await route.fulfill({json:{user:session().user,session:null}});
  });
  await context.route('**/auth/v1/token**',async route=>{
@@ -89,12 +91,12 @@ test('new account validates passwords and completes email confirmation',async({p
  await expect(page.getByText(email,{exact:true})).toBeVisible();
 });
 
-test('recovery opens password setup and updates the same account',async({page,context})=>{
+test('recovery opens password setup and updates the same account',async({page,context,baseURL})=>{
  await mockAccount(context);
  let updates=0;
  await context.route('**/auth/v1/recover**',async route=>{
   expect(route.request().postDataJSON().email).toBe(email);
-  expect(new URL(route.request().url()).searchParams.get('redirect_to')).toBe('http://localhost:3000/auth/callback');
+  expect(new URL(route.request().url()).searchParams.get('redirect_to')).toBe(new URL('/auth/callback',baseURL).href);
   await route.fulfill({json:{}});
  });
  await context.route('**/auth/v1/token**',route=>route.fulfill({json:session()}));
@@ -106,6 +108,8 @@ test('recovery opens password setup and updates the same account',async({page,co
  await page.goto('/profile');
  await page.getByRole('link',{name:'Sign in or create an account'}).click();
  await page.getByRole('link',{name:'Forgot your password or previously used email links?'}).click();
+ // Wait for client navigation, or the email lands in the outgoing login form.
+ await expect(page).toHaveURL(/\/forgot-password$/);
  await page.getByLabel('Email address').fill(email);
  await page.getByRole('button',{name:'Send password recovery email'}).click();
  await expect(page.getByRole('status')).toContainText('If an account exists');
@@ -173,6 +177,7 @@ test('account settings save offline and sync after reconnecting',async({page,con
  let version=0;
  const records=new Map<string,{collection:string;key:string;value:unknown;version:number}>();
  await page.route('**/auth/v1/**',route=>route.fulfill({json:{user}}));
+ await page.route('**/rest/v1/rpc/harf_sync_v3',route=>route.fulfill({status:404,json:{code:'PGRST202',message:'Could not find the function public.harf_sync_v3'}}));
  await page.route('**/rest/v1/rpc/harf_sync',async route=>{
   const body=route.request().postDataJSON();
   if(body.expected_version!==null&&body.expected_version!==version){await route.fulfill({json:{conflict:true,version,changes:[]}});return;}
