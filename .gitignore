@@ -50,3 +50,6 @@ harf-backup-*.json
 
 # Supabase CLI local cache
 /supabase/.temp/
+
+# Agency run records live in ~/Code/my-agency/runs (private)
+docs/agency-runs/
