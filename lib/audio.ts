@@ -41,14 +41,15 @@ export async function playAudio(url: string, playbackRate = 1) {
   if (![0.75, 1, 1.25].includes(playbackRate)) throw new Error('Unsupported playback speed');
   const parsed = new URL(url);
   if (parsed.protocol !== 'https:' || !['everyayah.com', 'audios.quranwbw.com', 'audio.qurancdn.com'].includes(parsed.hostname)) throw new Error('Unsupported audio source');
-  if (player) player.playbackRate = playbackRate;
+  // Assigning src resets playbackRate to defaultPlaybackRate, so set both on every play.
+  if (player) { player.defaultPlaybackRate = playbackRate; player.playbackRate = playbackRate; }
   if (snapshot.url === url && snapshot.status === 'playing') { clearTimeout(timer); player?.pause(); publish({ url, status: 'paused' }); return; }
   if (snapshot.url === url && snapshot.status === 'paused' && player) {
     const token = generation;
     try { await player.play(); if (token === generation) publish({ url, status: 'playing' }); } catch { if (token === generation) publish({ url, status: 'error', error: 'Audio could not load. Try again.' }); }
     return;
   }
-  stopAudio(); const token = generation; player ??= new Audio(); player.playbackRate = playbackRate;
+  stopAudio(); const token = generation; player ??= new Audio(); player.defaultPlaybackRate = playbackRate; player.playbackRate = playbackRate;
   const fail = () => { if (token === generation) { clearTimeout(timer); generation++; player?.pause(); publish({ url, status: 'error', error: 'Audio could not load. Try again.' }); } };
   player.onended = () => { if (token === generation) stopAudio(); };
   player.onerror = fail;

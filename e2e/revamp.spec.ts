@@ -19,7 +19,7 @@ test('two-letter Arabic searches in All mode',async({page})=>{
 test('single-surah listening accepts typed ayah retry and adapts hints',async({page})=>{
  await page.goto('/practice?mode=listening&seed=42&round=0');
  await page.getByText('Range and playback options',{exact:true}).click();
- await page.getByLabel('Surah',{exact:true}).selectOption('112');
+ await page.getByRole('combobox',{name:'Surah',exact:true}).selectOption('112');
  await page.getByRole('button',{name:'Apply range and restart'}).click();
  await expect(page.getByText('4 ayahs in this range.',{exact:false})).toBeVisible();
  await expect(page.getByText('Surah 112 is selected.',{exact:false})).toBeVisible();
@@ -35,6 +35,21 @@ test('single-surah listening accepts typed ayah retry and adapts hints',async({p
  await page.getByRole('button',{name:'Check answer'}).click();
  await expect(page.getByRole('heading',{name:`Ayah ${target}`,exact:true})).toBeVisible();
  await expect(page.getByText('1 / 3 points',{exact:false})).toBeVisible();
+});
+
+test('listening speed applies to each play and does not leak into reader audio',async({page})=>{
+ // Record the rate at the moment play() is called; no network audio is needed.
+ await page.addInitScript(()=>{const w=window as unknown as {rates:number[]};w.rates=[];HTMLMediaElement.prototype.play=function(){w.rates.push(this.playbackRate);return Promise.resolve();};});
+ const rates=()=>page.evaluate(()=>(window as unknown as {rates:number[]}).rates);
+ await page.goto('/practice?mode=listening&seed=42&round=0');
+ await page.getByText('Range and playback options',{exact:true}).click();
+ await page.getByLabel('Playback speed').selectOption('0.75');
+ await page.getByRole('button',{name:'Play ayah'}).click();
+ await expect.poll(rates).toEqual([0.75]);
+ await page.getByRole('button',{name:'Reveal answer (0 points)'}).click();
+ await page.getByRole('link',{name:'Open in Read'}).click();
+ await page.getByRole('button',{name:'Listen to ayah'}).click();
+ await expect.poll(rates).toEqual([0.75,1]);
 });
 
 test('one-ayah listening range is explicitly unscored',async({page})=>{
