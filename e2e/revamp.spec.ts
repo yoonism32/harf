@@ -48,9 +48,10 @@ test('listening speed applies to each play and does not leak into reader audio',
  await expect.poll(rates).toEqual([1.5]);
  await page.getByRole('button',{name:'Reveal answer (0 points)'}).click();
  await page.getByRole('link',{name:'Open in Read'}).click();
- await page.getByRole('button',{name:'Listen to ayah'}).click();
+ await page.getByRole('button',{name:'Play range'}).click();
  await expect.poll(rates).toEqual([1.5,1]);
- await expect(page.getByText(/ · \d+ kbps$/).first()).toBeVisible();
+ await page.getByText('Audio options',{exact:true}).click();
+ await expect(page.getByRole('button',{name:/Reciter:.* · \d+ kbps/})).toBeVisible();
 });
 
 test('one-ayah listening range is explicitly unscored',async({page})=>{

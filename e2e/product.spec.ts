@@ -35,20 +35,20 @@ test('landing, onboarding, and first study card work', async ({ page }) => {
 
 test('reader validates navigation, word inspection, and bookmarks', async ({ page }) => {
   await page.goto('/read/1/1');
-  await expect(page.getByRole('heading', { name: 'Ayah 1:1' })).toBeVisible();
+  await expect(page.getByText('Surah 1 · Ayah 1 of 7', {exact:true})).toBeVisible();
   await page.locator('.token-button').first().click();
   await expect(page.getByRole('heading', { name: 'Word meaning' })).toBeVisible();
   await page.getByRole('button', { name: 'Close' }).click();
   await page.getByRole('button', { name: 'Bookmark ayah' }).click();
   await expect(page.getByRole('button', { name: 'Remove bookmark' })).toBeVisible();
   await page.getByRole('link', { name: '1:2 →' }).click();
-  await expect(page.getByRole('heading', { name: 'Ayah 1:2' })).toBeVisible();
+  await expect(page.getByText('Surah 1 · Ayah 2 of 7', {exact:true})).toBeVisible();
 });
 
 test('search, vocabulary filters, and legacy redirects work', async ({ page }) => {
   await page.goto('/read?mode=reference&q=2%3A255');
   await page.getByRole('link', { name: /Open ayah 2:255/ }).click();
-  await expect(page.getByRole('heading', { name: 'Ayah 2:255' })).toBeVisible();
+  await expect(page.getByText('Surah 2 · Ayah 255 of 286', {exact:true})).toBeVisible();
   await page.goto('/learn?q=mercy');
   await expect(page.getByRole('status')).toContainText(/entries/);
   await page.goto('/words');
