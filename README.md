@@ -73,6 +73,10 @@ On Render, set the two public variables above, use Node 26+, build with `npm ci 
 
 After deployment, set a password on the existing account, verify password sign-in on another device, reload persistence, one saved review, second-device sync, recovery and sign-out. Automated account browser tests intercept Supabase calls; live database isolation/version checks are tested separately and do not prove email delivery.
 
+### Keeping Supabase awake
+
+A free Supabase project pauses after seven days without a database query, and a request to the project URL is answered by the edge, so it does not count. Apply `supabase/migrations/20261027120000_keepalive.sql` in the SQL editor (or with `supabase db push`); it publishes `public.harf_keepalive()`, a constant-returning query the anon role may execute. Then add the two public values as repository secrets, `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`, so `.github/workflows/supabase-keepalive.yml` can call it every three days. Run that workflow once from the Actions tab to confirm it returns HTTP 200 and `1`. The job fails on any other response, so a paused project or a rotated key is visible instead of assumed. It only prevents pausing; it cannot wake a paused project.
+
 ## Keep your progress
 
 Progress, notes, bookmarks and learning history live in IndexedDB. Theme uses localStorage; temporary note drafts use sessionStorage. When signed in, progress also syncs to your Supabase account. Guest progress stays separate; first sign-in does not import it.

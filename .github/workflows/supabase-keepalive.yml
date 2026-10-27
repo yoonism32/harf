@@ -1,0 +1,47 @@
+name: Supabase keep-alive
+
+# Supabase pauses a free project after seven days without a database query.
+# A request to the project URL never reaches Postgres, so this calls the RPC
+# from supabase/migrations/20261027120000_keepalive.sql instead.
+on:
+  schedule:
+    - cron: '0 6 */3 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    name: Query Postgres through PostgREST
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call harf_keepalive
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_URL}" ] || [ -z "${SUPABASE_PUBLISHABLE_KEY}" ]; then
+            echo "Set the SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY repository secrets." >&2
+            exit 1
+          fi
+          body=$(mktemp)
+          status=$(curl -sS --max-time 30 --retry 3 --retry-delay 10 --retry-all-errors \
+            -o "$body" -w '%{http_code}' \
+            -X POST "${SUPABASE_URL%/}/rest/v1/rpc/harf_keepalive" \
+            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
+            -H 'Content-Type: application/json' \
+            --data '{}')
+          echo "HTTP ${status}"
+          cat "$body"
+          echo
+          if [ "$status" != "200" ]; then
+            echo "Keep-alive query failed; the project may be paused or the key rotated." >&2
+            exit 1
+          fi
+          if [ "$(tr -d '[:space:]' < "$body")" != "1" ]; then
+            echo "Unexpected keep-alive response." >&2
+            exit 1
+          fi
