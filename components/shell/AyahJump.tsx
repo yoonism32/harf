@@ -1,12 +1,73 @@
 'use client';
-import {useId} from 'react';
+import {useEffect,useId,useRef,useState,type KeyboardEvent} from 'react';
 import {useRouter} from 'next/navigation';
-import {parseRef} from '@/lib/content/refs';
-// Go to any ayah from any page; invalid input uses the browser's own validation message.
+import surahsRaw from '@/data/quran-surah-meta.json';
+type SurahMeta={id:number;name:string;arabic:string;verses:number};
+type Hit={surah:number;ayah:number;name:string};
+const surahs=surahsRaw as SurahMeta[];
+
+/** Reference hits for what has been typed: 94 and 94: list the surah, 94:1 selects the ayah. */
+function hitsFor(value:string):Hit[]{
+ const cleaned=value.trim().replace(/\s*:\s*/,':');
+ const match=/^(\d{1,3})(?::(\d{0,3}))?$/.exec(cleaned);
+ if(!match)return [];
+ const surah=Number(match[1]);
+ if(surah<1||surah>114)return [];
+ const meta=surahs[surah-1]!;
+ const ayahPart=match[2];
+ if(ayahPart===undefined||ayahPart==='')return Array.from({length:meta.verses},(_,i)=>({surah,ayah:i+1,name:meta.name}));
+ const ayah=Number(ayahPart);
+ if(ayah>=1&&ayah<=meta.verses)return [{surah,ayah,name:meta.name}];
+ // A partial ayah number (94:1 while heading for 94:10) keeps matching by prefix.
+ return Array.from({length:meta.verses},(_,i)=>i+1).filter(n=>String(n).startsWith(ayahPart)).slice(0,20).map(n=>({surah,ayah:n,name:meta.name}));
+}
+
+// Live reference search from any page: the same affordance the old search had, without a round trip.
 export function AyahJump(){
- const router=useRouter();const id=useId();
- return <form role="search" aria-label="Go to ayah" className="ayah-jump" onSubmit={e=>{e.preventDefault();const input=e.currentTarget.elements.namedItem('ref') as HTMLInputElement;const ref=parseRef(input.value.trim().replace(/\s*:\s*/,':'));if(!ref){input.setCustomValidity('Enter a surah:ayah that exists, for example 2:255.');input.reportValidity();return;}input.value='';router.push(`/read/${ref.surah}/${ref.ayah}`);}}>
+ const router=useRouter();const id=useId();const listId=`${id}-results`;
+ const [value,setValue]=useState('');
+ const [open,setOpen]=useState(false);
+ const [active,setActive]=useState(0);
+ const listRef=useRef<HTMLUListElement>(null);
+ const inputRef=useRef<HTMLInputElement>(null);
+ const hits=hitsFor(value);
+ useEffect(()=>{setActive(0);},[value]);
+ useEffect(()=>{
+  if(!open)return;
+  const row=listRef.current?.querySelector<HTMLElement>(`[data-index="${active}"]`);
+  row?.scrollIntoView({block:'nearest'});
+ },[active,open]);
+ function go(hit:Hit){setValue('');setOpen(false);router.push(`/read/${hit.surah}/${hit.ayah}`);}
+ function onKeyDown(e:KeyboardEvent<HTMLInputElement>){
+  if(e.key==='Escape'){setOpen(false);setValue('');return;}
+  if(e.key==='ArrowDown'&&hits.length){e.preventDefault();setOpen(true);setActive(i=>Math.min(i+1,hits.length-1));return;}
+  if(e.key==='ArrowUp'&&hits.length){e.preventDefault();setActive(i=>Math.max(i-1,0));return;}
+  if(e.key==='Enter'){
+   e.preventDefault();
+   const hit=hits[active]??hits[0];
+   if(hit){go(hit);return;}
+   const input=inputRef.current;
+   if(input){input.setCustomValidity('Enter an ayah like 2:255, or a surah number like 101.');input.reportValidity();}
+  }
+ }
+ return <form role="search" aria-label="Go to ayah" className="ayah-jump" onSubmit={e=>e.preventDefault()}>
   <label className="sr-only" htmlFor={id}>Go to ayah (surah:ayah)</label>
-  <input id={id} name="ref" inputMode="decimal" autoComplete="off" placeholder="Go to 2:255" size={9} onInput={e=>e.currentTarget.setCustomValidity('')}/>
+  <input ref={inputRef} id={id} name="ref" inputMode="decimal" autoComplete="off" placeholder="Go to 2:255" size={9}
+   value={value} role="combobox" aria-expanded={open&&hits.length>0} aria-controls={listId} aria-autocomplete="list"
+   aria-activedescendant={open&&hits[active]?`${listId}-${active}`:undefined}
+   onFocus={()=>setOpen(true)}
+   onBlur={()=>setTimeout(()=>setOpen(false),140)}
+   onInput={e=>e.currentTarget.setCustomValidity('')}
+   onChange={e=>{setValue(e.target.value);setOpen(true);}}
+   onKeyDown={onKeyDown}/>
+  {open&&hits.length>0&&<ul ref={listRef} id={listId} role="listbox" aria-label="Matching ayahs" className="ayah-jump-results">
+   {hits.map((hit,index)=><li key={`${hit.surah}:${hit.ayah}`}>
+    <button type="button" role="option" id={`${listId}-${index}`} data-index={index} aria-selected={index===active}
+     onMouseEnter={()=>setActive(index)} onMouseDown={e=>{e.preventDefault();go(hit);}}>
+     <span className="ayah-ref">{hit.surah}:{hit.ayah}</span>
+     <span className="ayah-name">{hit.name}</span>
+    </button>
+   </li>)}
+  </ul>}
  </form>;
 }

@@ -14,7 +14,7 @@ describe('Search boundaries',()=>{
   expect(normalizeArabic(text)).toBe('رحمة');
   expect(search([{ref:'1:1',text}],'arabic','رحمه')).toEqual([]);
   expect(search([{ref:'1:1',text:'the'}],'english','th')).toEqual([]);
-  expect(search([{ref:'1:1',text:'a'.repeat(201)}],'english','a'.repeat(201))).toEqual([]);
+  expect(search([{ref:'1:1',text:'a'.repeat(401)}],'english','a'.repeat(401))).toEqual([]);
   expect(search(Array.from({length:35},(_,i)=>({ref:`2:${i+1}`,text:'believe'})),'english','believe')).toHaveLength(30);
  });
  it('finds a later exact word after an earlier substring miss',()=>{
