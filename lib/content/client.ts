@@ -1,3 +1,4 @@
+import {mushafPageSchema,mushafIndexSchema} from './mushaf-schema';
 import {morphologySchema,rootFamilySchema} from './morphology-schema';
 import { z } from 'zod';
 import { ayahSchema, catalogSchema, entryPayloadSchema, nameEntrySchema, overlapSchema, searchIndexSchema, listeningManifestSchema, type SearchMode } from './schema';
@@ -25,7 +26,7 @@ async function request<T>(path: string, schema: z.ZodType<T>): Promise<T> {
       if(!response.ok)throw new Error(`Content could not be loaded (${response.status}). Please retry.`);
       try{sessionStorage.removeItem('harf:content-reload');}catch{/* Private mode. */}
       const value=schema.parse(await response.json());
-      if(!path.startsWith('search/')) { cache.set(path,value); for(const [prefix,limit] of [['surahs/',16],['morphology/',4],['roots/',8]] as const){const keys=[...cache.keys()].filter(k=>k.startsWith(prefix));if(keys.length>limit)cache.delete(keys[0]!);} }
+      if(!path.startsWith('search/')) { cache.set(path,value); for(const [prefix,limit] of [['surahs/',16],['morphology/',4],['roots/',8],['mushaf/',4]] as const){const keys=[...cache.keys()].filter(k=>k.startsWith(prefix));if(keys.length>limit)cache.delete(keys[0]!);} }
       return value;
     } finally {clearTimeout(timer);const next=waiting.shift();if(next)next();else running--;}
   })();
@@ -47,3 +48,6 @@ export async function getWordDetail(key:string){
  const detail=data[key];if(!detail)throw Error('No word analysis for this position');return detail;
 }
 export function getRootFamily(id:string){if(!/^r-[a-f0-9]{16}$/.test(id))throw Error('Invalid root');return request(`roots/${id}.json`,rootFamilySchema);}
+
+export const getMushafIndex=()=>request('mushaf/index.json',mushafIndexSchema);
+export function getMushafPage(page:number){if(!Number.isInteger(page)||page<1||page>604)throw Error('Invalid Mushaf page');return request(`mushaf/${page}.json`,mushafPageSchema);}

@@ -7,7 +7,7 @@
       "url": "https://qul.tarteel.ai/resources/quran-script/56",
       "retrievedAt": "2026-09-23",
       "sourceVersion": "QUL resource 56 (Uthmani, word by word), JSON export",
-      "attribution": "Quranic Universal Library (QUL), Tarteel AI — Uthmani script, word by word.",
+      "attribution": "Quranic Universal Library (QUL), Tarteel AI \u2014 Uthmani script, word by word.",
       "permission": "verified",
       "termsEvidence": "Verified 2026-09-24 from https://qul.tarteel.ai/resources: QUL states that its resources are intended to be downloaded and packaged with a user's own project. The Harf project owner explicitly approved relying on this published permission and the recorded attribution.",
       "tokenization": "qul-word-location"
@@ -18,7 +18,7 @@
       "url": "https://qul.tarteel.ai/resources/translation/92",
       "retrievedAt": "2026-09-23",
       "sourceVersion": "QUL resource 92 (English Word by Word Translation), JSON export",
-      "attribution": "Quranic Universal Library (QUL), Tarteel AI — English word by word translation.",
+      "attribution": "Quranic Universal Library (QUL), Tarteel AI \u2014 English word by word translation.",
       "permission": "verified",
       "termsEvidence": "Verified 2026-09-24 from https://qul.tarteel.ai/resources: QUL states that its resources are intended to be downloaded and packaged with a user's own project. The Harf project owner explicitly approved relying on this published permission and the recorded attribution.",
       "tokenization": "qul-word-location"
@@ -29,7 +29,7 @@
       "url": "https://qul.tarteel.ai/resources/transliteration/71",
       "retrievedAt": "2026-09-23",
       "sourceVersion": "QUL resource 71 (English word by word transliteration), JSON export",
-      "attribution": "Quranic Universal Library (QUL), Tarteel AI — English word by word transliteration.",
+      "attribution": "Quranic Universal Library (QUL), Tarteel AI \u2014 English word by word transliteration.",
       "permission": "verified",
       "termsEvidence": "Verified 2026-09-24 from https://qul.tarteel.ai/resources: QUL states that its resources are intended to be downloaded and packaged with a user's own project. The Harf project owner explicitly approved relying on this published permission and the recorded attribution.",
       "tokenization": "qul-word-location"
@@ -40,7 +40,7 @@
       "url": "https://qul.tarteel.ai/resources/translation/301",
       "retrievedAt": "2026-09-23",
       "sourceVersion": "QUL resource 301 (Muhammad Taqi-ud-Din al-Hilali and Muhammad Muhsin Khan), inline-footnote JSON export",
-      "attribution": "Quranic Universal Library (QUL), Tarteel AI — translation by Muhammad Taqi-ud-Din al-Hilali and Muhammad Muhsin Khan, with inline footnotes.",
+      "attribution": "Quranic Universal Library (QUL), Tarteel AI \u2014 translation by Muhammad Taqi-ud-Din al-Hilali and Muhammad Muhsin Khan, with inline footnotes.",
       "permission": "verified",
       "termsEvidence": "Verified 2026-09-24 from https://qul.tarteel.ai/resources: QUL states that its resources are intended to be downloaded and packaged with a user's own project. The Harf project owner explicitly approved relying on this published permission and the recorded attribution.",
       "tokenization": "qul-ayah-location"
@@ -51,7 +51,7 @@
       "url": "https://qul.tarteel.ai/resources/morphology/75",
       "retrievedAt": "2026-09-23",
       "sourceVersion": "QUL resource 75 (Word lemma), SQLite export",
-      "attribution": "Quranic Universal Library (QUL), Tarteel AI — word lemma data.",
+      "attribution": "Quranic Universal Library (QUL), Tarteel AI \u2014 word lemma data.",
       "permission": "verified",
       "termsEvidence": "Verified 2026-09-24 from https://qul.tarteel.ai/resources: QUL states that its resources are intended to be downloaded and packaged with a user's own project. The Harf project owner explicitly approved relying on this published permission and the recorded attribution.",
       "tokenization": "qul-word-location"
@@ -62,7 +62,7 @@
       "url": "https://qul.tarteel.ai/resources/morphology/76",
       "retrievedAt": "2026-09-23",
       "sourceVersion": "QUL resource 76 (Word root), SQLite export",
-      "attribution": "Quranic Universal Library (QUL), Tarteel AI — word root data.",
+      "attribution": "Quranic Universal Library (QUL), Tarteel AI \u2014 word root data.",
       "permission": "verified",
       "termsEvidence": "Verified 2026-09-24 from https://qul.tarteel.ai/resources: QUL states that its resources are intended to be downloaded and packaged with a user's own project. The Harf project owner explicitly approved relying on this published permission and the recorded attribution.",
       "tokenization": "qul-word-location"
@@ -72,7 +72,7 @@
       "sha256": "f9f80e2d3f6b2785e3a9669a5fd170e845359b7fb54306963c63391d6b711e42",
       "url": "https://qul.tarteel.ai/resources/tafsir/35",
       "retrievedAt": "2026-09-24",
-      "sourceVersion": "QUL resource 35 (Tafsir Ibn Kathir, English), JSON export — updated 2:238 typo fix ('Ar prayer -> 'Asr prayer)",
+      "sourceVersion": "QUL resource 35 (Tafsir Ibn Kathir, English), JSON export \u2014 updated 2:238 typo fix ('Ar prayer -> 'Asr prayer)",
       "attribution": "Tafsir Ibn Kathir, English edition, distributed through Quranic Universal Library (QUL), Tarteel AI.",
       "permission": "verified",
       "termsEvidence": "Verified 2026-09-24 from https://qul.tarteel.ai/resources and resource 35: QUL offers this tafsir as a JSON download and states that QUL resources are intended to be downloaded and packaged with a user's own project. The Harf project owner explicitly approved relying on this published permission and attribution.",
@@ -83,7 +83,7 @@
       "sha256": "8e0db7078b4d9bfe8e4652ffbc2151e9adc1739ad7b4284815a8e345f8640fa4",
       "url": null,
       "retrievedAt": "2026-10-02",
-      "sourceVersion": "Original Harf 99 Names — selected for personal use on 2026-10-02",
+      "sourceVersion": "Original Harf 99 Names \u2014 selected for personal use on 2026-10-02",
       "attribution": "Original Harf dataset; external publisher not recorded.",
       "permission": "pending",
       "termsEvidence": "Owner explicitly selected the original Names, meanings, roots and explanations for personal use on 2026-10-02. This records source selection, not a third-party licence or independent editorial review. The date above is the selection date, not an external retrieval date.",
@@ -105,7 +105,7 @@
       "sha256": "a7d09bba0029f85785a75ab5932b3a0620afebe33747047a6fdc762c8a8e01af",
       "url": "https://api-docs.quran.com/docs/sdk/javascript/verses/",
       "retrievedAt": "2026-10-02",
-      "sourceVersion": "Retained Quran.com word exports — 114 chapters, hash manifest",
+      "sourceVersion": "Retained Quran.com word exports \u2014 114 chapters, hash manifest",
       "attribution": "Quran.com / Quran Foundation: retained word surfaces, glosses, transliteration and explicit audio paths.",
       "permission": "pending",
       "termsEvidence": "Existing local data selected by the owner for personal use on 2026-10-02; not a new download or independent publication-rights review. Original QAC notices are retained verbatim.",
@@ -121,6 +121,39 @@
       "permission": "pending",
       "termsEvidence": "Existing local data selected by the owner for personal use on 2026-10-02; not a new download or independent publication-rights review. Original QAC notices are retained verbatim.",
       "tokenization": "source-word-location-aligned-to-canonical-spans"
+    },
+    {
+      "path": "data/source/qul/mushaf-v2/glyphs.json",
+      "sha256": "40964a1b7932e9a69e0dfc0d58dce3b73e30a803febda119fd6828bcb75fac98",
+      "url": "https://qul.tarteel.ai/resources/quran-script/61",
+      "retrievedAt": "2026-10-27",
+      "sourceVersion": "QPC V2 word glyphs",
+      "attribution": "King Fahd Quran Printing Complex, distributed by QUL / Tarteel AI.",
+      "permission": "pending",
+      "termsEvidence": "Owner supplied QUL downloads for Harf on 27 October 2026. Source-specific redistribution review remains pending.",
+      "tokenization": "qul-word-location"
+    },
+    {
+      "path": "data/source/qul/mushaf-v2/layout.db",
+      "sha256": "e4df98f35dd3b8927ff096337c8739e0f0b12c8ba622834c345eaa4c3e28dd8c",
+      "url": "https://qul.tarteel.ai/resources/mushaf-layout/10",
+      "retrievedAt": "2026-10-27",
+      "sourceVersion": "QPC V2 1421H page layout",
+      "attribution": "King Fahd Quran Printing Complex, distributed by QUL / Tarteel AI.",
+      "permission": "pending",
+      "termsEvidence": "Owner supplied QUL downloads for Harf on 27 October 2026. Source-specific redistribution review remains pending.",
+      "tokenization": "qul-word-location"
+    },
+    {
+      "path": "data/source/qul/mushaf-v2/fonts.json",
+      "sha256": "b6d10704eeeecea77c7dc914f20bbafadb3b658a7bc6ac2db36d2bb31b59cfb9",
+      "url": "https://qul.tarteel.ai/resources/font/249",
+      "retrievedAt": "2026-10-27",
+      "sourceVersion": "QPC V2 page fonts, SHA-256 manifest",
+      "attribution": "King Fahd Quran Printing Complex, distributed by QUL / Tarteel AI.",
+      "permission": "pending",
+      "termsEvidence": "Owner supplied QUL downloads for Harf on 27 October 2026. Source-specific redistribution review remains pending.",
+      "tokenization": "qul-word-location"
     }
   ],
   "selectedQulResources": [

@@ -1,3 +1,4 @@
+import {buildMushaf} from './content-mushaf';
 import {parseTranslation,resolveTranslationNotes} from './content-translation';
 import {buildMorphology,rootId} from './content-morphology';
 import { createHash } from 'node:crypto';
@@ -16,7 +17,7 @@ const sourceSchema = z.object({ mode: z.enum(['preview', 'qul']), files: z.array
 const sources = sourceSchema.parse(json('data/sources.json'));
 const pinnedPaths = new Set(sources.files.map(source => source.path));
 if (pinnedPaths.size !== sources.files.length) throw new Error('Duplicate pinned source path');
-const contentSources = ['data/tafsir-ibn-kathir.json','data/99names.json','data/source/preview/qac-morphology-0.4.txt','data/source/preview/manifest.json','data/wbw-morphology.json'];
+const contentSources = ['data/source/qul/mushaf-v2/glyphs.json','data/source/qul/mushaf-v2/layout.db','data/source/qul/mushaf-v2/fonts.json','data/tafsir-ibn-kathir.json','data/99names.json','data/source/preview/qac-morphology-0.4.txt','data/source/preview/manifest.json','data/wbw-morphology.json'];
 const requiredPaths = [...contentSources, ...(sources.mode === 'preview'
  ? ['data/source/preview/qac-morphology-0.4.txt', ...Array.from({length:114}, (_,i) => `data/source/preview/surah-${i+1}.json`)]
  : ['data/source/qul/raw/uthmani.json','data/source/qul/raw/word-glosses.json','data/source/qul/raw/word-transliteration.json','data/source/qul/raw/translation-301.json','data/source/qul/raw/word-lemma.db','data/source/qul/raw/word-root.db'])];
@@ -27,7 +28,7 @@ for(let n=1;n<=114;n++){const path=`surah-${n}.json`;if(previewManifest[path]!==
 const approval = z.object({ status: z.enum(['pending','approved']), reviewer:z.string().optional(), reviewedAt:z.string().optional(), evidence:z.string().optional() });
 const overrides = z.object({ entries: z.record(z.string(), z.object({ exampleKeys: z.array(z.string()).min(1).max(3).optional(), approval: approval.optional() })), legacyMappings: z.record(z.string().regex(/^[a-z0-9-]+$/),z.string().regex(/^l-[a-f0-9]{16}$/)), namesApproved:z.boolean() }).parse(json('data/course-overrides.json'));
 const alignment = z.object({ exceptions:z.record(z.string(),z.object({ sourceKeys:z.array(z.string()).min(1), evidence:z.string().min(10) })) }).parse(json('data/token-alignment.json'));
-const contentVersion = hash(JSON.stringify({files:sources.files.map(s=>s.sha256),sources,overrides,alignment,compiler:hash(read('scripts/build-content.ts')+read('scripts/content-morphology.ts')+read('scripts/content-translation.ts')+read('lib/content/alignment.ts')+read('lib/content/morphology-schema.ts')),schema:hash(read('lib/content/schema.ts')),metadata:hash(read('data/quran-surah-meta.json'))})).slice(0,16);
+const contentVersion = hash(JSON.stringify({files:sources.files.map(s=>s.sha256),sources,overrides,alignment,compiler:hash(read('scripts/content-mushaf.ts')+read('lib/content/mushaf-schema.ts')+read('scripts/build-content.ts')+read('scripts/content-morphology.ts')+read('scripts/content-translation.ts')+read('lib/content/alignment.ts')+read('lib/content/morphology-schema.ts')),schema:hash(read('lib/content/schema.ts')),metadata:hash(read('data/quran-surah-meta.json'))})).slice(0,16);
 const contentRoot=join(root,'public/content');
 const previousPointer=existsSync(join(contentRoot,'manifest.json'))?z.object({contentVersion:z.string().regex(/^[a-f0-9]{16}$/),releaseReady:z.boolean()}).parse(json('public/content/manifest.json')):null;
 const existingVersions=existsSync(contentRoot)?readdirSync(contentRoot,{withFileTypes:true}).filter(entry=>entry.isDirectory()&&/^[a-f0-9]{16}$/.test(entry.name)).map(entry=>entry.name):[];
@@ -165,8 +166,9 @@ write(`${out}/overlap.json`,{totalWords:words.length,surahs:Object.fromEntries(s
 for(const mode of ['arabic','english','transliteration'] as const)write(`${out}/search/${mode}.json`,ayahs.map(a=>({ref:a.ref,text:mode==='arabic'?a.tokens.map(t=>t.arabic).join(' '):mode==='english'?a.translation+' '+a.tokens.filter(t=>t.kind==='word').map(t=>t.gloss).join(' '):a.tokens.filter(t=>t.kind==='word').map(t=>t.transliteration).join(' ')})));
 const report={mode:sources.mode,contentVersion,verseCount:ayahs.length,wordCount:words.length,entryCount:entries.length,unalignedMorphology:unaligned,restoredMorphology:morphology.report,morphologyCounts:{withLemma:words.filter(t=>t.lemma!==null).length,withoutLemma:words.filter(t=>t.lemma===null).length,inCourse:words.filter(t=>t.entryId!==null).length},excludedGroups:excluded.map(id=>({id,reason:'No aligned gloss and transliteration example'})),blockers};write(`${out}/alignment-report.json`,report);
 write('data/legacy-entry-map.json',overrides.legacyMappings);
-const paths=['practice/listening.json','source-notices.txt','sources.json','catalog.json','names.json','overlap.json','alignment-report.json',...surahs.map(s=>`surahs/${s.number}.json`),...surahs.map(s=>`morphology/${s.number}.json`),...[...morphology.roots.keys()].map(id=>`roots/${id}.json`),...entries.map(e=>`entries/${e.id}.json`),...['arabic','english','transliteration'].map(m=>`search/${m}.json`)];
-write(`${out}/manifest.json`,{contentVersion,files:Object.fromEntries(paths.map(p=>[p,hash(read(`${out}/${p}`))]))});write('public/content/manifest.json',{contentVersion,releaseReady:catalog.releaseReady});
+const mushafPaths=buildMushaf(ayahs,out,write);
+const paths=[...mushafPaths,'practice/listening.json','source-notices.txt','sources.json','catalog.json','names.json','overlap.json','alignment-report.json',...surahs.map(s=>`surahs/${s.number}.json`),...surahs.map(s=>`morphology/${s.number}.json`),...[...morphology.roots.keys()].map(id=>`roots/${id}.json`),...entries.map(e=>`entries/${e.id}.json`),...['arabic','english','transliteration'].map(m=>`search/${m}.json`)];
+write(`${out}/manifest.json`,{contentVersion,files:Object.fromEntries(paths.map(p=>[p,hash(readFileSync(join(root,out,p)))]))});write('public/content/manifest.json',{contentVersion,releaseReady:catalog.releaseReady});
 write('lib/content/version.json',{contentVersion});
 for(const entry of readdirSync(contentRoot,{withFileTypes:true}))if(entry.isDirectory()&&/^[a-f0-9]{16}$/.test(entry.name)&&entry.name!==contentVersion&&entry.name!==previousContentVersion)rmSync(join(contentRoot,entry.name),{recursive:true,force:true});
 console.log(JSON.stringify({contentVersion,verses:ayahs.length,words:words.length,entries:entries.length,unaligned:unaligned.length,releaseReady:catalog.releaseReady,blockers},null,2));

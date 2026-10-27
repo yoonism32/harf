@@ -1,4 +1,5 @@
 import {morphologySchema,rootFamilySchema} from '../lib/content/morphology-schema';
+import {mushafPageSchema,mushafIndexSchema} from '../lib/content/mushaf-schema';
 import {comparableArabic} from '../lib/content/alignment';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -11,7 +12,7 @@ const assert=(condition:unknown,message:string)=>{if(!condition)throw new Error(
 const pointer=z.object({contentVersion:z.string().regex(/^[a-f0-9]{16}$/),releaseReady:z.boolean()}).parse(json('public/content/manifest.json'));
 const base=`public/content/${pointer.contentVersion}`;
 const manifest=z.object({contentVersion:z.string(),files:z.record(z.string(),z.string())}).parse(json(`${base}/manifest.json`));
-for(const [path,hash] of Object.entries(manifest.files)){assert(!path.includes('..')&&!path.startsWith('/'),'Unsafe generated manifest path');assert(createHash('sha256').update(read(`${base}/${path}`)).digest('hex')===hash,`Output checksum mismatch: ${path}`);}
+for(const [path,hash] of Object.entries(manifest.files)){assert(!path.includes('..')&&!path.startsWith('/'),'Unsafe generated manifest path');assert(createHash('sha256').update(readFileSync(join(process.cwd(),base,path))).digest('hex')===hash,`Output checksum mismatch: ${path}`);}
 const catalog=catalogSchema.parse(json(`${base}/catalog.json`));
 assert(manifest.contentVersion===pointer.contentVersion&&catalog.contentVersion===pointer.contentVersion,'Content version mismatch');
 assert(pointer.releaseReady===catalog.releaseReady,'Release status mismatch');
@@ -26,6 +27,20 @@ const allAyahs:z.infer<typeof ayahSchema>[]=[];
 let verseCount=0,wordCount=0;const counts:Record<string,number>={};
 for(const surah of catalog.surahs){const ayahs=z.array(ayahSchema).parse(json(`${base}/surahs/${surah.number}.json`));allAyahs.push(...ayahs);assert(ayahs.length===surah.ayahCount,`Missing ayahs ${surah.number}`);counts[surah.number]=0;ayahs.forEach((a,i)=>{assert(a.ref===`${surah.number}:${i+1}`,'Ayah order mismatch');verseCount++;a.tokens.forEach((t,j)=>{assert(t.key===`${a.ref}:${j+1}`&&t.position===j+1,'Token position mismatch');assert(!tokens.has(t.key),'Duplicate token');tokens.set(t.key,t);if(t.kind==='word'){wordCount++;counts[surah.number]=(counts[surah.number]??0)+1;}});});}
 assert(verseCount===6236,'Incomplete verse corpus');
+const mushafIndex=mushafIndexSchema.parse(json(`${base}/mushaf/index.json`));
+const mushafWords=new Set<string>(),firstPages:Record<string,number>={};
+for(let page=1;page<=604;page++){
+ const path=`mushaf/${page}.json`,font=`mushaf/fonts/p${page}.woff`;
+ assert(Object.hasOwn(manifest.files,path)&&Object.hasOwn(manifest.files,font),'Missing Mushaf checksum');
+ const layout=mushafPageSchema.parse(json(`${base}/${path}`));assert(layout.page===page,'Mushaf page mismatch');
+ for(const line of layout.lines)for(const word of line.words){
+  assert(tokens.has(word.key)&&!mushafWords.has(word.key),'Invalid/duplicate Mushaf word');mushafWords.add(word.key);
+  firstPages[word.key.split(':').slice(0,2).join(':')]??=page;
+ }
+}
+assert(mushafWords.size===tokens.size,'Mushaf word coverage mismatch');
+assert(Object.hasOwn(manifest.files,'mushaf/index.json')&&Object.keys(mushafIndex).length===verseCount,'Mushaf index coverage mismatch');
+for(const [ref,page] of Object.entries(firstPages))assert(mushafIndex[ref]===page,'Mushaf first-page mapping mismatch');
 const listening=listeningManifestSchema.parse(json(`${base}/practice/listening.json`));
 assert(listening.every((v,i)=>v.ref===allAyahs[i]?.ref),'Listening reference coverage mismatch');
 const ayahMap=new Map(allAyahs.map(a=>[a.ref,a]));

@@ -54,3 +54,7 @@ harf-backup-*.json
 
 # Agency run records live in ~/Code/my-agency/runs (private)
 docs/agency-runs/
+
+# QPC V2 page fonts: 105 MB of re-downloadable pinned inputs (QUL resource 249),
+# byte-identical to the copies already shipped in public/content and pinned by fonts.json
+data/source/qul/mushaf-v2/fonts/
