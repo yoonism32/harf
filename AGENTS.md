@@ -35,6 +35,7 @@ Next.js App Router, React, strict TypeScript, Tailwind v4 plus custom CSS, `ts-f
 | `app/(main)/practice/`, `insights/` | Additional practice, themes, related wording and similar passages |
 | `app/(main)/settings/`, `sources/` | Preferences, backup/recovery, sources and methodology |
 | `app/api/tafsir/route.ts` | Validated access to local structured commentary |
+| `app/api/health/route.ts` | Liveness body for Render's health check and keep-alive monitors; must not read Supabase |
 | `components/learning/`, `reader/`, `today/`, `practice/`, `insights/` | Feature UI |
 | `components/shell/`, `ui/` | Navigation and shared accessible primitives |
 | `lib/data/` | Browser database, schemas, migration, backup, reactive store |
