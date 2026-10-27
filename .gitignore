@@ -44,6 +44,7 @@ yarn-error.log*
 next-env.d.ts
 
 # local scratch / research notes / personal data exports — not app code
+/scripts/tmp-dump.ts
 harf-backup-*.json
 /1-5.txt
 /inital-qsemantic.txt
