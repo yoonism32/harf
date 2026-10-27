@@ -38,7 +38,10 @@ export function buildMorphology(ayahs:Ayah[],plain:(text:string)=>string){
      // A combined phrase gloss belongs to the span, not independently to each split token.
      if(shared){token.gloss=plain(word.translation.text??'');token.transliteration=plain(word.transliteration.text??'');token.meaningScope={keys:mapping.canonicalKeys,arabic:word.text_uthmani};}
      else if(!token.transliteration&&word.transliteration.text){token.transliteration=plain(word.transliteration.text);transliterationFallbacks++;}
-     details[key]={key,sourceKey:mapping.sourceKey,canonicalKeys:mapping.canonicalKeys,sourceArabic:word.text_uthmani,segments,audioPath:word.audio_url||null,rootId:token.root?rootId(token.root):null};
+     // The CDN numbers waqf/hizb marks as extra slots, so audio_url runs ahead of the real
+     // recording number; the file suffix is the source word position, which is what we use.
+     const audioPath=word.audio_url?`wbw/${verse.verse_key.split(':').map(n=>n.padStart(3,'0')).join('_')}_${String(word.position).padStart(3,'0')}.mp3`:null;
+     details[key]={key,sourceKey:mapping.sourceKey,canonicalKeys:mapping.canonicalKeys,sourceArabic:word.text_uthmani,segments,audioPath,rootId:token.root?rootId(token.root):null};
     }
    }
   }

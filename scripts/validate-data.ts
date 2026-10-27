@@ -55,7 +55,7 @@ for(const surah of catalog.surahs){
   for(const target of detail.canonicalKeys)assert(target.startsWith(`${ref}:`)&&tokens.get(target)?.kind==='word','Invalid span target');
   assert(detail.canonicalKeys.map(k=>tokens.get(k)!.arabic.replace(/\s/g,'')).join('')===detail.sourceArabic.replace(/\s/g,''),'Misaligned source surface');
   assert(comparableArabic(detail.segments.map(s=>s.arabic).join(''))===comparableArabic(detail.sourceArabic),'Misaligned grammar');
-  if(detail.audioPath){const parts=detail.audioPath.slice(4,-4).split('_').map(Number);assert(`${parts[0]}:${parts[1]}`===ref,'Audio crosses ayah');}
+  if(detail.audioPath){const parts=detail.audioPath.slice(4,-4).split('_').map(Number);assert(`${parts[0]}:${parts[1]}`===ref,'Audio crosses ayah');assert(parts[2]===Number(detail.sourceKey.split(':')[2]),'Audio word number disagrees with the source word position');}
   assert(detail.rootId===(token!.root?`r-${createHash('sha256').update(token!.root.normalize('NFC')).digest('hex').slice(0,16)}`:null),'Mismatched word/root link');
   if(detail.canonicalKeys.length>1)assert(JSON.stringify(token!.meaningScope?.keys)===JSON.stringify(detail.canonicalKeys),'Shared phrase meaning is not labeled');
   detailedWords++;

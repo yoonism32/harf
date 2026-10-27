@@ -47,7 +47,10 @@ it('restores every word analysis and aligns split phrases, audio filenames and f
  expect(morphology['2:181:4'].canonicalKeys).toEqual(['2:181:3','2:181:4']);
  expect(morphology['2:181:5'].sourceKey).toBe('2:181:4');
  expect(morphology['2:181:5'].audioPath).toBe('wbw/002_181_004.mp3');
- expect(morphology['2:181:12'].audioPath).toBe('wbw/002_181_012.mp3');
+ // The recording number is the source word position: the phrase "بَعْدَ مَا" merges two
+ // canonical words, so canonical 2:181:12 is source word 11 and its file is _011.
+ expect(morphology['2:181:12'].sourceKey).toBe('2:181:11');
+ expect(morphology['2:181:12'].audioPath).toBe('wbw/002_181_011.mp3');
  for(const [surah,key,sourceKey] of [[8,'8:6:5','8:6:4'],[13,'13:37:9','13:37:8']] as const){
   expect(read(`morphology/${surah}.json`)[key].sourceKey).toBe(sourceKey);
  }

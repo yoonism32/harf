@@ -16,7 +16,14 @@ async function request<T>(path: string, schema: z.ZodType<T>): Promise<T> {
     const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),8000);
     try {
       const response=await fetch(`/content/${CONTENT_VERSION}/${path}`,{signal:controller.signal});
+      if(response.status===404){
+        // This tab's bundle points at a content version that has since been replaced.
+        // Retrying the same URL can never succeed, so pick up the current build once.
+        try{if(!sessionStorage.getItem('harf:content-reload')){sessionStorage.setItem('harf:content-reload','1');location.reload();}}catch{/* Reload is a courtesy; the error below still explains it. */}
+        throw new Error('Content was updated. Reload the page to continue.');
+      }
       if(!response.ok)throw new Error(`Content could not be loaded (${response.status}). Please retry.`);
+      try{sessionStorage.removeItem('harf:content-reload');}catch{/* Private mode. */}
       const value=schema.parse(await response.json());
       if(!path.startsWith('search/')) { cache.set(path,value); for(const [prefix,limit] of [['surahs/',16],['morphology/',4],['roots/',8]] as const){const keys=[...cache.keys()].filter(k=>k.startsWith(prefix));if(keys.length>limit)cache.delete(keys[0]!);} }
       return value;
