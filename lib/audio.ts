@@ -43,8 +43,17 @@ export function stopAudio() {
   if (player) { player.pause(); player.removeAttribute('src'); player.load(); }
   publish(idle);
 }
+// The reader speed slider: 0.5–1.5 in 0.05 steps, which keeps every legacy stop (0.75, 1.25 …) on the grid.
+export const SPEED_MIN = 0.5;
+export const SPEED_MAX = 1.5;
+export const SPEED_STEP = 0.05;
+/** The original Harf speed stops, shown as labelled ticks on the slider. */
+export const SPEED_STOPS = [0.5, 0.75, 1, 1.25, 1.5];
+function validSpeed(rate: number): boolean {
+  return rate >= SPEED_MIN && rate <= SPEED_MAX && Math.abs(rate / SPEED_STEP - Math.round(rate / SPEED_STEP)) < 1e-6;
+}
 export async function playAudio(url: string, playbackRate = 1, onEnded?: () => void) {
-  if (![0.5, 0.75, 1, 1.25, 1.5].includes(playbackRate)) throw new Error('Unsupported playback speed');
+  if (!validSpeed(playbackRate)) throw new Error('Unsupported playback speed');
   const parsed = new URL(url);
   if (parsed.protocol !== 'https:' || !['everyayah.com', 'audios.quranwbw.com', 'audio.qurancdn.com'].includes(parsed.hostname)) throw new Error('Unsupported audio source');
   // Assigning src resets playbackRate to defaultPlaybackRate, so set both on every play.
@@ -67,6 +76,6 @@ export async function playAudio(url: string, playbackRate = 1, onEnded?: () => v
 }
 
 export function setPlaybackSpeed(rate:number){
- if(![0.5,0.75,1,1.25,1.5].includes(rate))throw Error('Unsupported playback speed');
+ if(!validSpeed(rate))throw Error('Unsupported playback speed');
  if(player){player.defaultPlaybackRate=rate;player.playbackRate=rate;}
 }

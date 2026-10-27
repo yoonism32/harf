@@ -46,7 +46,10 @@ test('audio ranges pause, resume, change speed, stop and survive a mode toggle',
  await expect(page.getByRole('article',{name:'Mushaf page 233'})).toBeVisible();
  await expect(audio.getByRole('button',{name:'Pause',exact:true})).toBeVisible();
  await audio.getByRole('button',{name:'Pause',exact:true}).click();
- await audio.getByRole('combobox',{name:'Speed',exact:true}).selectOption('0.75');
+ const speed=audio.getByRole('slider',{name:'Speed',exact:true});
+ await speed.focus();
+ for(let i=0;i<5;i++)await page.keyboard.press('ArrowLeft');
+ await expect(speed).toHaveValue('0.75');
  await audio.getByRole('button',{name:'Resume',exact:true}).click();
  expect(await page.evaluate('window.testAudio.playbackRate')).toBe(0.75);
  await page.evaluate('window.testAudio.onended()');

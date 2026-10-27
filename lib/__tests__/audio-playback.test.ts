@@ -35,6 +35,13 @@ describe('reader range playback',()=>{
   const replaced=FakeAudio.instance.onended;
   await playAudio('https://audio.qurancdn.com/wbw/001_001_001.mp3');replaced?.();
   expect(next).not.toHaveBeenCalled();
+ }); it('applies fine slider speeds and rejects rates off the slider grid',async()=>{
+  await playAudio(verseAudioUrl('2','1'),1.05);
+  expect(FakeAudio.instance.playbackRate).toBe(1.05);
+  setPlaybackSpeed(1.15);
+  expect(FakeAudio.instance.playbackRate).toBe(1.15);
+  expect(()=>setPlaybackSpeed(1.12)).toThrow();
+  expect(()=>setPlaybackSpeed(0.45)).toThrow();
  });
  it('does not advance a failed recording and rejects unsupported speeds',async()=>{
   const next=vi.fn();await playAudio(verseAudioUrl('1','1'),1,next);

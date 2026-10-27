@@ -32,7 +32,7 @@ p a,.status-message a{text-decoration:underline;text-underline-offset:3px}
 .reader-audio-more>summary::-webkit-details-marker{display:none}
 .reader-audio-more>summary::after{content:'⌃';font-size:12px;color:var(--muted)}
 .reader-audio-more[open]>summary::after{content:'⌄'}
-.reader-audio-options{position:absolute;z-index:40;inset-inline:0;bottom:calc(100% + 8px);display:grid;grid-template-columns:minmax(240px,1.4fr) 100px minmax(260px,1fr) minmax(240px,1fr);gap:24px;align-items:start;padding:16px;max-height:min(70dvh,520px);overflow:auto;background:var(--surface);border:1px solid var(--control-line);border-radius:12px;box-shadow:0 12px 32px rgb(0 0 0 / .18)}
+.reader-audio-options{position:absolute;z-index:40;inset-inline:0;bottom:calc(100% + 8px);display:grid;grid-template-columns:minmax(240px,1.4fr) 150px minmax(260px,1fr) minmax(240px,1fr);gap:24px;align-items:start;padding:16px;max-height:min(70dvh,520px);overflow:auto;background:var(--surface);border:1px solid var(--control-line);border-radius:12px;box-shadow:0 12px 32px rgb(0 0 0 / .18)}
 .reader-audio details[open]{overflow:visible}.reader-audio summary{cursor:pointer}.reader-audio .row{gap:8px}
 .reader-audio .audio-source-note{grid-column:1/-1}
 .reader-audio .reciter-menu{position:static;inset-inline:auto;margin-top:8px;padding:8px;box-shadow:none}
@@ -50,6 +50,14 @@ p a,.status-message a{text-decoration:underline;text-underline-offset:3px}
 @media(min-width:1024px){.app-main:has(.reader-audio){padding-bottom:88px}.reader-audio{inset-inline-start:232px;inset-inline-end:24px;bottom:16px}}
 
 .audio-range,.audio-loop{display:flex;flex-direction:column;gap:12px}.audio-presets{display:flex;flex-wrap:wrap;gap:4px;padding:4px;background:var(--canvas);border:1px solid var(--line);border-radius:8px}.audio-presets button{flex:1;min-height:40px;padding:6px 10px;border:0;border-radius:5px;background:transparent;color:var(--muted);white-space:nowrap}.audio-presets button[aria-pressed=true]{background:var(--selection);color:var(--text)}.audio-range .field{flex:1;min-width:80px}.audio-range input,.loop-count input{width:100%}.audio-loop legend{margin-bottom:8px}.loop-count{max-width:130px}.reader-audio .audio-source-note{font-size:13px;margin-top:4px}.reader-audio summary{font-size:14px}.audio-voice .reciter-trigger{min-height:48px}
-@media(max-width:1399px){.reader-audio-options{grid-template-columns:minmax(200px,1fr) 100px}.audio-range,.audio-loop{grid-row:2}}
-@media(max-width:599px){.reader-audio-options{grid-template-columns:minmax(0,1fr) 90px;gap:16px}.audio-range,.audio-loop{grid-column:1/-1;grid-row:auto}}
+.audio-speed input[type=range]{width:100%;min-height:40px;padding:0;border:0;background:transparent;accent-color:var(--primary)}
+.audio-speed small{text-align:center;font-variant-numeric:tabular-nums;color:var(--muted)}
+.audio-speed-ticks{position:relative;display:block;height:14px;font-size:10px;line-height:14px;color:var(--muted)}
+.audio-speed-ticks span{position:absolute;top:0;transform:translateX(-50%);font-variant-numeric:tabular-nums;white-space:nowrap}
+.audio-speed-ticks span:first-child{left:0;transform:none}
+.audio-speed-ticks span:last-child{left:auto;right:0;transform:none}
+/* Long Arabic words are unbreakable, so the flex row's min-width:0 let them spill out of the panel; cap the column and allow a last-resort break. */
+.root-family .entry-arabic{max-width:50%;overflow-wrap:anywhere}
+@media(max-width:1399px){.reader-audio-options{grid-template-columns:minmax(200px,1fr) 150px}.audio-range,.audio-loop{grid-row:2}}
+@media(max-width:599px){.reader-audio-options{grid-template-columns:minmax(0,1fr) 140px;gap:16px}.audio-range,.audio-loop{grid-column:1/-1;grid-row:auto}}
 @media(min-width:1600px){.mushaf-layout,.mushaf-nav{grid-template-columns:minmax(280px,1fr) auto minmax(260px,1fr);gap:28px}.mushaf-layout>.word-panel{padding:24px}.mushaf-layout>.translation-panel{min-height:420px}}
