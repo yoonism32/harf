@@ -26,6 +26,9 @@ function form(source:string, mode:SearchMode, compact=false):Form {
 // folds those so "al-ladheena ithaa aSaabathum" and "alladhīna idhā aṣābathum" align.
 function skeleton(word:string){return word.toLowerCase().replace(/[^a-z]/g,'').replace(/a{2,}|e{2,}|i{2,}|o{2,}|u{2,}|dh|th|(.)\1+/g,m=>m==='dh'||m==='th'?'d':m[0]==='e'||m[0]==='i'?'i':m[0]==='o'||m[0]==='u'?'u':m[0]!);}
 function closeEnough(a:string,b:string){return a===b||(Math.min(a.length,b.length)>=4&&oneEdit(a,b));}
+// Vowels drift between human spellings of one word (shakireen / shakirina), so folding every vowel
+// together compares the consonants people do remember.
+function foldVowels(word:string){return word.toLowerCase().replace(/[^a-z]/g,'').replace(/[aeiou]+/g,'a');}
 function oneEdit(a:string,b:string){
  if(Math.min(a.length,b.length)<5||Math.abs(a.length-b.length)>1)return false;
  let i=0,j=0,edits=0;while(i<a.length&&j<b.length){if(a[i]===b[j]){i++;j++;continue;}if(++edits>1)return false;if(a.length>=b.length)i++;if(b.length>=a.length)j++;}return edits+(a.length-i)+(b.length-j)<=1;
@@ -78,7 +81,7 @@ export function search(index:SearchIndex,mode:SearchMode,query:string):SearchRes
    if(pos>=0){score=300;confidence=95;matchType='Spelling variant';ranges=[range(compact,pos,cq.length)];}
   }
   if(!score&&tokens.length<=12){
-   const words=row.words;const used=new Set<number>();let previous=-1,ordered=true;
+   const words=row.words;const used=new Set<number>();let previous=-1,ordered=true,partial=false;
    for(const token of tokens){
     // English tolerates one slip per long word so "harship" still reaches "hardship".
     const found=words.findIndex((w,i)=>!used.has(i)&&(w===token||(mode==='english'&&(stem(w)===stem(token)||(token.length>=5&&w[0]===token[0]&&oneEdit(token,w))))));
@@ -89,6 +92,21 @@ export function search(index:SearchIndex,mode:SearchMode,query:string):SearchRes
     const indices=[...used];const gaps=Math.max(...indices)-Math.min(...indices)+1-tokens.length;
     score=(ordered?200:100)-Math.min(gaps,50);confidence=ordered?70:55;matchType=ordered?'Related wording':'Words in a different order';
     ranges=indices.sort((a,b)=>a-b).map(i=>range(normal,row.starts[i]!,words[i]!.length));
+   } else if(mode==='transliteration'){
+    // A half-remembered word often stops mid-word ("shak" for shakirina), so a prefix of three
+    // or more letters also counts. The reading scores below an exact match, above the loose drift paths.
+    const words=row.words,used=new Set<number>();let previous=-1,ordered=true;
+    for(const token of tokens){
+     const found=words.findIndex((w,i)=>!used.has(i)&&(w===token||(token.length>=3&&w.length>token.length&&w.startsWith(token))||(token.length>=4&&foldVowels(w).startsWith(foldVowels(token)))));
+     if(found<0){used.clear();break;}
+     if(words[found]!==token)partial=true;
+     used.add(found);if(found<=previous)ordered=false;previous=found;
+    }
+    if(partial&&used.size===tokens.length){
+     const indices=[...used];const gaps=Math.max(...indices)-Math.min(...indices)+1-tokens.length;
+     score=(ordered?160:80)-Math.min(gaps,50);confidence=ordered?60:45;matchType=ordered?'Partial wording':'Partial words in a different order';
+     ranges=indices.sort((a,b)=>a-b).map(i=>range(normal,row.starts[i]!,words[i]!.length));
+    }
    }
   }
   if(!score&&mode==='transliteration'&&tokens.length<=12){

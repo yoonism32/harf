@@ -42,3 +42,23 @@ describe('Search boundaries',()=>{
   expect(row?.matchType).toBe('Approximate wording');expect(row?.ranges[0]![0]).toBe(360);
  });
 });
+describe('Half-remembered transliteration',()=>{
+ const ayah={ref:'6:53',text:'alaysa l-lahu bi-alama bil-shakirina'};
+ it('finds an ayah when the last word is only half remembered',()=>{
+  const [row]=search([ayah],'transliteration',"a'lama shak");
+  expect(row?.ref).toBe('6:53');expect(row?.matchType).toBe('Partial wording');
+ });
+ it('accepts a differently spelled half-remembered word',()=>{
+  expect(search([ayah],'transliteration',"a'lama shakireen").map(row=>row.ref)).toEqual(['6:53']);
+ });
+ it('ranks an exact phrase above a partial reading',()=>{
+  const rows=[{ref:'1:1',text:'alama shak'},{ref:'1:2',text:'bi-alama bil-shakirina'}];
+  expect(search(rows,'transliteration',"a'lama shak").map(row=>[row.ref,row.matchType])).toEqual([['1:1','Phrase'],['1:2','Partial wording']]);
+ });
+ it('still refuses a fragment of fewer than three letters',()=>{
+  expect(search([ayah],'transliteration',"a'lama sh")).toEqual([]);
+ });
+ it('leaves whole-word English and Arabic matching strict',()=>{
+  expect(search([{ref:'1:1',text:'believe'}],'english','belie')).toEqual([]);
+ });
+});
