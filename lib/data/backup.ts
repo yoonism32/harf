@@ -411,11 +411,23 @@ export async function replaceFromBackup(
   await notifyChange();
 }
 export async function resetProgress() {
-  const previous = await readData();
-  const next = emptyData();
-  next.meta.settings = previous.meta.settings;
-  next.legacy = previous.legacy;
-  await writeData(next, "reset");
+  const db = await getDB();
+  const tx = db.transaction([...stores, "recovery"], "readwrite");
+  void tx.done.catch(() => undefined);
+  const previous: Record<string, unknown> = {};
+  for (const name of stores) {
+    const values = await tx.objectStore(name).getAll();
+    const keys = await tx.objectStore(name).getAllKeys();
+    previous[name] = name === "meta" || name === "legacy"
+      ? Object.fromEntries(keys.map((key, i) => [String(key), values[i]])) : values;
+  }
+  await tx.objectStore("recovery").put({data: previous, createdAt: new Date().toISOString(), reason: "reset"}, "previous");
+  for (const name of ["cards", "reviews", "sessions", "passageCards", "passageReviews"] as const) await tx.objectStore(name).clear();
+  await tx.objectStore("meta").delete("activeSessionId");
+  await tx.objectStore("meta").delete("priorityEntries");
+  await tx.objectStore("meta").put(new Date().toISOString(), "lastRecoveryAction");
+  await tx.objectStore("meta").put(Number(await tx.objectStore("meta").get("revision") ?? 0) + 1, "revision");
+  await tx.done;
   await notifyChange();
 }
 export async function recoverPrevious() {
