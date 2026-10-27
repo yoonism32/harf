@@ -9,7 +9,7 @@ import {PasswordFields} from './PasswordFields';
 type Mode = 'login' | 'signup' | 'recover';
 const copy = {
   login: {title: 'Sign in to Harf', description: 'Use your email and password to continue your progress on this device.', button: 'Sign in'},
-  signup: {title: 'Create your Harf account', description: 'Save your progress across devices. Confirm your email once, then sign in with your password.', button: 'Create account'},
+  signup: {title: 'Create your Harf account', description: 'Save your progress across devices. Sign in with your password on any device.', button: 'Create account'},
   recover: {title: 'Set or reset your password', description: 'Already used an email sign-in link? Set a password for that same account here. Your progress stays with your account.', button: 'Send password recovery email'},
 };
 
