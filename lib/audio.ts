@@ -22,11 +22,6 @@ function validate(ch: string, vs: string) {
 export function verseAudioUrl(ch: string, vs: string, reciter = DEFAULT_RECITER_ID): string {
   validate(ch, vs); return `${getReciterUrl(reciter)}/${ch.padStart(3, '0')}${vs.padStart(3, '0')}.mp3`;
 }
-export function wordAudioUrl(ch: string, vs: string, wd: number): string {
-  validate(ch, vs);
-  if (!Number.isInteger(wd) || wd < 1 || wd > 500) throw new Error('Invalid word position');
-  return `https://audios.quranwbw.com/words/${ch}/${ch.padStart(3, '0')}_${vs.padStart(3, '0')}_${String(wd).padStart(3, '0')}.mp3?version=2`;
-}
 // Use the recorded source path: audio filenames are not reliably equal to displayed word positions.
 export function recordedWordAudioUrl(path:string):string {
  if(!/^wbw\/\d{3}_\d{3}_\d{3}\.mp3$/.test(path))throw Error('Invalid word audio path');
@@ -60,7 +55,9 @@ export async function playAudio(url: string, playbackRate = 1) {
     try { await player.play(); if (token === generation) publish({ url, status: 'playing' }); } catch { if (token === generation) publish({ url, status: 'error', error: 'Audio could not load. Try again.' }); }
     return;
   }
-  stopAudio(); const token = generation; player ??= new Audio(); player.defaultPlaybackRate = playbackRate; player.playbackRate = playbackRate;
+  stopAudio(); const token = generation; player ??= new Audio();
+  // CORS mode keeps playback alive when an extension routes media through Web Audio (Firefox silences opaque sources).
+  player.crossOrigin = 'anonymous'; player.defaultPlaybackRate = playbackRate; player.playbackRate = playbackRate;
   const fail = () => { if (token === generation) { clearTimeout(timer); generation++; player?.pause(); publish({ url, status: 'error', error: 'Audio could not load. Try again.' }); } };
   player.onended = () => { if (token === generation) stopAudio(); };
   player.onerror = fail;
