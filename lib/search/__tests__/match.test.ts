@@ -1,5 +1,20 @@
 import {describe,expect,it} from 'vitest';
-import {normalizeArabic,search} from '../match';
+import {normalizeArabic,search,searchNotice} from '../match';
+describe('Search gate',()=>{
+ it('refuses a lone function word and a lone short fragment',()=>{
+  expect(searchNotice('english','verily')).toMatch(/too common/);
+  expect(searchNotice('english','her')).toMatch(/whole word/);
+ });
+ it('allows one distinctive word, or two words with one distinctive',()=>{
+  expect(searchNotice('english','hardship')).toBe('');
+  expect(searchNotice('english','verily hardship')).toBe('');
+ });
+ it('refuses two words that are both common, and never gates other modes',()=>{
+  expect(searchNotice('english','the day')).toMatch(/distinctive/);
+  expect(searchNotice('transliteration','verily')).toBe('');
+  expect(searchNotice('arabic','رحمة')).toBe('');
+ });
+});
 describe('Search boundaries',()=>{
  it('matches whole English words rather than substrings',()=>{
   const index=[{ref:'1:1',text:'the other believer'},{ref:'1:2',text:'her belief'}];
