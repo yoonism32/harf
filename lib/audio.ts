@@ -43,7 +43,7 @@ export function stopAudio() {
   if (player) { player.pause(); player.removeAttribute('src'); player.load(); }
   publish(idle);
 }
-export async function playAudio(url: string, playbackRate = 1) {
+export async function playAudio(url: string, playbackRate = 1, onEnded?: () => void) {
   if (![0.5, 0.75, 1, 1.25, 1.5].includes(playbackRate)) throw new Error('Unsupported playback speed');
   const parsed = new URL(url);
   if (parsed.protocol !== 'https:' || !['everyayah.com', 'audios.quranwbw.com', 'audio.qurancdn.com'].includes(parsed.hostname)) throw new Error('Unsupported audio source');
@@ -59,9 +59,14 @@ export async function playAudio(url: string, playbackRate = 1) {
   // CORS mode keeps playback alive when an extension routes media through Web Audio (Firefox silences opaque sources).
   player.crossOrigin = 'anonymous'; player.defaultPlaybackRate = playbackRate; player.playbackRate = playbackRate;
   const fail = () => { if (token === generation) { clearTimeout(timer); generation++; player?.pause(); publish({ url, status: 'error', error: 'Audio could not load. Try again.' }); } };
-  player.onended = () => { if (token === generation) stopAudio(); };
+  player.onended = () => { if (token === generation) { stopAudio(); onEnded?.(); } };
   player.onerror = fail;
   player.onplaying = () => { if (token === generation) { clearTimeout(timer); publish({ url, status: 'playing' }); } };
   publish({ url, status: 'loading' }); player.src = url; timer = setTimeout(fail, 12_000);
   try { await player.play(); } catch { fail(); }
+}
+
+export function setPlaybackSpeed(rate:number){
+ if(![0.5,0.75,1,1.25,1.5].includes(rate))throw Error('Unsupported playback speed');
+ if(player){player.defaultPlaybackRate=rate;player.playbackRate=rate;}
 }
