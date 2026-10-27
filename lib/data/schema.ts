@@ -33,6 +33,21 @@ export type CardRecord = z.infer<typeof cardSchema>;
 export const prayerLocationSchema = z.object({
   city: z.string().trim().min(1).max(80).regex(/^[\p{L}\p{M}\p{N} .,'’()-]+$/u, "Invalid city"),
   country: z.string().trim().min(1).max(80).regex(/^[\p{L}\p{M}\p{N} .,'’()-]+$/u, "Invalid country"),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+  timeZone: z
+    .string()
+    .min(1)
+    .max(100)
+    .refine((value) => {
+      try {
+        new Intl.DateTimeFormat('en', { timeZone: value }).format();
+        return true;
+      } catch {
+        return false;
+      }
+    }, "Invalid time zone")
+    .optional(),
 });
 export type PrayerLocation = z.infer<typeof prayerLocationSchema>;
 export const settingsSchema = z.object({

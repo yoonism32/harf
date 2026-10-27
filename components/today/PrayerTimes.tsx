@@ -2,13 +2,18 @@
 import Link from 'next/link';
 import {useEffect,useState} from 'react';
 import type {PrayerLocation} from '@/lib/data/schema';
-import {fetchPrayerTimes,formatPrayerTime,nextPrayer,type PrayerTimes as Times} from '@/lib/prayer/client';
+import {formatPrayerTime,isLocated,nextPrayer,prayerNames,prayerTimes,type PrayerTimes as Times} from '@/lib/prayer/times';
 import {Skeleton} from '@/components/ui';
 
-const prayerNames=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'] as const;
 export function PrayerTimes({location}:{location:PrayerLocation|null}) {
- const [state,setState]=useState<{times?:Times;error?:string;revision:number}>({revision:0});
- useEffect(()=>{if(!location){setState(current=>({revision:current.revision}));return;}let mounted=true;const controller=new AbortController();const timer=setTimeout(()=>{if(mounted)setState(current=>({...current,error:'Prayer times took too long to load. Try again.'}));controller.abort();},8000);setState(current=>({revision:current.revision}));fetchPrayerTimes(location,controller.signal).then(times=>{if(mounted)setState(current=>({...current,times}));},cause=>{if(mounted&&!controller.signal.aborted)setState(current=>({...current,error:cause instanceof Error?cause.message:'Prayer times could not load.'}));}).finally(()=>clearTimeout(timer));return()=>{mounted=false;clearTimeout(timer);controller.abort();};},[location?.city,location?.country,state.revision]);
- return <section className="stack" aria-labelledby="prayer-times-title"><div><p className="eyebrow">Optional utility</p><h2 id="prayer-times-title">Prayer times</h2></div>{!location?<div className="status-message"><p>Add your city and country to see prayer times. Harf never requests precise device location.</p><Link href="/settings#prayer-location">Set prayer location →</Link></div>:state.error?<div className="status-message" role="alert"><p>{state.error}</p><div className="row"><button className="button button-secondary" onClick={()=>setState(current=>({revision:current.revision+1}))}>Try again</button><Link href="/settings#prayer-location">Check location</Link></div></div>:!state.times?<Skeleton height={220} label="Loading prayer times"/>:<PrayerList times={state.times} location={location}/>}</section>;
+ const [now,setNow]=useState<Date|null>(null);
+ useEffect(()=>{setNow(new Date());const timer=setInterval(()=>setNow(new Date()),60000);return()=>clearInterval(timer);},[]);
+ const located=isLocated(location);
+ const times=located&&now?prayerTimes(location,now):null;
+ return <section className="stack" aria-labelledby="prayer-times-title"><div><p className="eyebrow">Optional utility</p><h2 id="prayer-times-title">Prayer times</h2></div>{!location?<div className="status-message"><p>Add your city and country to see prayer times. Harf never requests precise device location.</p><Link href="/settings#prayer-location">Set prayer location →</Link></div>:!located?<div className="status-message"><p>Your saved location still needs its coordinates. Save it once more to switch to on-device calculation.</p><Link href="/settings#prayer-location">Refresh prayer location →</Link></div>:!now||!times?<Skeleton height={220} label="Calculating prayer times"/>:<PrayerList times={times} location={location} now={now}/>}</section>;
 }
-function PrayerList({times,location}:{times:Times;location:PrayerLocation}) {const [now,setNow]=useState(()=>new Date());useEffect(()=>{const timer=setInterval(()=>setNow(new Date()),60000);return()=>clearInterval(timer);},[]);const next=nextPrayer(times,now);return <div className="stack"><p><strong>{next.tomorrow?'Tomorrow’s ':''}{next.name}</strong> is next at {formatPrayerTime(next.time)}.</p><ul style={{listStyle:'none',padding:0,margin:0}}>{prayerNames.map(name=><li className="list-row" key={name}><span>{name}{name==='Sunrise'&&<small className="muted"> · not a prayer</small>}</span><time>{formatPrayerTime(times.timings[name])}</time></li>)}</ul><p className="muted">{location.city}, {location.country} · {times.readableDate}<br/>{times.hijriDate} · Muslim World League calculation</p><Link href="/settings#prayer-location">Change location</Link></div>}
+
+function PrayerList({times,location,now}:{times:Times;location:PrayerLocation;now:Date}) {
+ const next=nextPrayer(times,now);
+ return <div className="stack"><p><strong>{next.tomorrow?'Tomorrow’s ':''}{next.name}</strong>{next.time==='—'?' has no reliable time at this latitude today.':` is next at ${formatPrayerTime(next.time)}.`}</p><ul style={{listStyle:'none',padding:0,margin:0}}>{prayerNames.map(name=><li className="list-row" key={name}><span>{name}{name==='Sunrise'&&<small className="muted"> · not a prayer</small>}</span><time>{formatPrayerTime(times.timings[name])}</time></li>)}</ul><p className="muted">{location.city}, {location.country} · {times.readableDate}<br/>{times.hijriDate} · Muslim World League · calculated on this device</p><Link href="/settings#prayer-location">Change location</Link></div>;
+}

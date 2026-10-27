@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",
+    "adhan": "4.4.6",
     "idb": "^8.0.3",
     "next": "16.4.3",
     "react": "^19.2.8",
