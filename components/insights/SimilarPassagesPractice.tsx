@@ -1,7 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import {ExploreLink} from '@/components/shell/QuickReturn';
+import { useCallback, useState } from 'react';
+import {z} from 'zod';
+import {useVisitState} from '@/lib/data/use-visit-state';
 import {useRouter,useSearchParams} from 'next/navigation';
 import {CONTENT_VERSION} from '@/lib/content/client';
 import {useHarfStore} from '@/lib/data/store';
@@ -18,15 +21,17 @@ export function SimilarPassagesPractice({ pairs }: { pairs: SimilarPair[] }) {
   const index=parsed>=0&&parsed<pairs.length?parsed:0;
   const complete=parsed===pairs.length;
   if(complete)return <section className="study-sheet stack"><p className="eyebrow">Practice complete</p><h2>You compared all {pairs.length} passages.</h2><p>Return whenever you want to look for the shared wording again.</p><div className="row"><Link className="button button-primary" href="/insights/practice?pair=0">Practice again</Link><Link className="button button-secondary" href="/insights">Back to Quran insights</Link></div></section>;
-  return <Comparison pairs={pairs} index={index} onNext={()=>router.push(`/insights/practice?pair=${index+1}`)}/>;
+  return <Comparison key={index} pairs={pairs} index={index} onNext={()=>router.push(`/insights/practice?pair=${index+1}`)}/>;
 }
 
 function Comparison({pairs,index,onNext}:{pairs:SimilarPair[];index:number;onNext:()=>void}){
-  const [revealed, setRevealed] = useState(false);
   const pair = pairs[index]!;
   const store=useHarfStore(),id=passageId(pair.verseA,pair.verseB),saved=store.passageCards.find(c=>c.id===id);
-  const [attempt,setAttempt]=useState(()=>crypto.randomUUID()),[error,setError]=useState(''),[busy,setBusy]=useState(false),[last,setLast]=useState<string|null>(null);
-  useEffect(()=>{setAttempt(crypto.randomUUID());setLast(null);setError('');},[id]);
+  const [revealed,setRevealed,revealedReady]=useVisitState(`comparison:${id}:revealed`,false,z.boolean());
+  const [attempt,setAttempt,attemptReady]=useVisitState(`comparison:${id}:attempt`,crypto.randomUUID() as string,z.string().uuid());
+  const [last,setLast,lastReady]=useVisitState<string|null>(`comparison:${id}:last`,null,z.string().uuid().nullable());
+  const [revision,setRevision,revisionReady]=useVisitState(`comparison:${id}:revision`,saved?.revision??0,z.number().int().nonnegative());
+  const [error,setError]=useState(''),[busy,setBusy]=useState(false);
   async function action(fn:()=>Promise<unknown>){setBusy(true);setError('');try{await fn();}catch(e){setError(e instanceof Error?e.message:'Could not save. Try again.');}finally{setBusy(false);}}
 
   const loadA = useCallback(() => getAyah(pair.verseA), [pair.verseA]);
@@ -35,7 +40,7 @@ function Comparison({pairs,index,onNext}:{pairs:SimilarPair[];index:number;onNex
   const ayahB = useResource(loadB);
   const sharedPositions = positionsInRanges(pair.matchWordsInB);
 
-  useEffect(() => setRevealed(false), [index]);
+  if(!revealedReady||!attemptReady||!lastReady||!revisionReady)return <p role="status">Restoring comparison…</p>;
 
   if (!ayahA.data) return <ResourceMessage error={ayahA.error} retry={ayahA.retry} />;
 
@@ -46,9 +51,9 @@ function Comparison({pairs,index,onNext}:{pairs:SimilarPair[];index:number;onNex
           <p className="eyebrow">Comparison {index + 1} of {pairs.length}</p>
           <h2 id="practice-heading">Recall the parallel wording</h2>
         </div>
-        <Link href={`/insights/${pair.verseA.replace(':', '/')}`}>Context for {pair.verseA}</Link>
+        <ExploreLink href={`/insights/${pair.verseA.replace(':', '/')}`}>Context for {pair.verseA}</ExploreLink>
       </div>
-      {error&&<p role="alert">{error}</p>}
+      {error&&<div role="alert"><p>{error}</p><button className="button button-secondary" disabled={busy} onClick={()=>{setRevealed(false);setLast(null);setAttempt(crypto.randomUUID());setRevision(saved?.revision??0);setError('');}}>Start a new recall attempt</button></div>}
       {!saved?<button className="button button-secondary" disabled={busy||store.status!=='ready'} onClick={()=>void action(()=>rememberPassage(pair.verseA,pair.verseB,CONTENT_VERSION))}>Remember this pair</button>:<p className="muted">Saved for practice · {Date.parse(saved.card.due)<=Date.now()?'Due now':`Next review ${new Date(saved.card.due).toLocaleString()}`}</p>}
       <progress value={index + 1} max={pairs.length}>Comparison {index + 1} of {pairs.length}</progress>
       <article className="sheet stack">
@@ -78,11 +83,11 @@ function Comparison({pairs,index,onNext}:{pairs:SimilarPair[];index:number;onNex
             })}
           </p>
           <p className="translation">{ayahB.data.translation}</p>
-          {saved&&Date.parse(saved.card.due)<=Date.now()&&!last&&<div className="row" aria-label="Rate passage recall">{(['Again','Hard','Good','Easy'] as const).map((label,i)=><button className="button button-secondary" key={label} disabled={busy} onClick={()=>void action(async()=>{const event=await reviewPassage({id,attemptId:attempt,expectedRevision:saved.revision,grade:(i+1) as 1|2|3|4});setLast(event.id);})}>{label}</button>)}</div>}
-          {last&&<button className="button button-secondary" disabled={busy} onClick={()=>void action(async()=>{await undoPassageReview(last);setLast(null);setAttempt(crypto.randomUUID());})}>Undo review</button>}
+          {saved&&Date.parse(saved.card.due)<=Date.now()&&!last&&<div className="row" aria-label="Rate passage recall">{(['Again','Hard','Good','Easy'] as const).map((label,i)=><button className="button button-secondary" key={label} disabled={busy} onClick={()=>void action(async()=>{const event=await reviewPassage({id,attemptId:attempt,expectedRevision:revision,grade:(i+1) as 1|2|3|4});setLast(event.id);})}>{label}</button>)}</div>}
+          {last&&<button className="button button-secondary" disabled={busy} onClick={()=>void action(async()=>{await undoPassageReview(last);setLast(null);setAttempt(crypto.randomUUID());setRevision(saved!.revision+1);})}>Undo review</button>}
           <div className="row between">
-            <Link href={`/insights/${pair.verseB.replace(':', '/')}`}>Explore {pair.verseB} in context</Link>
-            <button className="button button-primary" onClick={onNext}>{index===pairs.length-1?'Finish practice':'Next comparison'}</button>
+            <ExploreLink href={`/insights/${pair.verseB.replace(':', '/')}`}>Explore {pair.verseB} in context</ExploreLink>
+            <button className="button button-primary" disabled={busy} onClick={onNext}>{index===pairs.length-1?'Finish practice':'Next comparison'}</button>
           </div>
         </article>
       )}

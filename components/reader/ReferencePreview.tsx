@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import {ExploreLink as Link} from '@/components/shell/QuickReturn';
 import {useCallback} from 'react';
 import {getAyah} from '@/lib/content/client';
 import type {TranslationTarget} from '@/lib/content/schema';

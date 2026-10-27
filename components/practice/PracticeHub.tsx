@@ -1,8 +1,13 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {z} from 'zod';
+import {useVisitState} from '@/lib/data/use-visit-state';
+import {safeReturn} from '@/lib/navigation/return';
 import Link from 'next/link';
+import {ExploreLink} from '@/components/shell/QuickReturn';
 import { useRouter, useSearchParams } from 'next/navigation';
+import {EndPracticeLink} from './EndPracticeLink';
 import { ListeningRecall } from './ListeningRecall';
 import { ResourceMessage, useResource } from '@/components/learning/useResource';
 import { ArabicText, Button, StatusMessage } from '@/components/ui';
@@ -37,7 +42,7 @@ function answerHref(mode: PracticeMode, seed: number, round: number, answer: str
   return `/practice?${query.toString()}`;
 }
 
-function StartPractice({initialMode}:{initialMode:PracticeMode}) {
+function StartPractice({initialMode,resumeHref}:{initialMode:PracticeMode;resumeHref:string|null}) {
   const router = useRouter();
   const [mode, setMode] = useState<PracticeMode>(initialMode);
   function start() {
@@ -52,6 +57,7 @@ function StartPractice({initialMode}:{initialMode:PracticeMode}) {
       <p>Train recognition in short, pressure-free rounds. Your answers here never move a spaced-repetition card.</p>
     </header>
     <section className="sheet stack">
+      {resumeHref&&<Link className="button button-primary" href={resumeHref}>Resume previous practice</Link>}
       <fieldset>
         <legend>Choose an activity</legend>
         <div className={styles.modeGrid}>
@@ -72,7 +78,7 @@ function RoundFrame({ mode, round, children }: { mode: PracticeMode; round: numb
   return <div className={`${styles.shell} stack`}>
     <header className={styles.roundHeader}>
       <div><p className="eyebrow">{title}</p><h1>Round {round + 1}</h1></div>
-      <Link href="/practice">End practice</Link>
+      <EndPracticeLink/>
     </header>
     {children}
   </div>;
@@ -139,7 +145,7 @@ function WordRound({ question, mode, seed, round, answer }: {
         {!context.data && !context.error && <p role="status">Loading context…</p>}
         {context.data && <>
           <p>{mode === 'root' ? 'A shared root can connect words without making their meanings identical.' : `This gloss describes the word at ${context.data.examples[0]!.ref}.`}</p>
-          <Link href={`/learn/${question.entry.id}`}>Explore the entry and its ayah examples</Link>
+          <ExploreLink href={`/learn/${question.entry.id}`}>Explore the entry and its ayah examples</ExploreLink>
         </>}
         <Link className="button button-primary" href={nextRoundHref(mode, seed, round)}>Next round</Link>
       </div>}
@@ -156,6 +162,9 @@ export function PracticeHub() {
   const round = numberParam(params.get('round'), 9999);
   const answer = params.get('answer');
   const active = validMode(mode) && seed !== null && round !== null;
+  const [resume,setResume,resumeReady]=useVisitState('practice:last','',z.string().max(6000));
+  const query=params.toString();
+  useEffect(()=>{if(active&&resumeReady&&resume!==`/practice?${query}`)setResume(`/practice?${query}`);},[active,query,resumeReady]);
   const question = useMemo(() => {
     if (!active || !catalog.data || mode === 'listening') return null;
     try {
@@ -164,7 +173,7 @@ export function PracticeHub() {
       return cause instanceof Error ? cause : new Error('Practice could not start.');
     }
   }, [active, catalog.data, mode, round, seed]);
-  if (!active) return <StartPractice initialMode={validMode(mode)?mode:'listening'} />;
+  if (!active) return <StartPractice initialMode={validMode(mode)?mode:'listening'} resumeHref={safeReturn(resume)?.startsWith('/practice?')?resume:null} />;
   if (!catalog.data) return <div className={styles.shell}><ResourceMessage error={catalog.error} retry={catalog.retry} /></div>;
   if (question instanceof Error) return <div className={`${styles.shell} stack`}><StatusMessage error>{question.message}</StatusMessage><Link href="/practice">Choose another activity</Link></div>;
   if (mode === 'listening') return <ListeningRecall key={seed} seed={seed} initialRound={round} reciter={store.settings.reciter} surahs={catalog.data.surahs}/>;

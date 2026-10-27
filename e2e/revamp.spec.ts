@@ -5,7 +5,9 @@ for(const [query,ref] of [["fa inna ma'al 'usri yusran",'94:5'],["inna lil-laahi
  test(`natural search "${query}" finds ${ref} first`,async({page})=>{
   await page.goto(`/read?mode=all&q=${encodeURIComponent(query!)}`);
   const results=page.locator('.search-result');
-  await expect(results.first()).toHaveAttribute('href',`/read/${ref!.replace(':','/')}`);
+  // A result link also carries a validated ?returnTo= back to this search, so match the destination path.
+  await expect(results.first()).toHaveAttribute('href',new RegExp(`^/read/${ref!.replace(':','/')}(?:\\?|$)`));
+  await expect(results.first()).toHaveAttribute('href',/returnTo=/);
   await expect(results.first().locator('mark').first()).toBeVisible();
  });
 }
@@ -109,12 +111,14 @@ test('desktop reference preview preserves selected word',async({page})=>{
 
 test('ayah jump works from any page and rejects missing ayahs',async({page})=>{
  await page.goto('/today');
- const jump=page.getByLabel('Go to ayah (surah:ayah)').filter({visible:true});
+ const jump=page.getByLabel('Go to ayah (surah:ayah or name)').filter({visible:true});
  await jump.fill('2:999');await jump.press('Enter');
  await expect(page).toHaveURL(/\/today$/);
  expect(await jump.evaluate(e=>(e as HTMLInputElement).validationMessage)).toContain('2:255');
  await jump.fill('2 : 255');await jump.press('Enter');
  await expect(page).toHaveURL(/\/read\/2\/255$/);
+ await jump.fill('yaseen');await jump.press('Enter');
+ await expect(page).toHaveURL(/\/read\/36\/1$/);
 });
 
 test('mobile bottom navigation includes Insights',async({page},info)=>{

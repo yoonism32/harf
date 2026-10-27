@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import {ExploreLink as Link} from '@/components/shell/QuickReturn';
 import {useEffect,useRef,useState} from 'react';
 import {useRouter,useSearchParams} from 'next/navigation';
 import {parseRef} from '@/lib/content/refs';

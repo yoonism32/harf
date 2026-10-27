@@ -1,6 +1,6 @@
 'use client';
 import { Suspense } from 'react';
-import Link from 'next/link';
+import {ExploreLink as Link} from '@/components/shell/QuickReturn';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getCatalog } from '@/lib/content/client';
 import { useHarfStore } from '@/lib/data/store';
