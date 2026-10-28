@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Call /api/health
         env:
-          HARF_BASE_URL: ${{ secrets.HARF_BASE_URL || vars.HARF_BASE_URL || 'https://harf-gkfk.onrender.com' }}
+         HARF_BASE_URL: ${{ secrets.HARF_BASE_URL || vars.HARF_BASE_URL }}
         run: |
           set -euo pipefail
           if [ -z "${HARF_BASE_URL}" ]; then
