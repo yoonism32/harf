@@ -79,7 +79,7 @@ export function PassageStudy({reference, returnHref}: {reference: string; return
  if (!currentReady || !endReady) return <p role="status">Restoring passage…</p>;
  return <div className="stack">
   <header className="page-header">
-   <Link href={returnHref}>Return to reading</Link>
+   <Link href={returnHref}>{returnHref === '/today' ? 'Return to Today' : 'Return to reading'}</Link>
    <h1>Study this passage</h1>
    <p>{surahs[surah - 1]!.name} · Listen, recall, compare, revisit.</p>
   </header>

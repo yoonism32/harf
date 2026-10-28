@@ -33,6 +33,30 @@ test('landing, onboarding, and first study card work', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Undo last answer' })).toBeVisible();
 });
 
+test('Today revisits the last-read ayah and returns after passage practice', async ({page}) => {
+  await page.goto('/today');
+  await expect(page.getByRole('region',{name:'Vocabulary progress'})).toBeVisible();
+  await page.goto('/read/1/3');
+  await expect(page.getByText('Surah 1 · Ayah 3 of 7', {exact:true})).toBeVisible();
+  await expect.poll(()=>page.evaluate(()=>new Promise<string|undefined>((resolve,reject)=>{
+    const request=indexedDB.open('harf');
+    request.onerror=()=>reject(request.error);
+    request.onsuccess=()=>{
+      const db=request.result,read=db.transaction('meta').objectStore('meta').get('lastVerse');
+      read.onsuccess=()=>{resolve(read.result);db.close();};
+      read.onerror=()=>{reject(read.error);db.close();};
+    };
+  }))).toBe('1:3');
+  await page.goto('/today');
+  await page.reload();
+  const revisit=page.getByRole('link', {name:'Study this ayah again →'});
+  await expect(revisit).toHaveAttribute('href','/read/1/3/study?back=%2Ftoday');
+  await revisit.click();
+  await expect(page.getByRole('heading',{name:'Listen and understand · 1:3'})).toBeVisible();
+  await page.getByRole('link',{name:/Return to/}).click();
+  await expect(page).toHaveURL(/\/today$/);
+});
+
 test('reader validates navigation, word inspection, and bookmarks', async ({ page }) => {
   await page.goto('/read/1/1');
   await expect(page.getByText('Surah 1 · Ayah 1 of 7', {exact:true})).toBeVisible();

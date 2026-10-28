@@ -23,8 +23,9 @@ Hear a selected Quran passage, follow its wording and meaning, consult its conte
    point; the comparison browser is no longer capped at 12; review attempts capture their starting revision;
    navigation cannot race a save; and unavailable source pairs remain visible with retained progress. Account
    passage sync still awaits its separate Supabase migration and owner-controlled verification.
-5. **Slice 4 — resume a personal passage from Today: next.** Start with a manual revisit of `lastVerse`; do not
-   create a saved range or new synced meta key without the server allowlist migration.
+5. **Slice 4 — manual revisit from Today: implemented at the initial boundary.** Continue reading now offers
+   “Study this ayah again” for `lastVerse`, opening the existing passage exercise with a return to Today.
+   Persistent difficulty history, saved ranges and passage scheduling remain deferred; assessments are tab-only.
 6. **Slice 5 — useful language patterns: unblocked, not started.** The owner approved the current source and
    content gates for Harf release on 28 October. It still needs deliberate, passage-led examples rather than a
    generic grammar course.
@@ -84,7 +85,7 @@ Start with manual revisit; introduce passage scheduling only if repeated persona
 
 ### 5. Teach a few useful language patterns
 
-Use difficulties collected during passage study to select a small, source-reviewed set of examples for pronoun suffixes, negation, connectors and common verb forms. Explain what each does in its actual ayah. Reuse morphology only with its source permission and editorial status accounted for: several retained datasets still have pending permission records. Do not assume a morphological tag alone supplies sentence interpretation. Defer a general grammar course and automatically generated exercises.
+Use difficulties collected during passage study to select a small, source-reviewed set of examples for pronoun suffixes, negation, connectors and common verb forms. Explain what each does in its actual ayah. Reuse morphology with its recorded source and owner approval accounted for (the pending release gates were resolved on 28 October). Do not assume a morphological tag alone supplies sentence interpretation. Defer a general grammar course and automatically generated exercises.
 
 ## Existing obligations
 
@@ -122,3 +123,11 @@ Ship step 1 plus the existing-course “Study next” shortcut from step 2. Eval
   unavailable source pairs remain visible with their saved progress.
 - This is local persistence work only. Account-backed passage sync still needs the separately planned Supabase
   migration and owner-controlled verification.
+
+## Slice 4 manual revisit implemented, 28 October
+
+- Today offers “Study this ayah again” beside the last-read ayah, using the existing passage exercise.
+- The exercise returns directly to Today; reader entry points still return to their original reader location.
+- No new persistent data or sync keys. Difficulty feedback remains tab-only; saved ranges and scheduling remain deferred.
+- Verification: TypeScript, 138 unit tests and three browser checks (Chromium, Mobile Chrome and WebKit) passed.
+  Browser coverage checks the remembered ayah after reload, passage navigation and return to Today.

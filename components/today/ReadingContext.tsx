@@ -7,7 +7,7 @@ import {Skeleton} from '@/components/ui';
 
 export function ContinueReading({reference}:{reference:string}){
  const load=useCallback(()=>getAyah(reference),[reference]),resource=useResource(load);
- return <section className="stack" aria-labelledby="continue-reading-title"><p className="eyebrow">Continue reading</p><h2 id="continue-reading-title">Ayah {reference}</h2>{!resource.data?resource.error?<p role="alert">{resource.error}</p>:<Skeleton height={150} label="Loading your last ayah"/>:<><p className="quran-text" dir="rtl" lang="ar">{resource.data.tokens.map(token=>token.arabic).join(' ')}</p><p>{resource.data.translation}</p></>}<Link href={`/read/${reference.replace(':','/')}`}>Open ayah {reference} →</Link></section>;
+ return <section className="stack" aria-labelledby="continue-reading-title"><p className="eyebrow">Continue reading</p><h2 id="continue-reading-title">Ayah {reference}</h2>{!resource.data?resource.error?<p role="alert">{resource.error}</p>:<Skeleton height={150} label="Loading your last ayah"/>:<><p className="quran-text" dir="rtl" lang="ar">{resource.data.tokens.map(token=>token.arabic).join(' ')}</p><p>{resource.data.translation}</p></>}<Link href={`/read/${reference.replace(':','/')}`}>Open ayah {reference} →</Link><Link href={`/read/${reference.replace(':','/')}/study?back=%2Ftoday`}>Study this ayah again →</Link><p className="muted">Listen and revisit its meaning, separately from vocabulary reviews.</p></section>;
 }
 
 export function RevisitEntry({entryId,lastReference}:{entryId?:string;lastReference:string}){
