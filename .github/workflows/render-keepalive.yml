@@ -24,19 +24,24 @@ jobs:
     steps:
       - name: Call /api/health
         env:
-          HARF_BASE_URL: ${{ secrets.HARF_BASE_URL }}
+          HARF_BASE_URL: ${{ secrets.HARF_BASE_URL || vars.HARF_BASE_URL || 'https://harf-gkfk.onrender.com' }}
         run: |
           set -euo pipefail
           if [ -z "${HARF_BASE_URL}" ]; then
-            echo "Set the HARF_BASE_URL repository secret, for example https://harf.onrender.com." >&2
+            echo "Set HARF_BASE_URL (secret or variable), for example https://harf.onrender.com." >&2
             exit 1
           fi
+          base_url="${HARF_BASE_URL%/}"
+          case "$base_url" in
+            http://*|https://*) ;;
+            *) base_url="https://${base_url}" ;;
+          esac
           body=$(mktemp)
           # A cold start can take most of a minute, so the timeout is longer
           # than the Supabase job's and the retries cover a restart in progress.
           status=$(curl -sS --max-time 60 --retry 3 --retry-delay 15 --retry-all-errors \
             -o "$body" -w '%{http_code}' \
-            "${HARF_BASE_URL%/}/api/health")
+            "${base_url}/api/health")
           echo "HTTP ${status}"
           cat "$body"
           echo
