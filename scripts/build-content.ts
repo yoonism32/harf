@@ -13,7 +13,7 @@ const read = (path: string) => readFileSync(join(root, path), 'utf8');
 const json = (path: string) => JSON.parse(read(path));
 const hash = (value: string | Buffer) => createHash('sha256').update(value).digest('hex');
 const write = (path: string, value: unknown) => { mkdirSync(join(root, path, '..'), { recursive: true }); writeFileSync(join(root, path), JSON.stringify(value)); };
-const sourceSchema = z.object({ mode: z.enum(['preview', 'qul']), files: z.array(z.object({ path: z.string(), sha256: z.string().regex(/^[a-f0-9]{64}$/), url: z.string().url().nullable(), retrievedAt: z.string().min(1), sourceVersion: z.string().min(1), termsEvidence: z.string().min(1), tokenization: z.string().min(1), attribution: z.string().min(1), permission: z.enum(['pending', 'verified']) })), blockers: z.array(z.string()) });
+const sourceSchema = z.object({ mode: z.enum(['preview', 'qul']), files: z.array(z.object({ path: z.string(), sha256: z.string().regex(/^[a-f0-9]{64}$/), url: z.string().url().nullable(), retrievedAt: z.string().min(1), sourceVersion: z.string().min(1), termsEvidence: z.string().min(1), tokenization: z.string().min(1), attribution: z.string().min(1), permission: z.enum(['pending', 'owner-approved', 'verified']) })), blockers: z.array(z.string()) });
 const sources = sourceSchema.parse(json('data/sources.json'));
 const pinnedPaths = new Set(sources.files.map(source => source.path));
 if (pinnedPaths.size !== sources.files.length) throw new Error('Duplicate pinned source path');
@@ -26,7 +26,7 @@ for (const source of sources.files) if (hash(readFileSync(join(root, source.path
 const previewManifest=z.record(z.string().regex(/^surah-(?:[1-9]|[1-9][0-9]|10[0-9]|11[0-4])\.json$/),z.string().regex(/^[a-f0-9]{64}$/)).parse(json('data/source/preview/manifest.json'));
 for(let n=1;n<=114;n++){const path=`surah-${n}.json`;if(previewManifest[path]!==hash(readFileSync(join(root,'data/source/preview',path))))throw Error(`Preview source checksum mismatch ${path}`);}
 const approval = z.object({ status: z.enum(['pending','approved']), reviewer:z.string().optional(), reviewedAt:z.string().optional(), evidence:z.string().optional() });
-const overrides = z.object({ entries: z.record(z.string(), z.object({ exampleKeys: z.array(z.string()).min(1).max(3).optional(), approval: approval.optional() })), legacyMappings: z.record(z.string().regex(/^[a-z0-9-]+$/),z.string().regex(/^l-[a-f0-9]{16}$/)), namesApproved:z.boolean() }).parse(json('data/course-overrides.json'));
+const overrides = z.object({ entries: z.record(z.string(), z.object({ exampleKeys: z.array(z.string()).min(1).max(3).optional(), approval: approval.optional() })), legacyMappings: z.record(z.string().regex(/^[a-z0-9-]+$/),z.string().regex(/^l-[a-f0-9]{16}$/)), namesApproved:z.boolean(), allEntriesApproval:approval.optional() }).parse(json('data/course-overrides.json'));
 const alignment = z.object({ exceptions:z.record(z.string(),z.object({ sourceKeys:z.array(z.string()).min(1), evidence:z.string().min(10) })) }).parse(json('data/token-alignment.json'));
 const contentVersion = hash(JSON.stringify({files:sources.files.map(s=>s.sha256),sources,overrides,alignment,compiler:hash(read('scripts/content-mushaf.ts')+read('lib/content/mushaf-schema.ts')+read('scripts/build-content.ts')+read('scripts/content-morphology.ts')+read('scripts/content-translation.ts')+read('lib/content/alignment.ts')+read('lib/content/morphology-schema.ts')),schema:hash(read('lib/content/schema.ts')),metadata:hash(read('data/quran-surah-meta.json'))})).slice(0,16);
 const contentRoot=join(root,'public/content');
@@ -126,23 +126,23 @@ const entries:VocabularyEntry[]=eligible.map(([id,tokens],i)=>{
  const override=overrides.entries[id]; const keys=override?.exampleKeys??chosen.map(t=>t.key);
  const selected=keys.map(key=>{const t=tokens.find(t=>t.key===key);if(!t||!t.gloss||!t.transliteration)throw new Error(`Unaligned study answer ${key}`);return t;});
  const representative=selected[0]!;for(const t of tokens)t.entryId=id;
- return {id,lemma:representative.lemma!,root:representative.root,arabic:representative.arabic,gloss:representative.gloss,transliteration:representative.transliteration,representativeKey:representative.key,exampleKeys:keys,occurrenceCount:tokens.length,courseOrder:i+1,sourceIds:sources.mode==='preview'?['quran-com-v4','qac-0.4']:['qul-56','qul-92','qul-71','qul-75','qul-76','qul-301'],rootId:representative.root?rootId(representative.root):null,approval:override?.approval??{status:'pending'}};
+ return {id,lemma:representative.lemma!,root:representative.root,arabic:representative.arabic,gloss:representative.gloss,transliteration:representative.transliteration,representativeKey:representative.key,exampleKeys:keys,occurrenceCount:tokens.length,courseOrder:i+1,sourceIds:sources.mode==='preview'?['quran-com-v4','qac-0.4']:['qul-56','qul-92','qul-71','qul-75','qul-76','qul-301'],rootId:representative.root?rootId(representative.root):null,approval:override?.approval??overrides.allEntriesApproval??{status:'pending'}};
 });
 const entryIds=new Set(entries.map(entry=>entry.id));
 for(const [legacyId,entryId] of Object.entries(overrides.legacyMappings))if(!entryIds.has(entryId))throw new Error(`Legacy route ${legacyId} points to missing entry ${entryId}`);
 const blockers=[...sources.blockers];
-if(sources.files.some(s=>s.permission!=='verified')&&!blockers.some(blocker=>/permission|redistribution/i.test(blocker)))blockers.push('Source-specific redistribution permission evidence remains unverified.');
+if(sources.files.some(s=>s.permission==='pending')&&!blockers.some(blocker=>/permission|redistribution/i.test(blocker)))blockers.push('Source-specific redistribution permission evidence remains unverified.');
 const pending=entries.filter(e=>e.approval.status!=='approved'||!e.approval.reviewer||!e.approval.reviewedAt||!e.approval.evidence);
 if(pending.length)blockers.push(`${pending.length} course entries require Arabic-competent editorial approval.`);
 // The owner selected the original collection for personal use; selection is not editorial certification.
 const names = z.array(nameEntrySchema).length(99).parse(
  json('data/99names.json').map((name:unknown) => nameEntrySchema.parse({
   ...z.object({id:z.number(),arabic:z.string(),transliteration:z.string(),meaning:z.string(),root:z.string(),explanation:z.string()}).parse(name),
-  sourceIds:['harf-original-names'],verified:false,
+  sourceIds:['harf-original-names'],verified:overrides.namesApproved,
  }))
 );
 names.forEach((name,index)=>{if(name.id!==index+1)throw new Error('Names source must contain IDs 1–99 in order');});
-blockers.push('The 99 original Names are selected for personal use; independent editorial review is not recorded.');
+if(!overrides.namesApproved)blockers.push('The 99 original Names are selected for personal use; independent editorial review is not recorded.');
 const catalog=catalogSchema.parse({contentVersion,entries,surahs,releaseReady:blockers.length===0,blockers});
 write(`${out}/catalog.json`,catalog);
 const listeningRows=surahs.flatMap(s=>z.object({verses:z.array(z.object({verse_key:z.string(),juz_number:z.number().int().min(1).max(30)}))}).parse(json(`data/source/preview/surah-${s.number}.json`)).verses.map(v=>({ref:v.verse_key,juz:v.juz_number})));

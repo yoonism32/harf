@@ -6,6 +6,38 @@ Proposed 27 October 2026. This is a proposal, not a shipped-feature checklist.
 
 Hear a selected Quran passage, follow its wording and meaning, consult its context and tafsir, and retain personal reflections inside Harf. Vocabulary familiarity, listening self-assessment and reflection remain separate concepts.
 
+## Current implementation status — updated 28 October
+
+1. **Slice 1 — passage study: complete.** The reader opens a separate listening-for-meaning exercise with an
+   optional ten-ayah same-surah sequence, hints, reveal, word inspection, visit-only self-assessment and a safe
+   return to the reader. It does not alter vocabulary scheduling.
+2. **Slice 2 — reader discoveries feed vocabulary: complete at the planned boundary.** Both reader modes and the
+   passage exercise show existing course status and can queue an unintroduced course word for normal study. Words
+   outside the 300-entry course bookmark their ayah instead. Expanding the course remains deliberately deferred
+   until actual blocking words have been observed.
+3. **Slice 3 — reflection beside the ayah: complete locally.** Both reader modes render an ayah reflection using
+   a safe notes-store identity, retained unsaved drafts and revision-checked writes. It therefore participates in
+   existing backup/import and account-sync mechanisms without a new schema or RPC key. A real signed-in sync
+   round trip has not been performed.
+4. **Saved-passage maintenance: complete locally.** Due saved pairs have their own ordered queue and Today entry
+   point; the comparison browser is no longer capped at 12; review attempts capture their starting revision;
+   navigation cannot race a save; and unavailable source pairs remain visible with retained progress. Account
+   passage sync still awaits its separate Supabase migration and owner-controlled verification.
+5. **Slice 4 — resume a personal passage from Today: next.** Start with a manual revisit of `lastVerse`; do not
+   create a saved range or new synced meta key without the server allowlist migration.
+6. **Slice 5 — useful language patterns: unblocked, not started.** The owner approved the current source and
+   content gates for Harf release on 28 October. It still needs deliberate, passage-led examples rather than a
+   generic grammar course.
+
+### Current source and review gates
+
+`data/sources.json` records seven externally verified and seven owner-approved pinned inputs. The verified core is
+QUL Arabic script, word glosses, transliteration, Hilali/Khan translation, lemmas, roots and Ibn Kathir commentary.
+Owner-approved records cover the selected 99 Names, retained Quranic Arabic Corpus morphology and Quran.com word
+exports, QuranWBW morphology notes, and QPC V2 Mushaf glyph/layout/font assets. The owner also approved the current
+300 vocabulary entries and 99 Names for Harf release on 28 October. See `docs/CONTENT_SOURCES.md` and the source
+registry for the file-level record; owner approval remains distinct from independent editorial certification.
+
 ## Baseline inspected
 
 Local HEAD and the locally cached origin/main both point to `18fc7b5`. No remote fetch was performed. Recent commits include Mushaf compilation, Reading mode, the bottom audio toolbar, loops and reader tests. Further reader/audio/navigation changes are uncommitted; preserve them.
@@ -56,7 +88,10 @@ Use difficulties collected during passage study to select a small, source-review
 
 ## Existing obligations
 
-Before extending saved similar-passage practice, resolve its unfinished queue and persistence flow. The current practice page still calls `getPracticePairs()` with its default limit, and grading reads the live saved revision. Recheck the documented save/navigation race, account migration and missing due entry point together. These are maintenance of an existing feature, not prerequisites for a non-persistent listening prototype.
+The local saved-passage queue and persistence work described in the original proposal is now resolved: all eligible
+pairs can be browsed, due pairs are ordered separately, Today links to them only when due, and review attempts keep
+their original revision while a save is in flight. The account migration remains open: do not claim account-backed
+passage sync until its server migration and two-account/conflict/tombstone checks have been completed.
 
 For any new persistent feature, verify failed saves, reload and backup round-trip as part of delivery; verify account sync where the feature promises it. Do not claim old test results certify today's dirty working tree.
 
@@ -78,3 +113,12 @@ Ship step 1 plus the existing-course “Study next” shortcut from step 2. Eval
 - No new persistent records, word bookmarks, reflection storage, sync keys or scheduling rules. No timestamp-based range playback.
 - Verification uses npm run typecheck, npm test, npm run build:app and targeted Playwright reader/listening/study checks. Build does not regenerate content or claim editorial approval.
 - Results: TypeScript and production application build passed; 131 unit tests passed. All 12 new browser checks passed across Chromium, Mobile Chrome and WebKit, including automated accessibility, hidden answers, return navigation, bookmark/priority persistence and failed-save retry. The existing reader/revamp checks contributed 46 passes and two existing skips. A broad alert locator was narrowed after it also matched Next.js's route announcer; study playback now appears after content loads, avoiding an early interaction during initialization. No live account-sync or real-recording audition was performed.
+
+## Follow-on maintenance slice implemented, 28 October
+
+- Saved similar-passage cards now have a separate due queue, ordered by due time, with a conditional Today entry
+  point. The comparison browser exposes all eligible source pairs, not only the first 12.
+- A recall attempt captures its card revision when it begins. The review UI prevents navigation during a save, and
+  unavailable source pairs remain visible with their saved progress.
+- This is local persistence work only. Account-backed passage sync still needs the separately planned Supabase
+  migration and owner-controlled verification.

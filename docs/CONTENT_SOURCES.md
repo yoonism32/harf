@@ -1,12 +1,32 @@
 # Harf content: where it came from and what changed
 
-Checked against the working tree, Git history, and linked publisher pages on 1 October 2026. This is a provenance explanation, not an editorial approval of the Arabic or theological content.
+Checked against the working tree, Git history, and linked publisher pages on 1 October 2026; QUL downloads were rechecked on 28 October 2026. The owner approved the current pinned inputs and selected Names collection for Harf release on 28 October. This records an owner decision, not new third-party licence evidence or independent editorial certification.
 
 ## Update — 2 October 2026
 
 The owner has selected the **original `data/99names.json`** for personal use. The compiler and Names screen now preserve its Arabic, Ar-Rahman/Ar-Raheem labels, meanings, roots and explanations. NumroQ is retained for historical comparison but is no longer an active compiler input. This selection does not claim an external publisher or independent editorial certification. Attribution completeness is not a requirement to use this selected collection in the personal app.
 
 The old/new tables below describe the earlier switch to NumroQ, not the restored current selection. Read the [measured source audit](SOURCE_AUDIT_2026-10-02.md) for range tests, missing grammar fields and discovered annotation gaps.
+
+## Download verification — 28 October 2026
+
+The owner downloaded current QUL exports into a temporary review folder and Harf compared them without replacing repository files.
+
+| Harf layer | Upstream resource and format | Result |
+|---|---|---|
+| Ayah themes | [62: QUL Ayah Themes](https://qul.tarteel.ai/resources/ayah-theme/62), SQLite | All 1,049 distinct records match the local JSON projection. The downloaded database contains every row twice (2,098 rows); Harf correctly retains the 1,049 distinct records. |
+| Similar ayahs | [74: QUL Similar Ayah](https://qul.tarteel.ai/resources/ayah-theme/74), JSON | Byte-identical to `data/matching-ayah.json`. |
+| Repeated phrases | [73: QUL Mutashabihat](https://qul.tarteel.ai/resources/mutashabihat/73), two JSON files | Both `phrases.json` and `phrase_verses.json` are byte-identical to Harf's phrase data and reverse index. The web preview currently reports 13 occurrences for one 2:112 phrase while its downloaded JSON contains 12; treat the downloaded artifact as the reproducible input and record the preview disagreement as an upstream issue. |
+| Topics and ayah links | [45: QUL Ayah Topics](https://qul.tarteel.ai/resources/ayah-topics/45), SQLite | All 2,512 topic rows and 5,804 reverse links match after the local projection represents SQL `NULL` Arabic labels as empty strings. QUL identifies the ontology layer as Quranic Arabic Corpus material and its thematic layer as Clear Quran material. |
+| Basic surah metadata | [70: QUL Surah Names](https://qul.tarteel.ai/resources/quran-metadata/70), JSON | Harf's 114-row `quran-surah-meta.json` exactly matches the current export's simple name, Arabic name and ayah count fields. |
+
+These Insights inputs are QUL-derived even though they are bundled as app-friendly JSON rather than listed in `data/sources.json`. The registry deliberately remains the compiler's versioned input list; this document records the separate runtime/reference provenance and transformations.
+
+The fresh [301: Hilali/Khan translation](https://qul.tarteel.ai/resources/translation/301) has the same 6,236 ayah keys but different bytes. QUL's 13 October 2026 change log attributes this to translation and footnote formatting. Harf's parser successfully processed all 6,236 fresh records (760 notes; no failures, empty translations or raw markers). The verified 13 October export was adopted on 28 October and all generated content was rebuilt from it.
+
+`data/surah-info.json` has a different origin: the historical `scripts/fetch-surah-info.py` fetched and structured all 114 Quran.com `/surah/{n}/info` pages, including the material marked as adapted from Ibn Ashur. That historical script is not in the current working tree. `data/99names.json` remains the owner-selected original Harf collection without an external publisher record.
+
+The historical QuranWBW morphology generator used JSON endpoints under `https://static.quranwbw.com/data/v4` for word/root data, root families, verb forms and per-surah summaries. It produced `data/wbw-morphology.json`; it is not a QUL export. The historical generator is also absent from the current tree.
 
 ## Two different collections
 
@@ -23,7 +43,7 @@ Neither number proves that the content was reviewed by a qualified editor.
 | Full English translation | Same helper fetched `eng-muhammadtaqiudd` (Hilali/Khan) | QUL resource 301, Hilali/Khan with inline footnotes; same named translators, different distribution/export pipeline |
 | Vocabulary | `data/words.json`, root-based entries; the historical expansion script added frequent root families using QuranWBW morphology and gloss data | Compiler selects 300 eligible lemma/root groups from pinned QUL occurrence data |
 | Morphology/gloss enrichment | `HEAD:scripts/expand-words.ts` and `HEAD:scripts/fetch-morphology.ts` use `static.quranwbw.com/data/v4`; root-family size was a frequency proxy | QUL glosses 92, transliteration 71, lemmas 75, roots 76, aligned by word location |
-| 99 Names | `data/99names.json`: Arabic, transliteration, meaning, root and explanatory paragraph; no publisher/licence attached in that file | `data/source/names-numroq.json`: attributed NumroQ table, concise meanings and explicit pending approval records |
+| 99 Names | `data/99names.json`: Arabic, transliteration, meaning, root and explanatory paragraph; no publisher/licence attached in that file | Owner-approved for Harf release on 28 October; its external publisher remains unrecorded |
 | Tafsir | Local `data/tafsir-ibn-kathir.json`; old route exposed source HTML | Retained corpus, QUL resource 35 attribution/hash record, structured plain-text rendering; registry also records a specific typo correction |
 | Progress percentage | Root weights and a fixed 80% ceiling, described as comprehension | Actual unique word-position overlap for familiar course entries; explicitly not comprehension |
 
@@ -71,7 +91,7 @@ Actual local records:
 | Name 2 Latin label | Ar-Raheem | Al-Rahim |
 | Name 2 meaning | The Most Merciful | The Most Compassionate |
 | Root and explanatory paragraph | Present, without attached attribution | Omitted from the new records |
-| Editorial approval record | None attached | Pending for each record |
+| Editorial approval record | None attached | Owner-approved for Harf release on 28 October |
 
 **Al- versus Ar- is a transliteration convention, not a different Name.** Arabic writes the article ال. Before a sun letter such as ر, its l sound assimilates to the following consonant. “Ar-Raḥmān” reflects pronunciation; “Al-Rahman” preserves the written article. See [Madinah Arabic's definite-article lesson](https://madinaharabic.com/free-content/grammar/lesson-3/part-7).
 
@@ -95,9 +115,9 @@ Three distinct checks must not be conflated:
 |---|---|---|
 | Source selection/provenance | Publisher, file/version, attribution, recorded reuse evidence | Recorded in `data/sources.json`; owner approval in prior conversation |
 | Automated integrity/alignment | Files match their hashes; expected counts, schemas and example positions are consistent | Validation passed on 1 October 2026 |
-| Editorial accuracy | Arabic form, grouping, contextual meaning, transliteration, examples and Names treatment are suitable | 300 vocabulary entries and 99 Names remain pending |
+| Editorial accuracy | Arabic form, grouping, contextual meaning, transliteration, examples and Names treatment are suitable | Owner-approved for Harf release on 28 October; not an independent certification |
 
-Vocabulary reviews belong in `data/course-overrides.json`; The earlier NumroQ review records remain historical; they do not certify the restored original collection. Independent review metadata for the original collection is not implemented. A completed review needs `status: approved`, reviewer identity, review date and evidence of what was checked. Do not invent an editor or turn a blanket sourcing approval into 399 individual reviews. The legacy `namesApproved` flag is not a substitute for the compiler's per-record checks.
+Vocabulary reviews belong in `data/course-overrides.json`; the owner approval record supplies the reviewer, date and evidence for the current generated course. The earlier NumroQ review records remain historical; they do not certify the restored original collection. This is a release decision, not an independently qualified editor's certification.
 
 A useful review record identifies the entry, the references examined, the exact example positions checked, any corrections, and any unresolved interpretation. Review the meaning and examples as well as spelling. A source's own review date is not a Harf editorial sign-off.
 
@@ -117,6 +137,6 @@ Word recordings use each retained Quran.com `audio_url`, resolved against `https
 Inputs are pinned, generated detail files are validated and checksummed, and the original Corpus notice is emitted as `source-notices.txt` alongside the versioned content. Source selection does not invent independent editorial approval. Historical comparison sections above describe the pre-restoration state.
 # QPC V2 Mushaf additions — 27 October 2026
 
-Owner-supplied QUL downloads: layout resource 10, word-glyph resource 61, and page-font resource 249. Pinned inputs live in `data/source/qul/mushaf-v2/`; `fonts.json` pins all 604 WOFF files individually. The download labelled `.woff.bz2` was a ZIP archive. Glyph keys match all 83,668 canonical token positions (including verse markers). The compiler validates unique IDs, canonical keys, complete nonduplicated page coverage, and every font checksum, then emits versioned page JSON, an ayah-to-first-page index and fonts. Glyph codes are for display only; existing canonical Arabic remains the source for meanings, search and accessibility labels. This structural verification is not independent calligraphic/editorial review. Source-specific redistribution review remains pending in the source registry: all three QPC V2 entries carry `permission: "pending"`, which is what keeps the `npm run build` release gate red while personal testing continues through `npm run build:app`.
+Owner-supplied QUL downloads: layout resource 10, word-glyph resource 61, and page-font resource 249. Pinned inputs live in `data/source/qul/mushaf-v2/`; `fonts.json` pins all 604 WOFF files individually. The download labelled `.woff.bz2` was a ZIP archive. Glyph keys match all 83,668 canonical token positions (including verse markers). The compiler validates unique IDs, canonical keys, complete nonduplicated page coverage, and every font checksum, then emits versioned page JSON, an ayah-to-first-page index and fonts. Glyph codes are for display only; existing canonical Arabic remains the source for meanings, search and accessibility labels. The owner approved these pinned inputs for Harf release on 28 October. That decision is recorded as `permission: "owner-approved"`; it does not create new source-specific redistribution evidence or independent calligraphic/editorial review.
 
 The 604 page fonts under `data/source/qul/mushaf-v2/fonts/` are deliberately not tracked in git. They are 105 MB of WOFF files whose byte-identical copies already ship in the generated content package, and `fonts.json` pins every one of them by SHA-256. `glyphs.json`, `fonts.json` and `layout.db` are tracked. A fresh checkout that needs to regenerate content must first re-download QUL resources 10 (layout), 61 (glyphs) and 249 (fonts) into `data/source/qul/mushaf-v2/`; without them `npm run build:content` stops at the first missing file, and with them it re-verifies every font checksum and fails on any mismatch.

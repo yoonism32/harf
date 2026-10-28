@@ -71,7 +71,7 @@ export function getRepeatedPhrases(reference: string, limit = 3): RepeatedPhrase
     .slice(0, Math.max(0, limit));
 }
 
-export function getPracticePairs(limit = 12): SimilarPair[] {
+export function getPracticePairs(limit?: number): SimilarPair[] {
   const used = new Set<string>();
   const selected: SimilarPair[] = [];
   for (const pair of [...pairs].sort((a, b) => b.score - a.score)) {
@@ -80,7 +80,7 @@ export function getPracticePairs(limit = 12): SimilarPair[] {
     selected.push(pair);
     used.add(pair.verseA);
     used.add(pair.verseB);
-    if (selected.length >= limit) break;
+    if (limit !== undefined && selected.length >= limit) break;
   }
   return selected;
 }

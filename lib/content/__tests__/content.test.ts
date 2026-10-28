@@ -30,14 +30,14 @@ describe('Canonical content boundaries',()=>{
  });
 });
 
-it('preserves the owner-selected original Names without claiming editorial verification',()=>{
+it('preserves the owner-selected original Names with recorded owner approval',()=>{
  const original=JSON.parse(readFileSync('data/99names.json','utf8'));
  const names=read('names.json');
  expect(names).toHaveLength(99);
  for(const [index,name] of names.entries()){
   expect(name).toMatchObject(original[index]);
   expect(name.sourceIds).toEqual(['harf-original-names']);
-  expect(name.verified).toBe(false);
+  expect(name.verified).toBe(true);
  }
 });
 

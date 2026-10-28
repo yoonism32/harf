@@ -15,6 +15,7 @@ describe('insight data', () => {
     expect(pairs).toHaveLength(8);
     expect(pairs.every(pair => pair.score >= 80 && pair.score < 100)).toBe(true);
     expect(new Set(pairs.flatMap(pair => [pair.verseA, pair.verseB])).size).toBe(16);
+    expect(getPracticePairs().length).toBeGreaterThan(12);
   });
 
   it('orders repeated phrases by occurrence count', () => {

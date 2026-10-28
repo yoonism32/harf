@@ -36,10 +36,10 @@
     },
     {
       "path": "data/source/qul/raw/translation-301.json",
-      "sha256": "36564fe1d6f3b9240a04185f4077f21103bcc2614957eac7f0bfa6e8541d9bb0",
+      "sha256": "810283b2fe3bddcb9ab5ac7172a391c9fcff17363513abd0a66b73d41020f429",
       "url": "https://qul.tarteel.ai/resources/translation/301",
-      "retrievedAt": "2026-09-23",
-      "sourceVersion": "QUL resource 301 (Muhammad Taqi-ud-Din al-Hilali and Muhammad Muhsin Khan), inline-footnote JSON export",
+      "retrievedAt": "2026-10-28",
+      "sourceVersion": "QUL resource 301 (Muhammad Taqi-ud-Din al-Hilali and Muhammad Muhsin Khan), inline-footnote JSON export — 13 October 2026 translation and footnote formatting update",
       "attribution": "Quranic Universal Library (QUL), Tarteel AI \u2014 translation by Muhammad Taqi-ud-Din al-Hilali and Muhammad Muhsin Khan, with inline footnotes.",
       "permission": "verified",
       "termsEvidence": "Verified 2026-09-24 from https://qul.tarteel.ai/resources: QUL states that its resources are intended to be downloaded and packaged with a user's own project. The Harf project owner explicitly approved relying on this published permission and the recorded attribution.",
@@ -85,8 +85,8 @@
       "retrievedAt": "2026-10-02",
       "sourceVersion": "Original Harf 99 Names \u2014 selected for personal use on 2026-10-02",
       "attribution": "Original Harf dataset; external publisher not recorded.",
-      "permission": "pending",
-      "termsEvidence": "Owner explicitly selected the original Names, meanings, roots and explanations for personal use on 2026-10-02. This records source selection, not a third-party licence or independent editorial review. The date above is the selection date, not an external retrieval date.",
+      "permission": "owner-approved",
+      "termsEvidence": "Owner approved the original Names, meanings, roots and explanations for Harf release on 2026-10-28. The external publisher remains unrecorded; this records an owner release decision, not a third-party licence or independent editorial review.",
       "tokenization": "ordered-name-id"
     },
     {
@@ -96,8 +96,8 @@
       "retrievedAt": "2026-10-02",
       "sourceVersion": "Quranic Arabic Corpus morphology v0.4",
       "attribution": "Kais Dukes, Quranic Arabic Corpus v0.4; Tanzil Arabic text. Full original notices are packaged with generated content.",
-      "permission": "pending",
-      "termsEvidence": "Existing local data selected by the owner for personal use on 2026-10-02; not a new download or independent publication-rights review. Original QAC notices are retained verbatim.",
+      "permission": "owner-approved",
+      "termsEvidence": "Owner approved this pinned QAC v0.4 input for Harf release on 2026-10-28. Original QAC notices are retained verbatim; this is an owner release decision, not new third-party permission evidence.",
       "tokenization": "source-word-location-aligned-to-canonical-spans"
     },
     {
@@ -107,8 +107,8 @@
       "retrievedAt": "2026-10-02",
       "sourceVersion": "Retained Quran.com word exports \u2014 114 chapters, hash manifest",
       "attribution": "Quran.com / Quran Foundation: retained word surfaces, glosses, transliteration and explicit audio paths.",
-      "permission": "pending",
-      "termsEvidence": "Existing local data selected by the owner for personal use on 2026-10-02; not a new download or independent publication-rights review. Original QAC notices are retained verbatim.",
+      "permission": "owner-approved",
+      "termsEvidence": "Owner approved these retained Quran.com exports for Harf release on 2026-10-28. This is an owner release decision, not new third-party permission evidence.",
       "tokenization": "source-word-location-aligned-to-canonical-spans"
     },
     {
@@ -118,8 +118,8 @@
       "retrievedAt": "2026-10-02",
       "sourceVersion": "Original Harf QuranWBW morphology snapshot",
       "attribution": "QuranWBW root-family summaries and verb forms, retained original Harf export.",
-      "permission": "pending",
-      "termsEvidence": "Existing local data selected by the owner for personal use on 2026-10-02; not a new download or independent publication-rights review. Original QAC notices are retained verbatim.",
+      "permission": "owner-approved",
+      "termsEvidence": "Owner approved this retained QuranWBW morphology snapshot for Harf release on 2026-10-28. This is an owner release decision, not new third-party permission evidence.",
       "tokenization": "source-word-location-aligned-to-canonical-spans"
     },
     {
@@ -129,8 +129,8 @@
       "retrievedAt": "2026-10-27",
       "sourceVersion": "QPC V2 word glyphs",
       "attribution": "King Fahd Quran Printing Complex, distributed by QUL / Tarteel AI.",
-      "permission": "pending",
-      "termsEvidence": "Owner supplied QUL downloads for Harf on 27 October 2026. Source-specific redistribution review remains pending.",
+      "permission": "owner-approved",
+      "termsEvidence": "Owner approved this QUL-distributed QPC V2 glyph input for Harf release on 2026-10-28. This is an owner release decision, not new source-specific redistribution evidence.",
       "tokenization": "qul-word-location"
     },
     {
@@ -140,8 +140,8 @@
       "retrievedAt": "2026-10-27",
       "sourceVersion": "QPC V2 1421H page layout",
       "attribution": "King Fahd Quran Printing Complex, distributed by QUL / Tarteel AI.",
-      "permission": "pending",
-      "termsEvidence": "Owner supplied QUL downloads for Harf on 27 October 2026. Source-specific redistribution review remains pending.",
+      "permission": "owner-approved",
+      "termsEvidence": "Owner approved this QUL-distributed QPC V2 layout input for Harf release on 2026-10-28. This is an owner release decision, not new source-specific redistribution evidence.",
       "tokenization": "qul-word-location"
     },
     {
@@ -151,8 +151,8 @@
       "retrievedAt": "2026-10-27",
       "sourceVersion": "QPC V2 page fonts, SHA-256 manifest",
       "attribution": "King Fahd Quran Printing Complex, distributed by QUL / Tarteel AI.",
-      "permission": "pending",
-      "termsEvidence": "Owner supplied QUL downloads for Harf on 27 October 2026. Source-specific redistribution review remains pending.",
+      "permission": "owner-approved",
+      "termsEvidence": "Owner approved this QUL-distributed QPC V2 font manifest for Harf release on 2026-10-28. This is an owner release decision, not new source-specific redistribution evidence.",
       "tokenization": "qul-word-location"
     }
   ],

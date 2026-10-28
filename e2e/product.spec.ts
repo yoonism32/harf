@@ -91,6 +91,29 @@ test('restored practice, insights, commentary, and legacy routes work',async({pa
   expect((await commentary.json()).blocks.length).toBeGreaterThan(0);
 });
 
+test('saved similar passages have a separate due queue',async({page})=>{
+  await page.goto('/insights/practice');
+  await page.getByRole('button',{name:'Remember this pair'}).click();
+  await expect(page.getByText('Saved for practice · Due now')).toBeVisible();
+  await page.goto('/insights/practice?mode=due');
+  await expect(page.locator('p.eyebrow').filter({hasText:'Comparison 1 of 1'})).toBeVisible();
+  await expect(page.getByRole('link',{name:'← Browse comparisons'})).toBeVisible();
+  await page.goto('/today');
+  await expect(page.getByRole('link',{name:'Review saved pairs →'})).toBeVisible();
+  await page.evaluate(async()=>{
+    const db=await new Promise<IDBDatabase>((resolve,reject)=>{const request=indexedDB.open('harf');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
+    const transaction=db.transaction('passageCards','readwrite'),cards=transaction.objectStore('passageCards');
+    const saved=await new Promise<any>((resolve,reject)=>{const request=cards.getAll();request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
+    const pair=saved[0]!;
+    await new Promise<void>((resolve,reject)=>{const request=cards.put({...pair,id:'114:5|114:6',verseA:'114:5',verseB:'114:6'},'114:5|114:6');request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error);});
+    await new Promise<void>((resolve,reject)=>{transaction.oncomplete=()=>resolve();transaction.onerror=()=>reject(transaction.error);transaction.onabort=()=>reject(transaction.error);});
+    db.close();
+  });
+  await page.goto('/insights/practice');
+  await expect(page.getByRole('heading',{name:'Saved pair unavailable'})).toBeVisible();
+  await expect(page.getByText('114:5 and 114:6')).toBeVisible();
+});
+
 test('optional prayer location persists without precise geolocation',async({page})=>{
   await page.goto('/settings#prayer-location');
   await page.getByLabel('City').fill('London');

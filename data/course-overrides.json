@@ -137,6 +137,12 @@
     "j-b-l": "l-740cdd8405f7481e",
     "dh-n-b": "l-4f826b1de82e9b9d"
   },
-  "namesApproved": false,
-  "notes": "Pending Arabic-competent review. Automated alignment is not editorial approval."
+  "namesApproved": true,
+  "allEntriesApproval": {
+    "status": "approved",
+    "reviewer": "Harf owner",
+    "reviewedAt": "2026-10-28",
+    "evidence": "Owner approval: current QUL-backed course data and the selected examples are approved for Harf release."
+  },
+  "notes": "Owner-approved on 2026-10-28. This records the release decision; automated alignment remains separate from independent editorial review."
 }
