@@ -18,6 +18,19 @@ test('two-letter Arabic searches in All mode',async({page})=>{
  await expect(page.getByText('Enter more characters to search.')).toHaveCount(0);
 });
 
+test('search input keeps fast typing, held backspace and deep links',async({page})=>{
+ await page.goto('/read?q=mercy');
+ const input=page.locator('section[aria-label="Search the Quran"] input[type="search"]');
+ await expect(input).toHaveValue('mercy');
+ await input.click();
+ for(let i=0;i<5;i++)await page.keyboard.press('Backspace');
+ await expect(input).toHaveValue('');
+ await expect(page).toHaveURL(/\/read$/);
+ await page.keyboard.type('mercy');
+ await expect(input).toHaveValue('mercy');
+ await expect(page).toHaveURL(/[?&]q=mercy/);
+});
+
 test('single-surah listening accepts typed ayah retry and adapts hints',async({page})=>{
  await page.goto('/practice?mode=listening&seed=42&round=0');
  await page.getByText('Range and playback options',{exact:true}).click();
