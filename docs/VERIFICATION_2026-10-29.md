@@ -45,6 +45,11 @@ rank 20:109 first. The two `dh` variants also passed the production browser sear
 
 ## Policy and boundaries
 
+Loaded-session reliability follow-up: six production browser checks passed across all three projects. Text practice
+can reveal, save, Undo and save again while offline; reconnect/reload retains exactly one effective review.
+An injected transaction abort after the card write leaves cards, reviews and session unchanged. Retrying saves
+the original attempt once. This checks loaded text study, not cold offline navigation or unavailable audio.
+
 Legacy migration follow-up: six production browser checks passed across Chromium, Mobile Chrome and WebKit.
 Known vocabulary mappings retain scheduling and notes; ambiguous or malformed records remain archived; original
 localStorage keys remain intact; reload does not reimport altered old data. Settings now reads migration details
