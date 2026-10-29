@@ -41,12 +41,16 @@ export function buildWordQuestion(
   mode: Exclude<PracticeMode, 'listening'>,
   seed: number,
   round: number,
+  targetIds?: readonly string[],
 ): WordQuestion {
   const answer = (entry: VocabularyEntry) => mode === 'root' ? entry.root : entry.gloss;
   const eligible = entries.filter((entry) => answer(entry)?.trim());
+  const allowed = targetIds ? new Set(targetIds) : null;
+  const targets = allowed ? eligible.filter((entry) => allowed.has(entry.id)) : eligible;
+  if (!targets.length) throw new Error('No saved study words are available for practice.');
   const answerPool = [...new Set(eligible.map(answer).filter((value): value is string => !!value))];
   if (answerPool.length < 4) throw new Error(`Not enough ${mode} entries are available for practice.`);
-  const entry = shuffled(eligible, seed, 0, 11)[round % eligible.length]!;
+  const entry = shuffled(targets, seed, 0, 11)[round % targets.length]!;
   const correct = answer(entry)!;
   const distractors = shuffled(
     answerPool.filter((value) => value !== correct),
@@ -72,8 +76,4 @@ export function buildListeningQuestion(catalog: Catalog, seed: number, round: nu
     53,
   ).slice(0, 3);
   return { ...target, choices: shuffled([target.surah, ...distractors], seed, round, 67) };
-}
-
-export function nextRoundHref(mode: PracticeMode, seed: number, round: number) {
-  return `/practice?mode=${mode}&seed=${seed}&round=${round + 1}`;
 }

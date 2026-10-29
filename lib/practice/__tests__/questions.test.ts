@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildListeningQuestion, buildWordQuestion, nextRoundHref } from '../questions';
+import { buildListeningQuestion, buildWordQuestion } from '../questions';
 import type { Catalog, VocabularyEntry } from '@/lib/content/schema';
 
 const entries: VocabularyEntry[] = Array.from({ length: 8 }, (_, index) => ({
@@ -53,7 +53,19 @@ describe('practice questions', () => {
     expect(question.choices.some((choice) => choice.number === question.surah.number)).toBe(true);
   });
 
-  it('advances without losing the mode or seed', () => {
-    expect(nextRoundHref('listening', 12, 6)).toBe('/practice?mode=listening&seed=12&round=7');
+  it('draws targets only from an explicit pool and does not repeat until it is exhausted', () => {
+    const targetIds = [entries[2]!.id, entries[5]!.id];
+    const first = buildWordQuestion(entries, 'meaning', 42, 0, targetIds);
+    const second = buildWordQuestion(entries, 'meaning', 42, 1, targetIds);
+    expect(targetIds).toContain(first.entry.id);
+    expect(targetIds).toContain(second.entry.id);
+    expect(second.entry.id).not.toBe(first.entry.id);
+    expect(buildWordQuestion(entries, 'meaning', 42, 2, targetIds).entry.id).toBe(first.entry.id);
+  });
+
+  it('keeps broad approved distractors when the target pool is smaller than four', () => {
+    const question = buildWordQuestion(entries, 'meaning', 42, 0, [entries[0]!.id]);
+    expect(question.entry.id).toBe(entries[0]!.id);
+    expect(new Set(question.choices)).toHaveLength(4);
   });
 });

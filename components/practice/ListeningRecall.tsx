@@ -46,7 +46,7 @@ function RecallRound({visitKey,target,pool,reciter,speed,next}:{visitKey:string;
  </section>;
 }
 
-export function ListeningRecall({seed,initialRound,reciter,surahs}:{seed:number;initialRound:number;reciter:string;surahs:Surah[]}) {
+export function ListeningRecall({seed,initialRound,reciter,surahs,returnTo}:{seed:number;initialRound:number;reciter:string;surahs:Surah[];returnTo?:string|null}) {
  const manifest=useResource(getListeningManifest);
  const filterSchema=z.object({surah:z.number().int().min(1).max(114).optional(),juz:z.number().int().min(1).max(30).optional(),from:z.string().max(20).optional(),to:z.string().max(20).optional()});
  const [round,setRound,roundReady]=useVisitState(`listening:${seed}:round`,initialRound,z.number().int().min(0).max(9999));
@@ -57,7 +57,7 @@ export function ListeningRecall({seed,initialRound,reciter,surahs}:{seed:number;
  const selected=useMemo(()=>{try{const pool=listeningPool(manifest.data??[],filters);return {pool,target:pool.length?listeningTarget(pool,seed,round):null,error:''};}catch(e){return {pool:[],target:null,error:e instanceof Error?e.message:'Invalid range'};}},[manifest.data,filters,seed,round]);
  useEffect(()=>()=>stopAudio(),[]);
  if(!roundReady||!filtersReady||!draftReady||!speedReady||!runReady)return <p role="status">Restoring listening…</p>;
- return <div className="stack"><header className="page-header"><p className="eyebrow">Listening recall · practice without changing your review schedule</p><h1>Round {round+1}</h1><EndPracticeLink/></header>
+ return <div className="stack"><header className="page-header"><p className="eyebrow">Listening recall · practice without changing your review schedule</p><h1>Round {round+1}</h1><EndPracticeLink returnTo={returnTo}/></header>
   <details className="sheet"><summary>Range and playback options</summary><form className="stack" onSubmit={e=>{e.preventDefault();stopAudio();setFilters(draft);setRound(0);setRun(n=>n+1);}}>
    <label className="field">Surah<select value={draft.surah??''} onChange={e=>setDraft({...draft,surah:Number(e.target.value)||undefined})}><option value="">All surahs</option>{surahs.map(s=><option key={s.number} value={s.number}>{s.number}. {s.englishName}</option>)}</select></label>
    <label className="field">Juz<select value={draft.juz??''} onChange={e=>setDraft({...draft,juz:Number(e.target.value)||undefined})}><option value="">All juz</option>{Array.from({length:30},(_,i)=><option key={i+1} value={i+1}>{i+1}</option>)}</select></label>

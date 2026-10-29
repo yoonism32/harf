@@ -408,16 +408,26 @@ export async function setLastVerse(ref: string) {
   if (!validReference(ref)) throw Error("Invalid ayah reference");
   await setRecord("meta", "lastVerse", ref);
 }
-export async function prioritizeEntry(id: string) {
+export async function setEntryPriority(id: string, prioritized: boolean) {
   validId(id);
   const db = await getDB();
   const tx = db.transaction("meta", "readwrite");
   void tx.done.catch(() => undefined);
-  const priorities = (await tx.store.get("priorityEntries")) ?? [];
-  await tx.store.put([...new Set([...priorities, id])], "priorityEntries");
+  const current = await tx.store.get("priorityEntries");
+  const priorities = Array.isArray(current)
+    ? current.filter((value): value is string => typeof value === "string")
+    : [];
+  const next = prioritized
+    ? [...new Set([...priorities, id])]
+    : priorities.filter(value => value !== id);
+  if (next.length) await tx.store.put(next, "priorityEntries");
+  else await tx.store.delete("priorityEntries");
   await tx.store.put(((await tx.store.get("revision")) ?? 0) + 1, "revision");
   await tx.done;
   await changed();
+}
+export async function prioritizeEntry(id: string) {
+  await setEntryPriority(id, true);
 }
 export async function setPaused(
   collection: Collection,
