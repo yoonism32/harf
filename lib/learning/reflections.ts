@@ -1,12 +1,9 @@
-import {parseRef} from '@/lib/content/refs';
 import {getDB} from '@/lib/data/db';
 import {notifyChange} from '@/lib/data/store';
 import type {Note} from '@/lib/data/schema';
+import {reflectionId} from './reflection-id';
 
-export function reflectionId(reference: string) {
- if (!parseRef(reference)) throw Error('Invalid ayah reference');
- return `ayah-${reference.replace(':', '-')}`;
-}
+export * from './reflection-id';
 
 export async function saveReflection(reference: string, text: string, expectedUpdatedAt: string | null) {
  const id = reflectionId(reference);
