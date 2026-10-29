@@ -1,11 +1,12 @@
 import {morphologySchema,rootFamilySchema} from '../lib/content/morphology-schema';
 import {mushafPageSchema,mushafIndexSchema} from '../lib/content/mushaf-schema';
 import {comparableArabic} from '../lib/content/alignment';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { z } from 'zod';
 import { listeningManifestSchema, ayahSchema, catalogSchema, entryPayloadSchema, nameEntrySchema, overlapSchema, searchIndexSchema } from '../lib/content/schema';
+import {semanticDiffSchema} from '../lib/content/semantic-report-schema';
 const read=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
 const json=(path:string)=>JSON.parse(read(path));
 const assert=(condition:unknown,message:string)=>{if(!condition)throw new Error(message);};
@@ -17,6 +18,11 @@ const catalog=catalogSchema.parse(json(`${base}/catalog.json`));
 assert(manifest.contentVersion===pointer.contentVersion&&catalog.contentVersion===pointer.contentVersion,'Content version mismatch');
 assert(pointer.releaseReady===catalog.releaseReady,'Release status mismatch');
 assert(catalog.releaseReady===(catalog.blockers.length===0),'Release blockers disagree with release status');
+if(existsSync(join(process.cwd(),`${base}/semantic-diff.json`))){
+ const semanticDiff=semanticDiffSchema.parse(json(`${base}/semantic-diff.json`));
+ assert(semanticDiff.current.contentVersion===pointer.contentVersion,'Semantic diff was generated for another content version');
+ if(semanticDiff.status==='ok')assert(semanticDiff.baseline!==null,'Semantic diff is missing its baseline metadata');
+}
 const requiredFiles=['practice/listening.json','sources.json','catalog.json','names.json','overlap.json','alignment-report.json',...catalog.surahs.map(s=>`surahs/${s.number}.json`),...catalog.surahs.map(s=>`morphology/${s.number}.json`),'source-notices.txt',...catalog.entries.map(e=>`entries/${e.id}.json`),...['arabic','english','transliteration'].map(m=>`search/${m}.json`)];
 for(const path of requiredFiles)assert(Object.hasOwn(manifest.files,path),`Missing output checksum: ${path}`);
 assert(catalog.surahs.every((s,i)=>s.number===i+1),'Surah catalog order mismatch');

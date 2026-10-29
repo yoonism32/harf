@@ -2,6 +2,7 @@ import {mushafPageSchema,mushafIndexSchema} from './mushaf-schema';
 import {morphologySchema,rootFamilySchema} from './morphology-schema';
 import { z } from 'zod';
 import { ayahSchema, catalogSchema, entryPayloadSchema, nameEntrySchema, overlapSchema, searchIndexSchema, listeningManifestSchema, type SearchMode } from './schema';
+import {semanticDiffSchema} from './semantic-report-schema';
 import { parseRef } from './refs';
 import version from './version.json';
 export const CONTENT_VERSION = version.contentVersion;
@@ -9,7 +10,7 @@ const pending = new Map<string, Promise<unknown>>();
 const cache = new Map<string, unknown>();
 let running = 0;
 const waiting: Array<() => void> = [];
-async function request<T>(path: string, schema: z.ZodType<T>): Promise<T> {
+async function request<T>(path: string, schema: z.ZodType<T>, allowMissing = false): Promise<T> {
   if(cache.has(path)) { const value=cache.get(path)!; cache.delete(path); cache.set(path,value); return value as T; }
   const active=pending.get(path); if(active) return active as Promise<T>;
   const task=(async()=>{
@@ -17,13 +18,13 @@ async function request<T>(path: string, schema: z.ZodType<T>): Promise<T> {
     const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),8000);
     try {
       const response=await fetch(`/content/${CONTENT_VERSION}/${path}`,{signal:controller.signal});
-      if(response.status===404){
+      if(response.status===404 && !allowMissing){
         // This tab's bundle points at a content version that has since been replaced.
         // Retrying the same URL can never succeed, so pick up the current build once.
         try{if(!sessionStorage.getItem('harf:content-reload')){sessionStorage.setItem('harf:content-reload','1');location.reload();}}catch{/* Reload is a courtesy; the error below still explains it. */}
         throw new Error('Content was updated. Reload the page to continue.');
       }
-      if(!response.ok)throw new Error(`Content could not be loaded (${response.status}). Please retry.`);
+      if(!response.ok)throw new Error(allowMissing?'No semantic change report is stored for this content version.':`Content could not be loaded (${response.status}). Please retry.`);
       try{sessionStorage.removeItem('harf:content-reload');}catch{/* Private mode. */}
       const value=schema.parse(await response.json());
       if(!path.startsWith('search/')) { cache.set(path,value); for(const [prefix,limit] of [['surahs/',16],['morphology/',4],['roots/',8],['mushaf/',4]] as const){const keys=[...cache.keys()].filter(k=>k.startsWith(prefix));if(keys.length>limit)cache.delete(keys[0]!);} }
@@ -40,6 +41,7 @@ export async function getAyah(ref:string) { const parsed=parseRef(ref);if(!parse
 export function getEntry(id:string) {if(!/^l-[a-f0-9]{16}$/.test(id))throw new Error('Invalid vocabulary entry');return request(`entries/${id}.json`,entryPayloadSchema);}
 export const getNames=()=>request('names.json',z.array(nameEntrySchema));
 export const getOverlap=()=>request('overlap.json',overlapSchema);
+export const getSemanticDiff=()=>request('semantic-diff.json',semanticDiffSchema,true);
 export function getSearchIndex(mode:SearchMode) {if(!['arabic','english','transliteration'].includes(mode))throw new Error('Invalid search mode');return request(`search/${mode}.json`,searchIndexSchema);}
 
 export async function getWordDetail(key:string){

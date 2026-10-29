@@ -19,7 +19,10 @@
     "test:e2e:report": "playwright show-report",
     "validate-data": "node --import tsx scripts/validate-data.ts",
     "build:content": "node --import tsx scripts/build-content.ts",
-    "validate:release": "npm run build:content -- --release && npm run validate-data -- --release",
+    "content:baseline": "node --import tsx scripts/content-report.ts --write-baseline",
+    "content:baseline:check": "node --import tsx scripts/content-report.ts --check",
+    "content:report": "node --import tsx scripts/content-report.ts --write-report",
+    "validate:release": "npm run build:content -- --release && npm run content:report && npm run validate-data -- --release",
     "typecheck": "tsc --noEmit",
     "check:budgets": "node scripts/check-budgets.mjs",
     "icons": "node scripts/generate-icons.mjs"
