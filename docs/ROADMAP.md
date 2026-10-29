@@ -66,6 +66,17 @@ Generated content `2bb58c86b4683669` reports `releaseReady: true` with no blocke
 `verified` and seven `owner-approved` source records. This clears Harf's internal release gate and preserves the distinction
 between owner approval, external permission evidence and independent editorial certification.
 
+A read-only **Content report** at the bottom of Progress shows this semantic baseline: approvals, source bundles, roots,
+examples, catalog/overlap counts and stored cards/reviews, with findings for orphaned progress or inconsistent records.
+It now also compares the compiled content with a checked-in approved baseline (`data/content-baseline.json`) and reports
+field-level changes to Arabic surface, lemma/root, representative example, gloss, sources and ayah translation/footnotes,
+with added/removed/re-keyed/changed counts and human-readable ayah/word citations. Missing, invalid or stale reports are
+stated as such rather than shown as a clean diff. The current compiled content (`2bb58c86b4683669`) has no semantic
+changes against its approved baseline.
+
+The report still cannot decide whether a prior approval covers a newly changed field; it displays the catalog's stored
+approval record and change set separately. It is a runtime disclosure, not the plan's suggested standalone script/report.
+
 The original Names collection remains selected. Its external publisher is still unrecorded; the owner chose to handle that provenance.
 Unused historical words/morphology/transliteration files are not active refresh or release blockers.
 See [content sources](CONTENT_SOURCES.md) for the QUL refresh results and the Mutashabihat preview/download discrepancy.
@@ -82,6 +93,11 @@ The full production browser run passed 133 checks with two existing skips; three
 Today footer link missing an underline. That presentation defect was corrected and the affected checks rerun against a rebuilt app.
 The follow-up includes stale-range protection, assessment removal, Today retries, on-demand grammar analysis and short
 plain-keyboard transliteration matching (`wa radhiya lahu qawla` → 20:109). See the verification record for exact results.
+
+Later local learning/practice/queue/content-report slices (not deployed) reached **220 unit tests across 34 files**.
+The content-report suite passed **21 browser checks across Chromium, Mobile Chrome and WebKit** (seven per project),
+and `content:baseline:check` reports zero semantic changes for `2bb58c86b4683669` against its checked-in baseline.
+These are working-tree checks, not production certification. See the [verification record](VERIFICATION_2026-10-29.md) for boundaries.
 
 The earlier complete release evidence remains:
 146 unit tests, TypeScript, production app build, 118 passing production browser checks (two existing skips),

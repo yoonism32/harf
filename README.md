@@ -33,12 +33,13 @@ npm start
 
 ```bash
 npm run build:content
+npm run content:report
 npm run validate-data
 npm run build:app
 npm start
 ```
 
-Keep the server stopped while regenerating/rebuilding. Generated content has versioned URLs. Starting an old build after its content directory has been removed causes missing-file errors; a successful server startup alone does not establish that pages can load.
+`npm run content:report` compares the generated content with the checked-in approved baseline at `data/content-baseline.json` and writes the semantic diff the Progress report reads. `npm run content:baseline` records a new approved baseline and `npm run content:baseline:check` fails if the current content has semantic changes; do not update the baseline merely to silence a diff. Keep the server stopped while regenerating/rebuilding. Generated content has versioned URLs. Starting an old build after its content directory has been removed causes missing-file errors; a successful server startup alone does not establish that pages can load.
 
 `npm run build` is the separate publication path: it regenerates content, enforces release validation, then builds the app. The owner approved the current 300 vocabulary entries and 99 Names on 28 October; the current pinned content passes that gate. Future unapproved input changes can block it. `build:app` builds only the application against existing generated content.
 
@@ -123,7 +124,7 @@ npm audit --audit-level=high
 
 Locally, Playwright starts/reuses a development server; CI runs browser checks against the production build. Chromium desktop/mobile and WebKit are configured. Passing automated accessibility checks does not certify full accessibility conformance.
 
-Implementation through `a7998f6` passed 143 unit tests, TypeScript, production app build, 18 targeted learning/passage browser checks and isolated PostgreSQL account checks. Those results are historical. The subsequent reliability phase passed 146 unit tests, 118 production browser checks (two skips), size budgets and a zero-vulnerability dependency audit; see [current verification](docs/VERIFICATION_2026-10-29.md). The remaining reliability and editorial work is listed in the [current roadmap](docs/ROADMAP.md) and [task list](todo.md).
+Implementation through `a7998f6` passed 143 unit tests, TypeScript, production app build, 18 targeted learning/passage browser checks and isolated PostgreSQL account checks. Those results are historical. The subsequent reliability phase passed 146 unit tests, 118 production browser checks (two skips), size budgets and a zero-vulnerability dependency audit. Later learning, practice, queue-explanation and content-report slices are local working-tree checks, not production certification; the latest unit suite is **220 tests across 34 files**, and the content-report suite passed **21 browser checks across Chromium, Mobile Chrome and WebKit**. See [current verification](docs/VERIFICATION_2026-10-29.md) for exact scope and remaining boundaries. The remaining reliability and editorial work is listed in the [current roadmap](docs/ROADMAP.md) and [task list](todo.md).
 
 Read [AGENTS.md](AGENTS.md) for the current code map and architectural rules. [HARF_REDESIGN_PLAN.md](HARF_REDESIGN_PLAN.md) records the original design rationale; later restored features and the current personal-use scope supersede conflicting parts.
 

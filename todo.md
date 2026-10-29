@@ -40,6 +40,7 @@ decide separately whether to enable it (no auth setting was changed here).
 
 ## Content follow-up
 
+- [x] Added a checked-in approved semantic baseline and a field-level diff on Progress; missing, invalid and stale reports are stated explicitly rather than shown as clean.
 - Owner approval of all 300 vocabulary entries and 99 Names was recorded on 28 October. Current generated content is release-ready.
 - Source records distinguish seven externally verified inputs from seven owner-approved inputs. Independent editorial certification is not claimed.
 - The owner is handling the original Names collection's unrecorded external publisher. Unused legacy datasets do not block current use.
@@ -54,14 +55,18 @@ save/navigation protection, and backup validation are implemented. See the [lear
 
 ## Evidence and deferrals
 
-Latest combined regression: **151 unit tests and 151 production browser checks passed**, with two existing browser
-skips. TypeScript and the application build passed. Fifteen added checks cover migration, offline text study,
+Latest complete production regression: **151 unit tests and 151 production browser checks passed**, with two existing
+browser skips. TypeScript and the application build passed. Fifteen added checks cover migration, offline text study,
 transaction rollback/retry and cross-tab study. Exact scope is in the verification record.
 
 The subsequent usability batch adds saved-range conflict protection, assessment clearing, Today retries, lazy grammar
 loading and plain-keyboard transliteration search. Afternoon checks passed TypeScript, 151 unit tests, data validation
 and budgets. The full browser run exposed an inline Profile-link accessibility defect, corrected before publishing;
 see the verification record for the affected-check rerun and release status.
+
+The later local learning/practice/queue/content-report slices are not production certification. They reached
+**220 unit tests across 34 files**, with **21 content-report browser checks** across Chromium, Mobile Chrome and
+WebKit, and `content:baseline:check` reports zero semantic changes for `2bb58c86b4683669`.
 
 Earlier release verification: TypeScript, app build, 146 unit tests, 118 passing production browser checks (two existing skips),
 12 focused persistence checks, generated-data validation, size budgets, zero-vulnerability audit and live SQL/browser sync checks passed.
