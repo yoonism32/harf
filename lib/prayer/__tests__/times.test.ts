@@ -1,5 +1,5 @@
 import {describe,expect,it} from 'vitest';
-import {formatPrayerTime,isLocated,nextPrayer,prayerTimes,type PrayerName,type PrayerTimes} from '../times';
+import {currentPrayer,formatPrayerTime,isLocated,nextPrayer,prayerTimes,type PrayerName,type PrayerTimes} from '../times';
 import fixtures from './fixtures.json';
 
 const names={fajr:'Fajr',sunrise:'Sunrise',dhuhr:'Dhuhr',asr:'Asr',maghrib:'Maghrib',isha:'Isha'} as const;
@@ -28,5 +28,11 @@ describe('on-device prayer times',()=>{
   const polar:PrayerTimes={timings:{Fajr:'—',Sunrise:'—',Dhuhr:'12:00',Asr:'12:30',Maghrib:'—',Isha:'—'},readableDate:'',hijriDate:'',timeZone:'Europe/Oslo'};
   expect(nextPrayer(polar,new Date('2026-07-15T09:00:00Z'))).toEqual({name:'Dhuhr',time:'12:00',tomorrow:false});
   expect(formatPrayerTime('—')).toBe('—');
+ });
+ it('marks the most recent prayer as current and leaves the pre-dawn gap open',()=>{
+  const times:PrayerTimes={timings:{Fajr:'05:00',Sunrise:'06:00',Dhuhr:'12:00',Asr:'15:00',Maghrib:'18:00',Isha:'20:00'},readableDate:'',hijriDate:'',timeZone:'UTC'};
+  expect(currentPrayer(times,new Date('2026-07-15T16:30:00Z'))).toEqual({name:'Asr',time:'15:00'});
+  expect(currentPrayer(times,new Date('2026-07-15T04:00:00Z'))).toBeNull();
+  expect(currentPrayer(times,new Date('2026-07-15T22:00:00Z'))).toEqual({name:'Isha',time:'20:00'});
  });
 });

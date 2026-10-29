@@ -75,6 +75,19 @@ export function nextPrayer(times: PrayerTimes, now = new Date()): { name: Exclud
   return { name: 'Fajr', time: times.timings.Fajr, tomorrow: true };
 }
 
+/** The most recent prayer whose time has passed today; null before Fajr. */
+export function currentPrayer(times: PrayerTimes, now = new Date()): { name: Exclude<PrayerName, 'Sunrise'>; time: string } | null {
+  const current = minutesAt(now, times.timeZone);
+  let latest: { name: Exclude<PrayerName, 'Sunrise'>; time: string } | null = null;
+  for (const name of ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const) {
+    const value = times.timings[name];
+    if (!CLOCK.test(value)) continue;
+    const [hours, minutes] = value.split(':').map(Number);
+    if (hours! * 60 + minutes! <= current) latest = { name, time: value };
+  }
+  return latest;
+}
+
 export function formatPrayerTime(value: string) {
   if (!CLOCK.test(value)) return value;
   const [hours, minutes] = value.split(':').map(Number);
