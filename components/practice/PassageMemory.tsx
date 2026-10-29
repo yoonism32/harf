@@ -1,7 +1,8 @@
 'use client';
-import {useState} from 'react';
+import Link from 'next/link';
+import {useEffect, useState} from 'react';
 import {useHarfStore} from '@/lib/data/store';
-import {passageLearning, type Assessment} from '@/lib/learning/passage-learning';
+import {passageLearning, obstacleLabels, type Assessment} from '@/lib/learning/passage-learning';
 import {savePassageLearning} from '@/lib/learning/passage-learning-commands';
 
 export function PassageAssessment({reference, assessment}: {reference: string; assessment: string}) {
@@ -9,13 +10,21 @@ export function PassageAssessment({reference, assessment}: {reference: string; a
  const [obstacle, setObstacle] = useState<Assessment['obstacle']>(saved?.obstacle ?? 'none');
  const [version, setVersion] = useState(saved?.updatedAt ?? null);
  const [busy, setBusy] = useState(false), [message, setMessage] = useState(''), [error, setError] = useState('');
+ useEffect(() => {setMessage('');}, [assessment, obstacle]);
  async function save() {
-  setBusy(true); setError('');
+  setBusy(true); setError(''); setMessage('');
   const updatedAt = new Date(Math.max(Date.now(), version ? Date.parse(version) + 1 : 0)).toISOString();
   try {
    await savePassageLearning({assessment: {reference, assessment: assessment as Assessment['assessment'], obstacle, updatedAt}, expectedUpdatedAt: version});
    setVersion(updatedAt); setMessage('Assessment saved for another visit.');
   } catch (cause) {setError(cause instanceof Error ? cause.message : 'Could not save. Try again.');}
+  finally {setBusy(false);}
+ }
+ async function remove() {
+  if (!version) return;
+  setBusy(true); setError(''); setMessage('');
+  try {await savePassageLearning({removeAssessment: reference, expectedUpdatedAt: version}); setVersion(null); setMessage('Saved assessment removed. Your reflection is kept.');}
+  catch (cause) {setError(cause instanceof Error ? cause.message : 'Could not remove the assessment. Try again.');}
   finally {setBusy(false);}
  }
  return <section className="stack" aria-label="Save passage assessment">
@@ -24,17 +33,21 @@ export function PassageAssessment({reference, assessment}: {reference: string; a
   </select></label>
   <p className="muted">Keep the latest assessment for up to 200 ayahs. This is personal feedback, not a comprehension score.</p>
   <button className="button button-secondary" disabled={!assessment || busy || store.status !== 'ready'} onClick={() => void save()}>{busy ? 'Saving assessment…' : 'Save assessment'}</button>
-  {saved && <p>Saved: {saved.assessment} · {saved.obstacle}</p>}{message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}
+  {saved && <><p>Saved: {saved.assessment} · {obstacleLabels[saved.obstacle]}</p><button className="button button-secondary" disabled={busy} onClick={() => void remove()}>Clear saved assessment</button></>}{message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}
  </section>;
 }
 
 export function SavePassage({reference, end, current}: {reference: string; end: number; current: number}) {
+ const store = useHarfStore();
+ const [expectedRange, setExpectedRange] = useState(() => passageLearning(store.meta.passageLearning).range);
  const [busy, setBusy] = useState(false), [message, setMessage] = useState(''), [error, setError] = useState('');
+ useEffect(() => {setMessage('');}, [reference, end, current]);
  async function save() {
-  setBusy(true); setError('');
-  try {await savePassageLearning({range: {reference, end, current}}); setMessage('Passage and current ayah saved. Resume it from Today.');}
+  setBusy(true); setError(''); setMessage('');
+  const range = {reference, end, current};
+  try {await savePassageLearning({range, expectedRange}); setExpectedRange(range); setMessage('Passage and current ayah saved. Resume it from Today.');}
   catch (cause) {setError(cause instanceof Error ? cause.message : 'Could not save. Try again.');}
   finally {setBusy(false);}
  }
- return <div className="stack"><button className="button button-secondary" disabled={busy} onClick={() => void save()}>Save passage for Today</button>{message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}</div>;
+ return <div className="stack"><button className="button button-secondary" disabled={busy || store.status !== 'ready'} onClick={() => void save()}>{busy ? 'Saving passage…' : 'Save passage for Today'}</button>{message && <p role="status">{message}</p>}{error && <div role="alert"><p>{error}</p><Link href="/today">Review saved passage in Today</Link></div>}</div>;
 }

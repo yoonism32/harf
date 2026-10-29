@@ -49,6 +49,9 @@ test('password sign-in survives reload, a new tab, and an expired access token w
  await expect(page.getByRole('status')).toHaveText('Progress synced.');
  await page.reload();
  await expect(page.getByText(email,{exact:true})).toBeVisible();
+ await page.goto('/today');
+ await expect(page.locator('footer')).toContainText('Signed in. Progress saves on this device');
+ await expect(page.locator('footer')).not.toContainText('Guest progress');
  await page.goto('/login');
  await expect(page).toHaveURL(/\/profile$/);
  const second=await context.newPage();

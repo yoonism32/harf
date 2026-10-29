@@ -1,6 +1,7 @@
 import {test, expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {text} from 'node:stream/consumers';
+test.use({serviceWorkers:'block'});
 
 test.beforeEach(async ({page}) => {
  await page.goto('/offline.html');
@@ -107,7 +108,7 @@ test('backup replacement is atomic on failure and its previous snapshot restores
  await expect(reflection.getByRole('status')).toHaveText('Reflection saved.');
  await page.goto('/settings');
  await page.getByLabel('Import a Harf backup').setInputFiles({name:'invalid.json',mimeType:'application/json',buffer:Buffer.from('{}')});
- await expect(page.getByRole('alert')).toBeVisible();
+ await expect(page.getByRole('main').getByRole('alert')).toBeVisible();
  await expect(page.getByRole('dialog',{name:'Replace current progress?'})).toHaveCount(0);
  await page.getByLabel('Import a Harf backup').setInputFiles(backup);
  const confirmation = page.getByRole('dialog',{name:'Replace current progress?'});
@@ -138,4 +139,72 @@ test('backup replacement is atomic on failure and its previous snapshot restores
  await expect(page.getByRole('status')).toHaveText('Recovery action completed.');
  await page.goto('/read/1/5');
  await expect(reflection.getByRole('textbox')).toHaveValue('Newer reflection before replacement');
+});
+
+test('passage confirmations track current inputs and saved assessments can be cleared', async ({page}) => {
+ await page.goto('/read/1/5/study');
+ await page.getByLabel('Last ayah in this practice').selectOption('7');
+ await page.getByRole('button',{name:'Save passage for Today',exact:true}).click();
+ await expect(page.getByText('Passage and current ayah saved. Resume it from Today.')).toBeVisible();
+ await page.getByRole('button',{name:'Next practice ayah'}).click();
+ await expect(page.getByText('Passage and current ayah saved. Resume it from Today.')).toHaveCount(0);
+ await page.getByRole('button',{name:'Reveal meaning',exact:true}).click();
+ await page.getByRole('button',{name:'Need another look',exact:true}).click();
+ await page.getByRole('button',{name:'Save assessment',exact:true}).click();
+ await expect(page.getByText('Assessment saved for another visit.')).toBeVisible();
+ await page.getByLabel('What made this difficult?').selectOption('word');
+ await expect(page.getByText('Assessment saved for another visit.')).toHaveCount(0);
+ await page.getByRole('button',{name:'Save assessment',exact:true}).click();
+ await expect(page.getByText('Saved: Need another look · Unfamiliar word',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Clear saved assessment',exact:true}).click();
+ await expect(page.getByText('Saved assessment removed. Your reflection is kept.')).toBeVisible();
+ await page.goto('/today'); await page.reload();
+ await expect(page.getByRole('link',{name:'Resume saved passage 1:5–7 →',exact:true})).toBeVisible();
+ await expect(page.getByText(/Ayahs to look at again/)).toHaveCount(0);
+});
+
+test('an older passage tab cannot overwrite a range saved in another tab', async ({page,context}) => {
+ await page.goto('/read/1/5/study');
+ await expect(page.getByRole('button',{name:'Save passage for Today',exact:true})).toBeEnabled();
+ const second=await context.newPage();
+ await second.goto('/read/1/6/study');
+ await second.getByRole('button',{name:'Save passage for Today',exact:true}).click();
+ await expect(second.getByText('Passage and current ayah saved. Resume it from Today.')).toBeVisible();
+ await page.bringToFront();
+ await page.getByRole('button',{name:'Save passage for Today',exact:true}).click();
+ await expect(page.getByRole('main').getByRole('alert')).toContainText('saved passage changed elsewhere');
+ await page.getByRole('link',{name:'Review saved passage in Today',exact:true}).click();
+ await expect(page.getByRole('link',{name:'Resume saved passage 1:6–6 →',exact:true})).toBeVisible();
+ await second.close();
+});
+
+test('language source analysis loads only when expanded', async ({page}) => {
+ let requests=0;
+ page.on('request',request=>{if(/\/morphology\/1\.json$/.test(request.url()))requests++;});
+ await page.goto('/read/1/5/study');
+ await page.getByRole('button',{name:'Reveal meaning',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Recognising “we” in a verb'})).toBeVisible();
+ expect(requests).toBe(0);
+ await page.getByText('Inspect the source analysis · 1:5:2',{exact:true}).click();
+ await expect.poll(()=>requests).toBe(1);
+ const example=page.getByRole('article').filter({has:page.getByRole('heading',{name:'Recognising “we” in a verb'})});
+ await expect(example.getByText('1st person · Plural',{exact:true})).toBeVisible();
+});
+
+test('Today can retry a failed last-ayah load without leaving the page', async ({page}) => {
+ await page.goto('/offline.html');
+ let requests=0;
+ await page.route('**/content/*/surahs/1.json',async route=>{
+  requests++;
+  if(requests===1) await route.fulfill({status:503,body:'Temporarily unavailable'});
+  else await route.continue();
+ });
+ await page.goto('/today');
+ const reading=page.getByRole('region',{name:'Ayah 1:1',exact:true});
+ await expect(reading.getByRole('alert')).toContainText('503');
+ await reading.getByRole('button',{name:'Try again',exact:true}).click();
+ await expect(reading.locator('.quran-text')).toBeVisible();
+ await expect(reading.getByRole('alert')).toHaveCount(0);
+ expect(requests).toBe(2);
+ await expect(page).toHaveURL(/\/today$/);
 });

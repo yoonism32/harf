@@ -35,7 +35,7 @@ function StudyAyah({reference}: {reference: string}) {
  const heading = useRef<HTMLHeadingElement>(null);
  const [surah, ayah] = reference.split(':') as [string, string];
  useEffect(() => () => stopAudio(), []);
- useEffect(() => {heading.current?.focus();}, [hintReady, revealReady, wordReady, feedbackReady]);
+ useEffect(() => {heading.current?.focus();}, [hintReady, revealReady, wordReady, feedbackReady, attemptReady]);
 
  function retry() {
   stopAudio(); setHint(false); setRevealed(false); setSelected(null); setPreview([]);

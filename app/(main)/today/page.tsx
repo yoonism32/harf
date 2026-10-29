@@ -3,6 +3,7 @@ import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {useState} from 'react';
 import {useHarfStore} from '@/lib/data/store';
+import {currentOwner} from '@/lib/account/client';
 import {getCatalog,getOverlap} from '@/lib/content/client';
 import {useResource,ResourceMessage} from '@/components/learning/useResource';
 import {buildQueue} from '@/lib/learning/queue';
@@ -42,6 +43,6 @@ export default function Today(){
   <div className="today-columns"><section className="stack"><p className="eyebrow">Your week</p><h2>{stats.studyDaysThisWeek} days of practice</h2><p>{stats.reviewedThisWeek} distinct entries reviewed since Monday.</p><ol className="week-strip" aria-label="Review actions during the last seven days">{stats.days.slice(-7).map(day=><li key={day.date}><span>{new Date(`${day.date}T12:00:00`).toLocaleDateString(undefined,{weekday:'short'})}</span><strong>{day.count}</strong></li>)}</ol><Link href="/progress">See your progress →</Link></section><section className="stack"><p className="eyebrow">Recently practiced</p><h2>Your last five words</h2>{recent.length?<ol className="recent-list">{recent.map(entry=><li key={entry.id}><Link href={`/learn/${entry.id}`}><span className="entry-arabic" dir="rtl" lang="ar">{entry.arabic}</span> {entry.gloss}</Link></li>)}</ol>:<p>Your practiced words will appear here after your first session.</p>}</section></div></>}
   <div className="today-columns"><DailyAyah surahs={catalogData.surahs} reciter={store.settings.reciter}/><PrayerTimes location={store.settings.prayerLocation}/></div>
   {new Set(store.reviews.filter(event=>!event.undone&&(!store.meta.lastExportAt||event.timestamp>String(store.meta.lastExportAt))).map(event=>event.localDate)).size>=7&&<div className="status-message">Keep a copy of your progress. <Link href="/settings">Export a backup</Link>.</div>}
-  <footer className="muted">Guest progress stays in this browser. Account sync is available in Profile. </footer>
+  <footer className="muted">{store.status === 'ready' && currentOwner() ? <>Signed in. Progress saves on this device; manage account sync in <Link href="/profile">Profile</Link>.</> : <>Guest progress stays in this browser. Account sync is available in <Link href="/profile">Profile</Link>.</>}</footer>
  </div>;
 }

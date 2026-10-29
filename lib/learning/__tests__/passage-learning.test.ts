@@ -17,13 +17,13 @@ afterEach(closeDB);
 const assessment = {reference: '1:5', assessment: 'Need another look' as const, obstacle: 'construction' as const, updatedAt: '2026-10-28T23:00:00.000Z'};
 it('retains range, assessments and reflections across reload and backup replacement', async () => {
  await savePassageLearning({assessment, expectedUpdatedAt: null});
- await savePassageLearning({range: {reference: '1:5', current: 6, end: 7}});
+ await savePassageLearning({range: {reference: '1:5', current: 6, end: 7}, expectedRange: null});
  await saveReflection('1:5', 'Look into this construction', null);
  const files = await exportBackup('test');
  const backup = await parseImport(files.map(file => new File([file.text], file.name)));
  await closeDB();
  expect(passageLearning((await readData()).meta.passageLearning).assessments).toEqual([assessment]);
- await savePassageLearning({range: null});
+ await savePassageLearning({range: null, expectedRange: {reference: '1:5', current: 6, end: 7}});
  await replaceFromBackup(backup.backup);
  const restored = await readData();
  expect(passageLearning(restored.meta.passageLearning).range?.current).toBe(6);
@@ -34,8 +34,33 @@ it('rejects stale assessment saves and invalid ranges without losing data', asyn
  await expect(savePassageLearning({assessment: {...assessment, assessment: 'Understood'}, expectedUpdatedAt: null})).rejects.toThrow('changed elsewhere');
  expect(passageLearning((await readData()).meta.passageLearning).assessments).toEqual([assessment]);
  expect(rangeSchema.safeParse({reference: '1:5', current: 5, end: 8}).success).toBe(false);
+ expect(rangeSchema.safeParse({reference: '999:1', current: 1, end: 2}).success).toBe(false);
  const data = await readData(); data.meta.passageLearning = {assessments: [assessment, assessment]};
  expect(() => validateBackup({app:'harf', schemaVersion:2, contentVersion:'test', exportedAt:assessment.updatedAt, data})).toThrow();
+});
+it('rejects stale range replacement and removal, then permits a deliberate retry', async () => {
+ const first = {reference:'1:5',current:5,end:7};
+ const second = {reference:'1:5',current:6,end:7};
+ await savePassageLearning({range:first,expectedRange:null});
+ await savePassageLearning({range:second,expectedRange:first});
+ await expect(savePassageLearning({range:first,expectedRange:first})).rejects.toThrow('changed elsewhere');
+ await expect(savePassageLearning({range:null,expectedRange:first})).rejects.toThrow('changed elsewhere');
+ expect(passageLearning((await readData()).meta.passageLearning).range).toEqual(second);
+ await savePassageLearning({range:null,expectedRange:second});
+ expect(passageLearning((await readData()).meta.passageLearning).range).toBeNull();
+});
+it('clears only the selected assessment and preserves reflections, ranges and other assessments', async () => {
+ await savePassageLearning({assessment,expectedUpdatedAt:null});
+ const other = {...assessment,reference:'1:6'};
+ await savePassageLearning({assessment:other,expectedUpdatedAt:null});
+ const range={reference:'1:5',current:5,end:7};
+ await savePassageLearning({range,expectedRange:null});
+ await saveReflection('1:5','Keep this reflection',null);
+ await expect(savePassageLearning({removeAssessment:'1:5',expectedUpdatedAt:'2026-10-27T00:00:00.000Z'})).rejects.toThrow('changed elsewhere');
+ await savePassageLearning({removeAssessment:'1:5',expectedUpdatedAt:assessment.updatedAt});
+ const data=await readData();
+ expect(passageLearning(data.meta.passageLearning)).toEqual({range,assessments:[other]});
+ expect(data.notes[0]!.text).toBe('Keep this reflection');
 });
 it('anchors every curated pattern to features in the pinned morphology', () => {
  for (const pattern of languagePatterns) {
