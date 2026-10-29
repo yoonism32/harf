@@ -1,4 +1,30 @@
-# Recently Fixed
+# Recently fixed — current entries and historical archive
+
+Reviewed 29 October 2026. Use [the roadmap](docs/ROADMAP.md) and [task list](todo.md) for unresolved work;
+older entries below reference retired files, old test totals and pre-rebuild behavior.
+
+## 28–29 October 2026 — personal passage learning
+
+Implemented in `6e5b165`, `c070db3` and `a7998f6`:
+
+- Adopted the verified QUL 301 translation export and recorded current owner content approvals.
+- Completed the saved-comparison due queue, Today entry point and save/navigation protections.
+- Added manual last-read revisit, saved passage ranges/current ayah and persistent assessments/obstacles.
+- Added optional meaning drafts, reflections/tafsir after reveal, and four source-anchored language examples.
+- Added backup validation and the passage sync migration with isolated account/conflict/tombstone checks.
+- Recorded 143 unit tests, TypeScript, app build and 18 targeted browser checks passing through `a7998f6`.
+  Live migration deployment and real signed-in verification remain open.
+
+## 29 October 2026 — documentation reconciliation
+
+Reviewed all project Markdown guides, added a docs index, refreshed the active roadmap/backlog,
+corrected storage/approval/audio/prayer descriptions, and labelled historical plans.
+This was documentation work, not a new functional test run or deployment.
+
+## Historical fixes — before the current rebuild
+
+The following entries are retained as history. “Queue complete”, missing icons, rank tests and legacy storage/route claims
+refer to their original sessions and do not define today's status.
 
 ## Study Session queue drift
 
@@ -123,7 +149,6 @@ User asked to iterate through a skill queue and apply each to the Harf codebase.
     - Improved `card-reveal` keyframe: added `translateY(8px)` to `from` state (Disney slow-out — content slides up into place, not just scales)
     - Staggered `MasteryButtons` entrance: each button gets `animate-rise` + `animationDelay: i * 60ms` (Overlapping Action / Follow Through principle)
     - Mastery bar segments: added `[transition-timing-function:var(--ease-out-expo)]` (smooth deceleration as bars fill)
-222
 14. **frontend-design-pro:review** ✅
     - Reviewed landing, dashboard, study pages + CoverageHero, LayoutShell
     - **Passes:** No hero badges, no generic fonts, no purple-blue gradients, skip link in LayoutShell, strong gold/dark contrast, motion properly gated

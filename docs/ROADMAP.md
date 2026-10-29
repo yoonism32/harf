@@ -1,81 +1,80 @@
-# Harf — current status and personal study plan
+# Harf — current roadmap
 
-Updated 1 October 2026 against the working tree. Replaces the obsolete September root-word feature checklist. The original redesign document is historical; later restored features and the owner's personal-use decision supersede its conflicting scope decisions.
+Updated 29 October 2026 against local implementation through `a7998f6`. This is the current priority list.
+See the [documentation index](README.md) for current guides versus historical plans.
 
-## Current scope
+## Current scope and implemented work
 
-Personal Quranic vocabulary study, optional Names practice, reading, portable backups, and owner-requested optional Supabase accounts as of 2 October. `/login` and `/profile` use fresh account caches with no automatic guest import. See README for email configuration and bounded conflict-aware sync.
+Personal Quranic vocabulary study with guest progress, portable backups, optional email/password accounts and conflict-aware Supabase sync.
+The app includes 300 lemma-based vocabulary entries, a separate 99 Names collection, due-first FSRS study,
+saved sessions, Undo, activity and actual word-position overlap.
 
-## Implemented
+Reading includes Ayah and QPC V2 Mushaf modes, translation/footnotes, source-aligned grammar and root families,
+word/ayah audio, bookmarks, search, surrounding context and local tafsir. Practice, Insights, Daily Ayah and city-based prayer times remain part of the product.
 
-- Today, setup, due-first vocabulary study, saved sessions, recall ratings, interval previews, pause/resume and Undo.
-- 300 frequency-selected lemma entries, contextual examples, word details, personal notes and priority/pause controls.
-- Reader with canonical word positions, translation/footnotes, word inspection, audio, bookmarks and search.
-- Separate 99 Names collection using the shared learning engine.
-- Activity history, distinct weekly entries, study days and per-surah vocabulary overlap.
-- IndexedDB transactions, review-attempt deduplication, revision conflict checks, cross-tab refresh, conservative legacy migration.
-- JSON backup/replace import, multipart validation, reset and one previous recovery snapshot.
-- Restored Practice, Insights, similar-passage practice, Daily Ayah, city-based prayer times and structured local Ibn Kathir commentary.
-- Paper/Night appearance, local fonts, install metadata, offline navigation fallback, security headers, legacy redirects.
+All five [personal learning slices](PERSONAL_LEARNING_PLAN_2026-10-27.md) are implemented at their stated boundaries:
+listening for meaning, reader-to-course shortcuts, reflections, saved-range/difficult-ayah revisits from Today,
+and four contextual language examples. Optional meaning drafts stay in the tab. Saved assessments and ranges
+participate in backup and account records. They do not change vocabulary scheduling or produce a comprehension score.
+Similar-passage comparison has its own due queue and persistence.
 
-Implemented does not mean every scenario in the original specification has been independently verified.
+## Remaining priorities
 
-## Evidence and remaining work
+1. **Deploy and verify passage account sync.** Apply [the passage migration](../supabase/migrations/20261028235500_passage_learning.sql)
+   to the configured Supabase project, then check a real signed-in two-device round trip for reflections, assessments,
+   saved ranges and comparison cards. SQL protocol tests passed locally; deployment was not performed.
+2. **Build/content consistency.** Prevent or clearly diagnose a production build referencing content removed by regeneration.
+   Server readers now resolve the disk manifest at runtime, but browser bundles still embed a version; that partial fix
+   does not make every old client compatible. Stop the server before regenerating, then rebuild and restart.
+3. **Remaining persistence coverage.** Extend real-browser tests for competing tabs, legacy migration, interrupted/rejected imports,
+   reset/recovery and loaded-session offline use. Reload, reflection failure/retry, saved ranges and assessment persistence now have targeted coverage;
+   that does not complete every original acceptance scenario.
+4. **Live deployment and release checks.** Verify Render runtime/health, actual signup/reset email delivery and deployed callback/password flows.
+   Run relevant production browser, size-budget, dependency and manual keyboard/screen-reader checks before a new release.
+   Automated axe results do not constitute a manual accessibility review.
+5. **Names audio, if still wanted.** Choose a reviewed Quran occurrence per Name before adding audio. No Names recording map or synthetic voice is shipped.
+   Current reader/word audio works without downloading a QUL recitation library.
+6. **Large account uploads, if needed.** Current atomic sync is bounded to 1,000 changed records/about 2 MiB.
+   Larger imports/offline backlogs remain local with an error; staged uploads are future work.
 
-On 1 October: 43 unit tests, TypeScript and compiled-content validation passed. The previous task reported 21 browser tests, application build, performance checks and a dependency audit passing. Those earlier results are historical; rerun relevant checks after functional changes.
+The [24–26 October record](PLAN_2026-10-24_to_26.md) also retains owner-only housekeeping:
+branch/worktree cleanup, share-link revocation and any request to purge old exposed commits. These were not performed or reverified in this docs update.
 
-Priority work:
+## Content status
 
-1. **Build/content consistency:** prevent or clearly diagnose starting an old app build after generated content has changed. Until addressed, regenerate then rebuild with the server stopped. The documented command sequence is a workaround, not a code fix.
-2. **Real-browser persistence tests:** broaden coverage for reload/resume, simultaneous tabs, failed saves, legacy migration, interrupted/rejected imports, reset recovery and loaded-session offline use. Existing unit tests cover some rules; the seven browser scenarios do not cover all original acceptance cases.
-3. **Content accuracy:** the original Names have been restored for personal use on 2 October; NumroQ is no longer active. Retain truthful independent-review status. All 300 vocabulary and 99 Names editorial approvals remain outstanding; see `CONTENT_SOURCES.md`. Personal testing does not require pretending these are complete.
-4. **Release verification when needed:** rerun production browser/accessibility/performance/security checks. Automated axe tests are not a manual keyboard/screen-reader or full accessibility-conformance assessment.
+The owner approved the current 300 vocabulary entries, 99 Names and formerly pending pinned sources on 28 October.
+Generated content `2bb58c86b4683669` reports `releaseReady: true` with no blockers. The registry has seven
+`verified` and seven `owner-approved` source records. This clears Harf's internal release gate and preserves the distinction
+between owner approval, external permission evidence and independent editorial certification.
 
-No accounts, streak counter, new reward system, or content approvals were implemented by the documentation refresh. The subsequent 2 October task restored the original Names dataset and documented source-comparison results in `SOURCE_AUDIT_2026-10-02.md`.
+The original Names collection remains selected. Its external publisher is still unrecorded; the owner chose to handle that provenance.
+Unused historical words/morphology/transliteration files are not active refresh or release blockers.
+See [content sources](CONTENT_SOURCES.md) for the QUL refresh results and the Mutashabihat preview/download discrepancy.
+New language-pattern explanations are authored teaching notes anchored to pinned Corpus analyses, not a new external corpus.
+
+## Verification recorded from implementation
+
+- Through `a7998f6`: TypeScript, production app build, 143 unit tests, six new learning-plan browser checks and 12 existing passage-study checks passed.
+- Isolated PostgreSQL verified the migration, authenticated RPC, two synthetic accounts, conflicts, tombstones and access restrictions.
+- Earlier approval batch `6e5b165`: full release build passed; broader browser suite reported 103 passes and two skips.
+  These results predate the final learning implementation.
+- No functional checks were rerun solely for this Markdown refresh. No live service was deployed or certified.
 
 ## Suggested daily routine
 
-This is a recommended personal routine using existing features, not a new enforced checklist or scientifically optimal time quota.
+1. Open Today and resume a saved vocabulary session or review due words. Start with three new words per day if that feels manageable.
+2. Recall before revealing, then rate honestly. Reduce new entries to zero when reviews feel heavy.
+3. Read or listen to one relevant ayah. Use Study this passage to attempt the meaning, then compare with translation and tafsir.
+4. Save a reflection, assessment or short passage when useful. Revisit difficult ayahs manually from Today.
+5. Keep Names optional and separate. Return for minute-scale reviews when due; do not bring future cards forward.
+6. Export about weekly and before device/origin changes. Keep all backup parts together outside the browser.
 
-1. **Open Today and resume any saved session.** Otherwise start the next review. Review due vocabulary before pursuing new material.
-2. **Try recalling the meaning before revealing it.** Grade honestly: Again if forgotten; Hard for correct but difficult; Good for correct; Easy for effortless. Getting something wrong and saving Again is still practice.
-3. **Start with three new vocabulary entries per day.** Set this yourself in Settings; the general default is five. Reduce to reviews-only when the backlog feels heavy. The software can mix new entries into a partially filled review queue; it does not require clearing the entire backlog first.
-4. **Finish one manageable session, then read a relevant ayah.** Use the result's context link, inspect the word, and optionally listen or bookmark. Around 5–10 minutes is a starting routine, not an enforced timer. A large backlog is not a requirement to keep studying indefinitely.
-5. **Treat Names as optional separate study.** Choose its own 0/3 new-entry setting and use it after vocabulary or on another occasion. It need not become a second compulsory daily task.
-6. **Return when reviews are due.** A 1- or 10-minute learning step can justify another short visit, but do not force early reviews just to earn a badge. If nothing is due and the new allowance is exhausted/zero, read and stop comfortably.
-7. **Export about weekly and before browser/device/origin changes.** Today already reminds after seven distinct practice days since the last recorded export. Keep a copy outside the browser/device where practical. Import replaces the target library; it is not multi-device sync.
+A recorded study day requires a saved, non-undone vocabulary or Names review on that local date; Again counts.
+Reading, reflection and personal passage assessments are worthwhile but do not increment that metric.
+Today combines collection activity; Progress separates collection figures. Dates are recorded at review time and weeks start Monday.
 
-Practice games, Insights, reading and listening can be useful supplements. They do not currently create FSRS review events and therefore do not earn a recorded study day just by opening them.
+## Deliberately deferred
 
-## What earns a study day now?
-
-The implemented rule is **at least one saved, non-undone review on that local calendar date**. No minimum accuracy, session completion or time spent is required. On Today, either vocabulary or Names counts. Progress also offers collection-specific figures.
-
-- Opening the app, revealing an answer, browsing, or leaving an unsaved/failed answer does not count.
-- Again counts as much as Easy for showing up; the scheduler still treats their learning outcomes differently.
-- Multiple answers increase action totals but count as one day. Weekly distinct-entry totals deduplicate card identities.
-- Undo removes the review from activity. If it was the day's only review, that day no longer qualifies.
-- Dates/time zones are captured at review time. Existing dates are not rewritten when travelling; the weekly summary starts Monday using the current local date.
-- Earlier aggregate legacy sessions are archived separately rather than invented into detailed review events.
-
-## Recommendation: weekly consistency before a streak
-
-Keep “days practiced this week” as the main measure. Personally aim for five days out of seven, with no penalty for a missed day. The app displays the count but does not currently store a five-day goal or award a completion badge. Reading-only days remain worthwhile even though they are not represented by the current review metric.
-
-A consecutive-day streak is optional future work, not a missing requirement for this personal release. If explicitly requested later, use this small specification:
-
-- Derive qualifying dates from existing non-undone vocabulary/Names review events; do not add a separately incremented streak value that can drift from history.
-- If today qualifies, count consecutive dates backwards from today. Otherwise start at yesterday so the streak stays available while today is still in progress. If neither qualifies, show zero.
-- Count each calendar date once across both collections. Undo recomputes it. A failed save never increases it.
-- Keep recorded historical dates when travelling; test midnight and DST. Do not introduce account/time-server infrastructure to police a personal habit counter.
-- Never require a correct answer, extra new words or premature review to preserve it. No freezes, paid repairs, rankings, or spiritual-merit claims.
-- Do not call it a general reading/Quran-engagement streak unless reading activity is explicitly recorded in a future feature.
-
-If implemented, verify one review today, yesterday-only, a gap, both collections on one date, an undone sole review and a midnight/DST boundary. Until then, the weekly activity already meets the basic habit-feedback need.
-
-
-Restored on 2 October: complete Corpus segment analysis, full canonical root-family browsing, original QuranWBW notes/verb forms, and source-backed alignment/audio for the three split phrases. Details and measured counts: `SOURCE_AUDIT_2026-10-02.md`.
-
-Verification after restoration (2 October 2026): 49 unit tests and 24 production browser tests passed across desktop Chromium, mobile Chromium and WebKit, including automated accessibility checks. Content validation, TypeScript, production application build and content/route size budgets passed. The audio browser check verifies the recorded request path with an intercepted request; it does not certify every remote recording or linguistic interpretation.
-
-Account verification (3 October 2026): 56 unit tests and 30 production browser checks passed across Chromium, mobile Chromium and WebKit, including accessibility checks. TypeScript, application build, content validation and size budgets passed. Live Supabase checks verified user isolation, anonymous denial, stale-write rejection and tombstones; security/performance advisors returned no findings. Real email delivery and the deployed callback still require verification after configuring Render and Supabase Auth. Nothing was pushed or deployed during implementation.
+A consecutive-day streak, enforced daily checklist, memory-palace tools, general grammar course, generated language exercises,
+expanded vocabulary course and another passage scheduler remain deferred. Use real blocking words and a week of personal passage practice
+to decide what helps next. No score measures Quran comprehension or religious merit.

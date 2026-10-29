@@ -2,7 +2,18 @@
 
 Checked 2 October 2026. Baseline generated version: `cff6f17340c5337e`, before restoring the original Names in this task. Comparisons use the actual local files, previous committed source (`git show HEAD:<path>`), pinned SQLite databases and the retained Quran.com/QAC preview files. This is a data audit, not a claim of expert linguistic certification.
 
-## Answer: are QuranWBW and Quranic Corpus still used?
+## Status of this audit — reviewed 29 October 2026
+
+This file preserves the measured **2 October pre-restoration snapshot**. Statements below about missing grammar/root browsing,
+preview-only morphology and guessed audio paths describe that baseline, not the current product.
+Grammar and root families were restored later on 2 October; source-word audio numbering was corrected on 26 October.
+Current compiled paths derive from the retained Quran.com source word positions rather than copying drifting raw `audio_url` values.
+The original Names remain selected; owner approval was recorded on 28 October. Current content version is `2bb58c86b4683669`.
+
+Use [CONTENT_SOURCES.md](CONTENT_SOURCES.md) for current provenance/refresh evidence and [ROADMAP.md](ROADMAP.md) for work still open.
+The temporary audit script/report mentioned below are historical artifacts, not guaranteed reproducible tools in the current checkout.
+
+## Baseline answer: were QuranWBW and Quranic Corpus still used?
 
 **Their old morphology files are not inputs to the currently selected compiler mode.** `data/sources.json` selects QUL. The QAC compiler branch runs only in preview mode. The old grammar-table component was removed.
 
@@ -57,7 +68,7 @@ QUL lemma mappings outside current word positions: `2:275:46`, `4:176:51`, `13:5
 
 The compiler can pass structural validation with these gaps: reader fields permit empty values, and course examples require non-empty target fields. “Validation passed” therefore does not mean every word has complete or independently verified linguistic data.
 
-## What the old morphology supplied that is missing now
+## What the old morphology supplied that was missing in the baseline
 
 `data/morphology.json` contains 172 ayahs and 3,106 segment records. The old UI explicitly attributed its grammar table to Quranic Arabic Corpus v0.4. Its fields include:
 
@@ -119,7 +130,7 @@ The three source phrases at 2:181:3, 8:6:4 and 13:37:8 span two canonical words 
 
 Full root families are available from reader words and course entries, including occurrences outside the 300-entry course. Original QuranWBW summaries and verb forms are retained as notes about their original examples, with canonical links. Related words do not inherit each other's meanings or learning progress. The original 99 Names remain active with roots and explanations.
 
-Word recordings use each retained Quran.com `audio_url`, resolved against `https://audio.qurancdn.com/`, as documented by the [Quran Foundation SDK](https://api-docs.quran.com/docs/sdk/javascript/audio/). Filenames are not assumed to equal canonical word numbers. A missing recording is shown honestly; ayah audio remains available. The old root-family English strings are not copied over mismatched word positions: the family uses canonical contextual glosses.
+Historical restoration behavior used retained Quran.com `audio_url` values against `https://audio.qurancdn.com/`; the 26 October source-position correction described above supersedes that raw-path rule, as documented by the [Quran Foundation SDK](https://api-docs.quran.com/docs/sdk/javascript/audio/). Filenames are not assumed to equal canonical word numbers. A missing recording is shown honestly; ayah audio remains available. The old root-family English strings are not copied over mismatched word positions: the family uses canonical contextual glosses.
 
 Inputs are pinned, generated detail files are validated and checksummed, and the original Corpus notice is emitted as `source-notices.txt` alongside the versioned content. Source selection does not invent independent editorial approval. Historical comparison sections above describe the pre-restoration state.
 

@@ -1,6 +1,6 @@
 # Harf — current project guide
 
-Verified against the working tree on 1 October 2026. This guide replaces the old root-word/localStorage architecture description.
+Reviewed against the working tree on 29 October 2026 (implementation through `a7998f6`). This guide replaces the old root-word/localStorage architecture description.
 
 ## Product and scope
 
@@ -12,6 +12,11 @@ The September redesign prompt called for deliberate product and architecture dec
 
 Documentation roles:
 
+- `docs/README.md`: index of every project Markdown document, with current/historical status.
+- `docs/PERSONAL_LEARNING_PLAN_2026-10-27.md`: implemented five-slice learning plan and remaining live verification.
+- `docs/PLAN_2026-10-24_to_26.md`: dated restoration record; use its current addendum before old open items.
+- `design.md`: current Paper/Night design guidance.
+
 - `README.md`: running and using the current app.
 - `docs/ROADMAP.md`: current status, remaining work, daily-study recommendation.
 - `docs/CONTENT_SOURCES.md`: old/new provenance, Names spelling differences, editorial review.
@@ -21,7 +26,7 @@ Documentation roles:
 
 ## Stack and structure
 
-Next.js App Router, React, strict TypeScript, Tailwind v4 plus custom CSS, `ts-fsrs`, `idb`, Zod, Vitest and Playwright. `package.json` requires Node >=26; the content compiler uses `node:sqlite`. Read installed Next.js documentation before changing framework code.
+Next.js App Router, React, strict TypeScript, Tailwind v4 plus custom CSS, `ts-fsrs`, `idb`, Zod, Vitest and Playwright. `package.json` requires Node >=26.12.1; the content compiler uses `node:sqlite`. Read installed Next.js documentation before changing framework code.
 
 | Location | Responsibility |
 |---|---|
@@ -52,15 +57,21 @@ Route groups do not appear in URLs. `/app`, `/words`, `/coverage`, and other old
 
 ## Persistence and boundaries
 
-`lib/data/db.ts` opens IndexedDB database `harf`, currently database version 2. Stores: `meta`, `cards`, `reviews`, `sessions`, `notes`, `bookmarks`, `legacy`, plus `recovery` and account `sync` metadata. Signed-in users open `harf-account-<user id>`; guests keep `harf`. The serialized data/backup schema uses version 2; do not confuse these version numbers.
+`lib/data/db.ts` opens IndexedDB database `harf`, currently database version 3. Stores: `meta`, `cards`, `reviews`, `sessions`, `notes`, `bookmarks`, `legacy`, `passageCards`, `passageReviews`, plus `recovery` and account `sync` metadata. Signed-in users open `harf-account-<user id>`; guests keep `harf`. App metadata remains schema version 2; the backup envelope accepts versions 2 and 3. Do not confuse these with the IndexedDB version.
 
-UI reads through `useHarfStore()` in `lib/data/store.ts`; learning mutations go through `lib/learning/commands.ts`. Preserve transactional writes, unique review attempt IDs, revision checks, and one active session. A failed save must leave the learner able to retry the same answer. BroadcastChannel coordinates tabs on the same origin. `lib/account/sync.ts` synchronizes accounts across devices through version-checked RPCs, with explicit conflict resolution and no polling. Do not bypass `databaseIdentity()` or use guest legacy migration for account caches.
+UI reads through `useHarfStore()` in `lib/data/store.ts`; vocabulary mutations go through `lib/learning/commands.ts`, reflection writes through `lib/learning/reflections.ts`, personal passage writes through `lib/learning/passage-learning-commands.ts`, and comparison-card writes through `lib/practice/passage-commands.ts`. Preserve transactional writes, unique review attempt IDs, revision checks, and one active session. A failed save must leave the learner able to retry the same answer. BroadcastChannel coordinates tabs on the same origin. `lib/account/sync.ts` synchronizes accounts across devices through version-checked RPCs, with explicit conflict resolution and no polling. Do not bypass `databaseIdentity()` or use guest legacy migration for account caches.
 
 Legacy migration reads old `harf:v1:*` data conservatively and retains raw archives. It does not delete the old keys. Ambiguous root-to-lemma mappings must not be guessed. Theme still uses localStorage (`lib/theme.ts`, applied before paint by the inline boot script in `app/layout.tsx` and reasserted by `components/ThemeSync.tsx`); unsaved mnemonic drafts use sessionStorage (`lib/data/note-draft.ts`). Therefore “all storage goes through storage.ts” is obsolete.
 
 Settings exports portable JSON, supports staged replacement imports and multipart backups, and offers one previous snapshot for import/reset recovery. Recovery in the same browser is not an external backup. Imports replace data rather than merge it. Keep every multipart file and manifest together. Today prompts for backup after seven distinct practice days since the last recorded export. Browser download completion is not proof of an independently verified backup.
 
 Use one stable browser profile and origin. `localhost`, a LAN IP, another port, and a deployed domain have separate storage. Clearing site data can remove both progress and local recovery.
+
+## Personal passage learning
+
+`/read/[surah]/[ayah]/study` offers listening for meaning, optional tab-retained attempts, reveal, word inspection, reflection, tafsir and four curated language examples. `meta.passageLearning` stores one explicitly saved range/current ayah and the latest assessments/obstacles for up to 200 ayahs; Today exposes manual revisit. These records do not alter vocabulary FSRS or activity metrics. Reflections use safe `ayah-<surah>-<ayah>` note IDs. Resetting scheduled progress retains notes, bookmarks and personal passage metadata; replacement imports replace them.
+
+The client calls `harf_sync_v3`; migration `20261028235500_passage_learning.sql` enables comparison collections and the personal passage meta key. Its isolated PostgreSQL tests passed, but it has not been applied to the live service in this work. Never claim live passage sync verified until deployment and a real signed-in round trip. Legacy fallback is permitted only for changes that do not require the new protocol.
 
 ## Learning flow and metrics
 
@@ -78,15 +89,15 @@ Familiar means Review state with stability >=21 days, not perfect recall or comp
 
 The compiler groups eligible QUL occurrences by normalized lemma and root, orders by frequency, and selects 300 groups with gloss/transliteration examples. These are vocabulary entries, not 300 Names and not 300 interchangeable root families. The 99 Names are a separate collection. As of 2 October 2026, compile the owner-selected original `data/99names.json`, preserving roots and explanations; NumroQ is historical, not active. Owner selection is not independent editorial certification.
 
-Quran positions are `surah:ayah:word`; ayah references are `surah:ayah`. Use canonical positions and source-backed lemmas, never substring/root-letter guessing. Generated content is read from the same version on client and server. Client reads validate schemas, deduplicate requests, limit concurrency to four, time out at eight seconds, and retain at most 16 surahs in the LRU cache.
+Quran positions are `surah:ayah:word`; ayah references are `surah:ayah`. Use canonical positions and source-backed lemmas, never substring/root-letter guessing. The browser embeds `lib/content/version.json`; server readers resolve the current disk manifest. Keep build and generated content together: runtime server lookup does not make old browser bundles compatible with rotated content. Client reads validate schemas, deduplicate requests, limit concurrency to four, time out at eight seconds, and retain at most 16 surahs in the LRU cache.
 
-Generated output is not an editing surface: change pinned inputs/overrides, then regenerate. A content hash confirms integrity, not linguistic accuracy. Source permission records and editorial approvals are separate. Preserve pending review labels; personal use does not turn unreviewed entries into reviewed entries.
+Generated output is not an editing surface: change pinned inputs/overrides, then regenerate. A content hash confirms integrity, not linguistic accuracy. Source permission records and editorial approvals are separate. The owner approved the current 300 vocabulary entries, 99 Names and formerly pending inputs on 28 October. The registry distinguishes `verified` from `owner-approved`; preserve truthful labels for future unreviewed content. Current content `2bb58c86b4683669` is release-ready; owner approval is not independent editorial certification.
 
 ## Presentation, network and security
 
 Paper/Night themes use current CSS variables/classes in `app/globals.css`; inspect them rather than copying obsolete gold-theme tokens. Fonts are local Source Sans 3, Amiri, and Amiri Quran, loaded by `next/font/local`.
 
-`proxy.ts` generates nonce-based CSP for matched page routes; `next.config.ts` supplies common security headers and redirects. Word audio uses recorded Quran.com paths on audio.qurancdn.com; ayah audio contacts everyayah.com or audios.quranwbw.com; optional prayer times use Aladhan with a saved city/country. Geolocation is disabled. Tafsir is parsed into structured text; do not insert raw source HTML into pages.
+`proxy.ts` generates nonce-based CSP for matched page routes; `next.config.ts` supplies common security headers and redirects. Word audio uses recorded Quran.com paths on audio.qurancdn.com; ayah audio uses EveryAyah; prayer times are calculated locally with `adhan` from saved coordinates, with an Open-Meteo city lookup when saving location. Geolocation is disabled. Tafsir is parsed into structured text; do not insert raw source HTML into pages.
 
 The service worker is a navigation-fallback worker, not a full Quran offline downloader. Cold offline navigation shows `offline.html`. Never claim installation alone downloads all content/audio.
 
@@ -108,9 +119,9 @@ npm run build              # Regenerate + release validation + application build
 
 After changing compiler/content inputs, stop the server, regenerate content, and rebuild the app before `npm start`. Old builds embed an old version; compiler cleanup can remove that directory, producing ENOENT. Do not run content regeneration against a production process expecting the previous assets. For personal testing use `npm run build:app && npm start` when generated content is already current.
 
-Unit tests are distributed across `lib/**/__tests__` and `components/**/__tests__`. Browser checks are in `e2e/product.spec.ts`, configured for Chromium desktop/mobile and WebKit. CI runs audit, data validation, typecheck, unit tests, app build, browser tests and budgets. The separate release workflow applies editorial gating.
+Unit tests are distributed across `lib/**/__tests__` and `components/**/__tests__`. Browser checks are distributed across `e2e/*.spec.ts`, configured for Chromium desktop/mobile and WebKit. CI runs audit, data validation, typecheck, unit tests, app build, browser tests and budgets. The separate release workflow applies editorial gating.
 
-On 1 October 2026, 43 unit tests, typecheck and content validation passed. Full build/browser/performance results recorded in the prior task are historical, not freshly rerun certification. The browser suite does not yet cover every failure/concurrency scenario requested in the original plan. See the roadmap before declaring completion.
+Implementation through `a7998f6` passed 143 unit tests, TypeScript, production app build, 18 targeted learning/passage browser checks and isolated SQL account checks. These are recorded implementation results, not freshly rerun certification from this docs refresh. The browser suite does not yet cover every failure/concurrency scenario requested in the original plan. See the roadmap before declaring completion.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

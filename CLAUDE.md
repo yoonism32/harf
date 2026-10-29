@@ -1,5 +1,7 @@
 @AGENTS.md
 
+Documentation routing reviewed 29 October 2026: use [docs/README.md](docs/README.md), [the current roadmap](docs/ROADMAP.md) and [todo.md](todo.md). The September redesign and old fix log are historical where explicitly marked; AGENTS and current source take precedence.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

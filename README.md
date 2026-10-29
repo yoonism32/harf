@@ -2,6 +2,8 @@
 
 Learn Quranic vocabulary through short recall sessions, then encounter the words in ayahs. Harf targets personal use, with optional email sign-in, account progress sync, guest study and portable JSON backups.
 
+Documentation reviewed 29 October 2026. See the [documentation index](docs/README.md) for current plans and archived specifications.
+
 ## What is here
 
 - 300 frequent lemma-based vocabulary entries and a separate 99 Names collection.
@@ -13,7 +15,7 @@ Learn Quranic vocabulary through short recall sessions, then encounter the words
 
 ## Run locally
 
-Use Node.js 26 or newer, as required by `package.json`.
+Use Node.js 26.12.1 or newer (the `.node-version` pin is 26.12.1), as required by `package.json`.
 
 ```bash
 npm ci
@@ -38,7 +40,7 @@ npm start
 
 Keep the server stopped while regenerating/rebuilding. Generated content has versioned URLs. Starting an old build after its content directory has been removed causes missing-file errors; a successful server startup alone does not establish that pages can load.
 
-`npm run build` is the separate publication path: it regenerates content, enforces release validation, then builds the app. It currently fails because 300 vocabulary entries and 99 Names await editorial approval. `build:app` permits personal testing without claiming those reviews were completed.
+`npm run build` is the separate publication path: it regenerates content, enforces release validation, then builds the app. The owner approved the current 300 vocabulary entries and 99 Names on 28 October; the current pinned content passes that gate. Future unapproved input changes can block it. `build:app` builds only the application against existing generated content.
 
 ## Accounts
 
@@ -69,7 +71,7 @@ One atomic upload is limited to 1,000 changed records and about 2 MiB. A larger 
 
 ### Render deployment
 
-On Render, set the two public variables above, use Node 26+, build with `npm ci && npm run build:app`, and start with `npm start` for this owner-approved personal deployment. Include the current generated content in the checkout. `npm run build` remains the separate editorial publication gate and will fail while approvals are pending.
+On Render, set the two public variables above, use Node 26+, build with `npm ci && npm run build:app`, and start with `npm start` for this owner-approved personal deployment. Include the current generated content in the checkout. `npm run build` remains the separate editorial publication gate and passes for the currently approved inputs; future pending approvals can block it.
 
 After deployment, set a password on the existing account, verify password sign-in on another device, reload persistence, one saved review, second-device sync, recovery and sign-out. Automated account browser tests intercept Supabase calls; live database isolation/version checks are tested separately and do not prove email delivery.
 
@@ -103,7 +105,7 @@ A saved, non-undone review earns a recorded practice day, including an Again ans
 
 Quran vocabulary is compiled from pinned QUL datasets. The current Names input is the original Harf collection, selected by the owner for personal use on 2 October 2026, including its meanings, roots and explanations. NumroQ is no longer active. The old and current data differ in transliteration conventions and English glosses. See the [source comparison and review explanation](docs/CONTENT_SOURCES.md), including Ar-Rahman versus Al-Rahman.
 
-Source-selection approval, automated file validation and Arabic editorial approval are separate. Existing pending labels remain accurate for personal testing.
+Source-selection approval, automated integrity and independent Arabic editorial certification are separate. The current owner-approved content is release-ready, with seven externally verified and seven owner-approved source records. Original Names publisher provenance remains unrecorded; NumroQ is historical. See the source registry and source guide for the exact evidence.
 
 ## Development checks
 
@@ -119,7 +121,7 @@ npm audit --audit-level=high
 
 Locally, Playwright starts/reuses a development server; CI runs browser checks against the production build. Chromium desktop/mobile and WebKit are configured. Passing automated accessibility checks does not certify full accessibility conformance.
 
-On 1 October 2026, 43 unit tests, typecheck and content validation passed. Full browser/build/performance results from the previous task are historical. The remaining reliability and editorial work is listed in the [current roadmap](docs/ROADMAP.md) and [task list](todo.md).
+Implementation through `a7998f6` passed 143 unit tests, TypeScript, production app build, 18 targeted learning/passage browser checks and isolated PostgreSQL account checks. These results were recorded during implementation; this docs-only refresh did not rerun them. The remaining reliability and editorial work is listed in the [current roadmap](docs/ROADMAP.md) and [task list](todo.md).
 
 Read [AGENTS.md](AGENTS.md) for the current code map and architectural rules. [HARF_REDESIGN_PLAN.md](HARF_REDESIGN_PLAN.md) records the original design rationale; later restored features and the current personal-use scope supersede conflicting parts.
 

@@ -1,6 +1,6 @@
 # Harf: personal understanding and reflection plan
 
-Proposed 27 October 2026. Status updated after the remaining learning slices on 28 October.
+Proposed 27 October 2026. Implementation and documentation reviewed 29 October; see [the docs index](README.md) and [current roadmap](ROADMAP.md). This is an implemented work record, not the main backlog.
 
 ## Outcome
 
@@ -41,7 +41,7 @@ exports, QuranWBW morphology notes, and QPC V2 Mushaf glyph/layout/font assets. 
 300 vocabulary entries and 99 Names for Harf release on 28 October. See `docs/CONTENT_SOURCES.md` and the source
 registry for the file-level record; owner approval remains distinct from independent editorial certification.
 
-## Baseline inspected
+## Historical baseline inspected — 27 October
 
 Local HEAD and the locally cached origin/main both point to `18fc7b5`. No remote fetch was performed. Recent commits include Mushaf compilation, Reading mode, the bottom audio toolbar, loops and reader tests. Further reader/audio/navigation changes are uncommitted; preserve them.
 
@@ -49,7 +49,9 @@ The app already has FSRS vocabulary study, source-backed word analysis, root bro
 
 The inspected listening activity asks for a surah/ayah reference. This exercises location recognition, not directly the owner's desired ability to understand what was heard. Vocabulary notes are currently attached to entries; the reader has no comparable personal reflection workflow.
 
-## Build order
+## Original build order and acceptance criteria
+
+All five slices below have since been implemented at the boundaries recorded above. Imperative wording preserves the original proposal; it is not a fresh instruction to rebuild shipped features.
 
 ### 1. One passage, one complete study flow
 
@@ -75,7 +77,7 @@ Acceptance: actions behave consistently in both reader modes; existing cards are
 
 Add an ayah-linked personal note beside translation and tafsir. Start with one free-text note, optionally prompted by “What did I understand?” and “What do I still need to look up?”. Keep personal writing visibly distinct from sourced commentary. Show surrounding ayahs and existing related-passage links without requiring the learner to abandon the selected verse.
 
-Reflection is a separate slice: saveNote currently rejects colon-separated ayah IDs, and resetProgress clears notes and bookmarks. Resolve note identity and explicit reset-safety semantics before adding reflections. Replacement imports must clearly describe their effect on reflections. Check ID validation, imports, exports, deletion and account sync for the chosen keys. Preserve draft recovery and save-failure handling. Avoid adding a new journal subsystem.
+Historical constraint resolved by the implemented safe note identity and reflection command: saveNote rejects colon-separated ayah IDs, and resetProgress clears notes and bookmarks. Resolve note identity and explicit reset-safety semantics before adding reflections. Replacement imports must clearly describe their effect on reflections. Check ID validation, imports, exports, deletion and account sync for the chosen keys. Preserve draft recovery and save-failure handling. Avoid adding a new journal subsystem.
 
 Acceptance: note survives reload, backup/restore and supported account sync; switching ayahs cannot overwrite another note; errors preserve the draft. Never grade reflection or label it authoritative tafsir.
 
@@ -106,7 +108,7 @@ Try the first slice with one personally relevant short passage for a week. After
 
 Practice testing and distributed practice have strong general support in [Dunlosky et al. (2013)](https://pubmed.ncbi.nlm.nih.gov/26173288/). The proposed Quran-specific workflow is a product hypothesis, not a method directly validated by that review. Keep optional mnemonic notes; defer memory-palace tooling, streak mechanics and another scheduler.
 
-## First implementation boundary
+## Historical first implementation boundary
 
 Ship step 1 plus the existing-course “Study next” shortcut from step 2. Evaluate it before building notes, new progress records or curriculum expansion. No framework rewrite, new hosting service or dependency is needed for this first slice. Quran.com can inform individual interaction patterns; inspect the exact repository and asset licenses before reusing code or content, rather than assuming all related projects share one license.
 
@@ -125,8 +127,7 @@ Ship step 1 plus the existing-course “Study next” shortcut from step 2. Eval
   point. The comparison browser exposes all eligible source pairs, not only the first 12.
 - A recall attempt captures its card revision when it begins. The review UI prevents navigation during a save, and
   unavailable source pairs remain visible with their saved progress.
-- This is local persistence work only. Account-backed passage sync still needs the separately planned Supabase
-  migration and owner-controlled verification.
+- This is local persistence work only. The later migration is now in the repository and locally tested; live deployment and signed-in verification remain open.
 
 ## Slice 4 manual revisit implemented, 28 October
 

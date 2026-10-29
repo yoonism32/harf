@@ -2,6 +2,20 @@
 
 Checked against the working tree, Git history, and linked publisher pages on 1 October 2026; QUL downloads were rechecked on 28 October 2026. The owner approved the current pinned inputs and selected Names collection for Harf release on 28 October. This records an owner decision, not new third-party licence evidence or independent editorial certification.
 
+## Current documentation update — 29 October 2026
+
+Current generated content is `2bb58c86b4683669` and reports release-ready with no blockers. The source registry has seven
+`verified` and seven `owner-approved` file records. The current course and Names approval was the owner's release decision on 28 October.
+The [docs index](README.md) separates this active provenance guide from the historical source audit.
+
+The four contextual language examples in `lib/learning/language-patterns.ts` are authored Harf teaching notes.
+Their canonical word keys (1:7:4, 1:5:3, 1:5:2, 112:3:1) and stated morphology features are checked against the pinned Corpus output.
+They are not a new vendor dataset or an independent scholarly certification. Personal attempts, reflections and assessments are learner-authored data.
+
+Other active supporting inputs include the EveryAyah reciter catalogue (`data/ea_reciters.json`), Quran.com surah introductions,
+and QUL-derived topics/themes/similarity metadata documented below. Prayer calculations use the installed `adhan` library;
+saving a location uses Open-Meteo's geocoder. This is distinct from a downloaded Quran corpus. No extra QUL audio library is required.
+
 ## Update — 2 October 2026
 
 The owner has selected the **original `data/99names.json`** for personal use. The compiler and Names screen now preserve its Arabic, Ar-Rahman/Ar-Raheem labels, meanings, roots and explanations. NumroQ is retained for historical comparison but is no longer an active compiler input. This selection does not claim an external publisher or independent editorial certification. Attribution completeness is not a requirement to use this selected collection in the personal app.
@@ -51,7 +65,9 @@ Neither number proves that the content was reviewed by a qualified editor.
 
 The old vocabulary scripts establish a QuranWBW source for expansion/enrichment. They do **not** establish the original authorship or editorial review of every seed entry. Likewise, no publisher attribution was found in the old Names file: do not guess that it came from a particular Islamic website, or claim its content was wrong simply because its provenance is incomplete.
 
-The compiler still contains a preview path using Quran.com chapter exports and QAC morphology. `data/sources.json` currently selects `mode: "qul"`; preview data is not the active production source.
+The compiler's canonical text/course path uses `mode: "qul"`. A separate preview-mode branch exists, but the retained
+Quran.com exports and QAC morphology are also active enrichment inputs to `scripts/content-morphology.ts` in the QUL build.
+Do not confuse the inactive canonical preview branch with these active grammar/alignment/audio inputs.
 
 ## How the 300 are selected
 
@@ -83,7 +99,7 @@ The local registry records the earlier project's permission evidence and owner s
 
 Actual local records:
 
-| Field | Old Names file | Current Names input |
+| Field | Original Harf Names | Historical NumroQ replacement (no longer active) |
 |---|---|---|
 | Name 1 Arabic | الرَّحْمَٰن | الرَّحْمَن |
 | Name 1 Latin label | Ar-Rahman | Al-Rahman |
@@ -91,7 +107,7 @@ Actual local records:
 | Name 2 Latin label | Ar-Raheem | Al-Rahim |
 | Name 2 meaning | The Most Merciful | The Most Compassionate |
 | Root and explanatory paragraph | Present, without attached attribution | Omitted from the new records |
-| Editorial approval record | None attached | Owner-approved for Harf release on 28 October |
+| Editorial approval record | Owner-approved for Harf release on 28 October | Historical replacement, no longer selected |
 
 **Al- versus Ar- is a transliteration convention, not a different Name.** Arabic writes the article ال. Before a sun letter such as ر, its l sound assimilates to the following consonant. “Ar-Raḥmān” reflects pronunciation; “Al-Rahman” preserves the written article. See [Madinah Arabic's definite-article lesson](https://madinaharabic.com/free-content/grammar/lesson-3/part-7).
 
@@ -113,8 +129,8 @@ Three distinct checks must not be conflated:
 
 | Check | What it establishes | Current status |
 |---|---|---|
-| Source selection/provenance | Publisher, file/version, attribution, recorded reuse evidence | Recorded in `data/sources.json`; owner approval in prior conversation |
-| Automated integrity/alignment | Files match their hashes; expected counts, schemas and example positions are consistent | Validation passed on 1 October 2026 |
+| Source selection/provenance | Publisher, file/version, attribution, recorded reuse evidence | Core inputs in `data/sources.json`; runtime references documented here; original Names publisher remains unrecorded |
+| Automated integrity/alignment | Files match their hashes; expected counts, schemas and example positions are consistent | Full release validation passed in the 28 October approval batch; see the roadmap for later app-only verification |
 | Editorial accuracy | Arabic form, grouping, contextual meaning, transliteration, examples and Names treatment are suitable | Owner-approved for Harf release on 28 October; not an independent certification |
 
 Vocabulary reviews belong in `data/course-overrides.json`; the owner approval record supplies the reviewer, date and evidence for the current generated course. The earlier NumroQ review records remain historical; they do not certify the restored original collection. This is a release decision, not an independently qualified editor's certification.
@@ -132,10 +148,10 @@ The three source phrases at 2:181:3, 8:6:4 and 13:37:8 span two canonical words 
 
 Full root families are available from reader words and course entries, including occurrences outside the 300-entry course. Original QuranWBW summaries and verb forms are retained as notes about their original examples, with canonical links. Related words do not inherit each other's meanings or learning progress. The original 99 Names remain active with roots and explanations.
 
-Word recordings use each retained Quran.com `audio_url`, resolved against `https://audio.qurancdn.com/`, as documented by the [Quran Foundation SDK](https://api-docs.quran.com/docs/sdk/javascript/audio/). Filenames are not assumed to equal canonical word numbers. A missing recording is shown honestly; ayah audio remains available. The old root-family English strings are not copied over mismatched word positions: the family uses canonical contextual glosses.
+Current correction to this restoration note: compiled word paths use the retained Quran.com source word position (not a canonical-position offset); the raw `audio_url` proved to drift around nonspoken marks and was corrected on 26 October. Runtime resolves the compiled path against `https://audio.qurancdn.com/`, as documented by the [Quran Foundation SDK](https://api-docs.quran.com/docs/sdk/javascript/audio/). Filenames are not assumed to equal canonical word numbers. A missing recording is shown honestly; ayah audio remains available. The old root-family English strings are not copied over mismatched word positions: the family uses canonical contextual glosses.
 
 Inputs are pinned, generated detail files are validated and checksummed, and the original Corpus notice is emitted as `source-notices.txt` alongside the versioned content. Source selection does not invent independent editorial approval. Historical comparison sections above describe the pre-restoration state.
-# QPC V2 Mushaf additions — 27 October 2026
+## QPC V2 Mushaf additions — 27 October 2026
 
 Owner-supplied QUL downloads: layout resource 10, word-glyph resource 61, and page-font resource 249. Pinned inputs live in `data/source/qul/mushaf-v2/`; `fonts.json` pins all 604 WOFF files individually. The download labelled `.woff.bz2` was a ZIP archive. Glyph keys match all 83,668 canonical token positions (including verse markers). The compiler validates unique IDs, canonical keys, complete nonduplicated page coverage, and every font checksum, then emits versioned page JSON, an ayah-to-first-page index and fonts. Glyph codes are for display only; existing canonical Arabic remains the source for meanings, search and accessibility labels. The owner approved these pinned inputs for Harf release on 28 October. That decision is recorded as `permission: "owner-approved"`; it does not create new source-specific redistribution evidence or independent calligraphic/editorial review.
 

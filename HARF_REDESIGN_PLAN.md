@@ -4,9 +4,9 @@
 **Prepared:** 21 September 2026.  
 **Audience:** the model implementing the replacement application.
 
-> **Current-status note — 1 October 2026:** the rebuild has since been implemented and amended. Practice, Insights, Daily Ayah, prayer times and local tafsir were restored in later work. The owner now explicitly chooses personal use with browser-local persistence and backups; accounts remain out of scope. Read `AGENTS.md`, `docs/ROADMAP.md`, and `docs/CONTENT_SOURCES.md` for current architecture, evidence, outstanding reviews and daily-study guidance. This historical plan does not establish that every acceptance check was completed, and its conflicting removal instructions must not undo later work.
+> **Historical specification — reviewed 29 October 2026.** The rebuild shipped and was subsequently amended. Optional email/password accounts, Practice, Insights, Daily Ayah, local prayer times, local tafsir, two reader modes and all five personal-learning slices now exist. The owner approved current release content on 28 October. Read [the docs index](docs/README.md), [AGENTS](AGENTS.md) and [the roadmap](docs/ROADMAP.md) for current requirements, evidence and remaining work. Do not execute this document's old removal instructions or infer that its original acceptance list is fully certified.
 
-This document makes the product and engineering decisions. Implement them in the order specified. Repository README files, DESIGN.md, roadmaps, and earlier design notes are not requirements. Preserve user data and unrelated working-tree changes. The existing untracked `AGENTS.md` is not part of this deliverable.
+The remainder preserves the September decisions and task order as historical rationale. Conflicting routes, dependencies, source choices, account scope and data contracts are superseded by the current code and guides. It is not the active work queue.
 
 ## 1. Product decision
 
