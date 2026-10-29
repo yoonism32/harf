@@ -8,6 +8,10 @@ The five personal-learning slices are implemented; do not restart them from an o
 The agreed reliability/deployment implementation is complete. The PLP is also complete as an implementation plan.
 See [executed verification](docs/VERIFICATION_2026-10-29.md) for evidence and exact boundaries.
 
+## Active measured-performance follow-up
+
+- [ ] Follow the [Lighthouse plan](docs/LIGHTHOUSE_PLAN_2026-10-29.md): verify label/CSP fixes, profile font/shared bundle/content loading, then compare repeat mobile runs.
+
 ## Owner-only and recurring release checks
 
 - [ ] Real password-recovery email/callback completion: explicitly retained as owner-only follow-up on 29 October.

@@ -68,7 +68,7 @@ test('one-ayah listening range is explicitly unscored',async({page})=>{
 
 test('translation reference preview closes with focus and reader position preserved',async({page})=>{
  await page.goto('/read/2/21');
- const trigger=page.getByRole('button',{name:'Preview ayah 2:2',exact:true});
+ const trigger=page.getByRole('button',{name:/^Preview ayah 2:2:/});
  // Centre it so the click needs no scroll (on mobile the fixed bottom nav covers the bottom edge).
  await trigger.evaluate(e=>e.scrollIntoView({block:'center'}));
  await trigger.focus();
@@ -102,7 +102,7 @@ test('desktop reference preview preserves selected word',async({page})=>{
  await page.setViewportSize({width:1440,height:900});
  await page.goto('/read/2/21?word=1');
  await expect(page.getByRole('heading',{name:'Word meaning',exact:true})).toBeVisible();
- await page.getByRole('button',{name:'Preview ayah 2:2',exact:true}).click();
+ await page.getByRole('button',{name:/^Preview ayah 2:2:/}).click();
  await expect(page.getByRole('dialog',{name:'Ayah 2:2',exact:true})).toBeVisible();
  await page.keyboard.press('Escape');
  await expect(page.locator('.selected-token')).toHaveCount(1);

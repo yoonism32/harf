@@ -31,6 +31,11 @@ Similar-passage comparison has its own due queue and persistence.
 
 ## Current direction and next decisions
 
+The owner's 29 October Lighthouse reports established a new [measured performance follow-up](LIGHTHOUSE_PLAN_2026-10-29.md).
+This records every amber/red finding, fixes for label mismatches and Zod's CSP eval probe, and ordered mobile font,
+shared-bundle and content-delivery investigations. Preserve dashboard indexing policy and supported-browser compatibility;
+retain performance changes only with comparable measurements. This is separate from the completed learning plan.
+
 The active implementation phase is complete and published through `e950cbe`; live health confirmed that revision on Node `v26.12.1`.
 Real signed-in reflection and saved-range upload/download checks passed, including cloud-side changes returning to the reader/Today.
 Temporary verification data was restored or removed, with cleanup confirmed in cloud.

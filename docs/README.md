@@ -8,6 +8,7 @@ Reviewed 29 October 2026. Start here to distinguish current work from old specif
 |---|---|---|
 | [Roadmap](ROADMAP.md) | Current priorities, implemented scope, daily routine and deferrals | Main roadmap |
 | [Task list](../todo.md) | Short actionable remaining-work checklist | Main backlog |
+| [Lighthouse follow-up](LIGHTHOUSE_PLAN_2026-10-29.md) | All amber/red findings, measured baseline and ordered performance investigation | Active |
 | [Personal learning plan](PERSONAL_LEARNING_PLAN_2026-10-27.md) | Five learning slices, acceptance boundaries and implementation evidence | Implemented; live migration and browser sync checks completed |
 | [24–26 October plan/progress](PLAN_2026-10-24_to_26.md) | Detailed restoration history, Names audio proposal and owner housekeeping | Dated record; current status addendum supersedes old open items |
 
