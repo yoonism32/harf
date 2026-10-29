@@ -42,8 +42,11 @@ Owner-only password recovery was explicitly deferred on 29 October. Manual scree
 a recurring release check; a keyboard spot check and automated axe coverage do not replace it.
 See [the verification record](VERIFICATION_2026-10-29.md) and [the task list](../todo.md) for precise evidence and follow-up.
 
-Legacy-migration edge cases, mid-transaction failure injection and loaded-session offline use remain broader regression work,
-not a reason to reopen the completed learning plan. Add targeted checks when changing those paths.
+The next reliability clusters now cover legacy migration in real browsers (including original archives, malformed records,
+known mappings and one-time import), mid-transaction review rollback/retry, loaded text study with offline save/Undo,
+and cross-tab review/Undo/session ending. Fifteen targeted production checks passed across the three browser projects;
+Settings also now exposes the migration report from its actual legacy-store location. These checks close those named
+regression gaps without claiming every legacy format or concurrency interleaving is covered.
 
 Names audio and staged large uploads are parked conditional ideas, not active tasks. Names audio requires reviewed Quran occurrences;
 large uploads should be revisited only if the 1,000-record/about-2-MiB bound blocks actual use.
@@ -64,6 +67,10 @@ See [content sources](CONTENT_SOURCES.md) for the QUL refresh results and the Mu
 New language-pattern explanations are authored teaching notes anchored to pinned Corpus analyses, not a new external corpus.
 
 ## Latest executed verification
+
+After the three persistence clusters, the full production browser suite passed **151 checks with two existing skips**;
+all **151 unit tests**, TypeScript and the application build passed. This includes fifteen added migration/offline/
+rollback/cross-tab checks. Production health confirmed the preceding `ed17f62` release on 29 October at 15:28 GMT.
 
 The afternoon release check reran TypeScript, all 151 unit tests, generated-data validation and size budgets successfully.
 The full production browser run passed 133 checks with two existing skips; three accessibility checks caught the same

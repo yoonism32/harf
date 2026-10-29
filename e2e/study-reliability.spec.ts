@@ -78,3 +78,29 @@ test('a transaction abort rolls back the card and retries the same answer once',
  expect(after.reviews[0].attemptId).toBe(before.sessions[0].queue[0].id);
  expect(after.sessions[0].actions).toBe(1);
 });
+
+test('review, Undo and ending a session stay coordinated between tabs', async ({page, context}) => {
+ await page.getByRole('button', {name: 'Try recalling it'}).click();
+ await page.getByRole('button', {name: 'Reveal answer'}).click();
+ const second = await context.newPage();
+ await second.goto(page.url());
+ await expect(second.getByRole('button', {name: /^Good/})).toBeVisible();
+ await page.getByRole('button', {name: /^Good/}).click();
+ await expect(second.getByRole('button', {name: 'Undo last answer'})).toBeVisible();
+ const saved = await records(second);
+ expect(saved.sessions).toHaveLength(1);
+ expect(saved.reviews.filter(review => !review.undone)).toHaveLength(1);
+ await second.getByRole('button', {name: 'Undo last answer'}).click();
+ await expect(page.getByRole('button', {name: /^Good/})).toBeVisible();
+ const undone = await records(page);
+ expect(undone.reviews).toHaveLength(1);
+ expect(undone.reviews[0].undone).toBe(true);
+ expect(undone.cards).toHaveLength(0);
+ expect(undone.sessions[0].actions).toBe(0);
+ await second.getByRole('button', {name: 'End session', exact: true}).click();
+ await expect(page.getByRole('heading', {name: 'A little more familiar.'})).toBeVisible();
+ await expect(page.getByRole('button', {name: /^Good/})).toHaveCount(0);
+ await page.reload();
+ await expect(page.getByRole('heading', {name: 'A little more familiar.'})).toBeVisible();
+ await second.close();
+});

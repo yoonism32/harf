@@ -45,6 +45,18 @@ rank 20:109 first. The two `dh` variants also passed the production browser sear
 
 ## Policy and boundaries
 
+Final regression after the three follow-up clusters: the complete production browser suite passed **151 checks**
+with **two existing skips** (153 total), without retries. All **151 unit tests**, TypeScript and the rebuilt application
+passed. No new content, database schema, authentication policy or dependencies were introduced.
+
+Cross-tab study follow-up: three production browser checks passed, one per browser project. A saved review appears
+in the second tab; Undo there restores the first tab's answer and leaves one undone event with no card; ending the
+session updates both tabs and survives reload. These use real shared IndexedDB and BroadcastChannel, not mocked sync.
+
+At 15:28 GMT the public production health endpoint returned HTTP 200 for revision
+`ed17f6254dd6d8b5b0c061cb62a9dc137469ea7b` on Node `v26.12.1`, confirming the earlier search/passage release
+had deployed. This health response does not certify the subsequent migration-report change or replace signed-in browser checks.
+
 Loaded-session reliability follow-up: six production browser checks passed across all three projects. Text practice
 can reveal, save, Undo and save again while offline; reconnect/reload retains exactly one effective review.
 An injected transaction abort after the card write leaves cards, reviews and session unchanged. Retrying saves

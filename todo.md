@@ -28,7 +28,8 @@ These checks do not reopen the completed PLP or imply another feature batch.
 
 ## Parked and recurring work
 
-Names audio and staged large uploads are conditional ideas, not active tasks. Broader legacy/offline regression coverage belongs
+Names audio and staged large uploads are conditional ideas, not active tasks. Legacy migration, loaded offline text study,
+mid-write rollback/retry and cross-tab study now have fifteen targeted production browser checks. Further edge cases belong
 with changes to those paths. Branch cleanup is housekeeping; old-share-link follow-up is separate security housekeeping.
 The owner confirmed registration remains closed. The live Auth advisor reports leaked-password protection disabled;
 decide separately whether to enable it (no auth setting was changed here).
@@ -48,6 +49,10 @@ persistent assessments/obstacles, four contextual language examples, full gramma
 save/navigation protection, and backup validation are implemented. See the [learning plan](docs/PERSONAL_LEARNING_PLAN_2026-10-27.md).
 
 ## Evidence and deferrals
+
+Latest combined regression: **151 unit tests and 151 production browser checks passed**, with two existing browser
+skips. TypeScript and the application build passed. Fifteen added checks cover migration, offline text study,
+transaction rollback/retry and cross-tab study. Exact scope is in the verification record.
 
 The subsequent usability batch adds saved-range conflict protection, assessment clearing, Today retries, lazy grammar
 loading and plain-keyboard transliteration search. Afternoon checks passed TypeScript, 151 unit tests, data validation
