@@ -29,6 +29,20 @@ Learning implementation: `a7998f6`. This record separates executed checks from o
 SQL assertions and the signed-in browser checks are separate evidence. The browser upload/download check used an independent
 cloud writer; it is not described as a physical second-device test. No comprehension ratings were fabricated in the owner's account.
 
+## Follow-up usability checks
+
+The subsequent local batch adds stale-range protection between tabs, assessment removal without deleting reflections,
+readable obstacle labels, accurate signed-in Today copy, retry controls for Today resources and on-demand language analysis.
+Range validation now rejects malformed references without throwing outside schema validation. No database migration is needed.
+TypeScript, the production application build and 151 unit tests passed. Targeted production browser checks exercised
+learning, accounts and search across Chromium, Mobile Chrome and WebKit. The initial 87-check run had 82 passes,
+two existing skips, two retries and one failed backup assertion that also matched Next.js's hidden route announcer;
+the assertion was narrowed to main content and all six affected checks passed on rerun. These local changes are not live-sync certification.
+
+Plain-keyboard transliteration search now matches short spelling variants anywhere in an ayah, preserving source text
+and highlights. Regression examples `wa radiya lahu qawla`, `wa radhiya lahu qawla` and `waradhiyalahuqawla`
+rank 20:109 first. The two `dh` variants also passed the production browser search journey in all three browser projects.
+
 ## Policy and boundaries
 
 - Owner confirmed registration stays **closed for personal use**. Live signup is disabled, automatic email confirmation is enabled,

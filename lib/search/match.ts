@@ -80,6 +80,15 @@ export function search(index:SearchIndex,mode:SearchMode,query:string):SearchRes
    const pos=compact.text.indexOf(cq);
    if(pos>=0){score=300;confidence=95;matchType='Spelling variant';ranges=[range(compact,pos,cq.length)];}
   }
+  if(!score&&mode==='transliteration'&&row.loose&&qc.length>=8){
+   // Match short digraph variants anywhere in an ayah, including joined particles (wa radhiya / waraḍiya).
+   const pos=row.loose.text.indexOf(qc);
+   if(pos>=0){
+    const first=row.loose.owner[pos]!,last=row.loose.owner[pos+qc.length-1]!;
+    score=280;confidence=90;matchType='Spelling variant';
+    ranges=[range(normal,row.starts[first]!,row.starts[last]!+row.words[last]!.length-row.starts[first]!)];
+   }
+  }
   if(!score&&tokens.length<=12){
    const words=row.words;const used=new Set<number>();let previous=-1,ordered=true,partial=false;
    for(const token of tokens){

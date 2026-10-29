@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {listeningTarget} from '../lib/practice/listening';
 
-for(const [query,ref] of [["fa inna ma'al 'usri yusran",'94:5'],["inna lil-laahi wa inna ilayhi raji'un ()",'2:156'],['allahu la ilaha illa huwa al hayyul qayyum','2:255'],['انا لله وانا اليه راجعون','2:156']]){
+for(const [query,ref] of [["fa inna ma'al 'usri yusran",'94:5'],["inna lil-laahi wa inna ilayhi raji'un ()",'2:156'],['allahu la ilaha illa huwa al hayyul qayyum','2:255'],['انا لله وانا اليه راجعون','2:156'],['wa radhiya lahu qawla','20:109'],['waradhiyalahuqawla','20:109']]){
  test(`natural search "${query}" finds ${ref} first`,async({page})=>{
   await page.goto(`/read?mode=all&q=${encodeURIComponent(query!)}`);
   const results=page.locator('.search-result');
