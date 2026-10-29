@@ -27,6 +27,24 @@ it('isolates guest and account databases',async()=>{
  mock.owner=null;expect(await (await getDB()).get('meta','marker')).toBeUndefined();await closeDB();
  mock.owner={id:'b',email:'b@example.test'};expect(await (await getDB()).get('meta','marker')).toBeUndefined();
 });
+it('round-trips reflections and personal passages through cloud records, including deletion and account isolation', async()=>{
+ const data=await readData();
+ data.notes=[{id:'ayah-1-5',text:'My reflection',updatedAt:'2026-10-28T23:00:00Z'}];
+ data.meta.passageLearning={range:{reference:'1:5',current:6,end:7},assessments:[{reference:'1:5',assessment:'Need another look',obstacle:'word',updatedAt:'2026-10-28T23:00:00Z'}]};
+ await writeData(data,'test');
+ expect(await syncAccount()).toBe(true);
+ expect(cloud['meta/passageLearning']).toBeDefined();
+ await closeDB();
+ await deleteDB('harf-account-a');
+ expect(await syncAccount()).toBe(true);
+ expect((await readData()).notes[0]!.text).toBe('My reflection');
+ expect((await readData()).meta.passageLearning).toEqual(data.meta.passageLearning);
+ const removed=await readData();removed.notes=[];delete removed.meta.passageLearning;await writeData(removed,'test');
+ expect(await syncAccount()).toBe(true);
+ expect(cloud['notes/ayah-1-5']).toBeUndefined();expect(cloud['meta/passageLearning']).toBeUndefined();
+ await closeDB();mock.owner={id:'b',email:'b@example.test'};
+ expect((await readData()).notes).toEqual([]);
+});
 it('uploads only differences, survives offline failures, and retries an acknowledged-lost write',async()=>{
  expect(await syncAccount()).toBe(true);
  const data=await readData();data.notes=[{id:'n',text:'offline note',updatedAt:'2026-10-02T14:00:00Z'}];await writeData(data,'test');

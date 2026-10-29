@@ -1,12 +1,12 @@
 # Harf: personal understanding and reflection plan
 
-Proposed 27 October 2026. This is a proposal, not a shipped-feature checklist.
+Proposed 27 October 2026. Status updated after the remaining learning slices on 28 October.
 
 ## Outcome
 
 Hear a selected Quran passage, follow its wording and meaning, consult its context and tafsir, and retain personal reflections inside Harf. Vocabulary familiarity, listening self-assessment and reflection remain separate concepts.
 
-## Current implementation status — updated 28 October
+## Current implementation status — updated 29 October
 
 1. **Slice 1 — passage study: complete.** The reader opens a separate listening-for-meaning exercise with an
    optional ten-ayah same-surah sequence, hints, reveal, word inspection, visit-only self-assessment and a safe
@@ -18,17 +18,19 @@ Hear a selected Quran passage, follow its wording and meaning, consult its conte
 3. **Slice 3 — reflection beside the ayah: complete locally.** Both reader modes render an ayah reflection using
    a safe notes-store identity, retained unsaved drafts and revision-checked writes. It therefore participates in
    existing backup/import and account-sync mechanisms without a new schema or RPC key. A real signed-in sync
-   round trip has not been performed.
+   round trip against the live service has not been performed. Backup replacement and the account protocol are
+   covered by automated tests, including a disposable PostgreSQL migration check.
 4. **Saved-passage maintenance: complete locally.** Due saved pairs have their own ordered queue and Today entry
    point; the comparison browser is no longer capped at 12; review attempts capture their starting revision;
    navigation cannot race a save; and unavailable source pairs remain visible with retained progress. Account
-   passage sync still awaits its separate Supabase migration and owner-controlled verification.
-5. **Slice 4 — manual revisit from Today: implemented at the initial boundary.** Continue reading now offers
-   “Study this ayah again” for `lastVerse`, opening the existing passage exercise with a return to Today.
-   Persistent difficulty history, saved ranges and passage scheduling remain deferred; assessments are tab-only.
-6. **Slice 5 — useful language patterns: unblocked, not started.** The owner approved the current source and
-   content gates for Harf release on 28 October. It still needs deliberate, passage-led examples rather than a
-   generic grammar course.
+   passage sync has a tested migration in the repository; applying it to the live service remains a deployment step.
+5. **Slice 4 — saved passage and difficult-ayah revisit: implemented.** Today resumes an explicitly saved
+   same-surah range and current ayah. Saved assessments record the latest feedback and obstacle for up to 200 ayahs;
+   Today offers difficult ayahs for manual revisit. No new scheduler or comprehension percentage.
+6. **Slice 5 — useful language patterns: implemented as a curated starting set.** Four examples in 1:5, 1:7 and
+   112:3 cover pronoun suffixes, connectors, first-person plural verbs and negation. Explanations appear after reveal
+   beside the actual ayah, with inspectable pinned Corpus morphology. These authored teaching notes are not an
+   independent scholarly certification. Saved obstacles and reflections guide future additions.
 
 ### Current source and review gates
 
@@ -91,8 +93,10 @@ Use difficulties collected during passage study to select a small, source-review
 
 The local saved-passage queue and persistence work described in the original proposal is now resolved: all eligible
 pairs can be browsed, due pairs are ordered separately, Today links to them only when due, and review attempts keep
-their original revision while a save is in flight. The account migration remains open: do not claim account-backed
-passage sync until its server migration and two-account/conflict/tombstone checks have been completed.
+their original revision while a save is in flight. Migration `20261028235500_passage_learning.sql` supplies the passage
+collections and preference allowlist. Disposable PostgreSQL checks cover two accounts, conflicts, reflection round trips,
+tombstones and access restrictions. Applying the migration and checking a real signed-in browser round trip on the live
+service remain deployment verification; local tests do not certify that service.
 
 For any new persistent feature, verify failed saves, reload and backup round-trip as part of delivery; verify account sync where the feature promises it. Do not claim old test results certify today's dirty working tree.
 
@@ -126,8 +130,28 @@ Ship step 1 plus the existing-course “Study next” shortcut from step 2. Eval
 
 ## Slice 4 manual revisit implemented, 28 October
 
+Historical initial boundary; the final implementation below extends this slice.
+
 - Today offers “Study this ayah again” beside the last-read ayah, using the existing passage exercise.
 - The exercise returns directly to Today; reader entry points still return to their original reader location.
 - No new persistent data or sync keys. Difficulty feedback remains tab-only; saved ranges and scheduling remain deferred.
 - Verification: TypeScript, 138 unit tests and three browser checks (Chromium, Mobile Chrome and WebKit) passed.
   Browser coverage checks the remembered ayah after reload, passage navigation and return to Today.
+
+## Remaining learning slices implemented, 28–29 October
+
+- Passage practice includes an optional tab-retained attempt at the meaning, saved reflection and local tafsir after reveal.
+- Save a range of up to ten ayahs and the current ayah, then resume it from Today. Saving again explicitly updates
+  the place; removing the saved range keeps reflections and assessments.
+- Save personal feedback and an obstacle (word, construction, context or none). Today lists difficult ayahs. Each ayah
+  keeps its latest assessment; the most recent 200 are retained.
+- `passageLearning` metadata uses transactional writes, revision bumps, per-ayah stale-write checks, backup validation
+  and existing explicit account conflict resolution. Failed saves retain inputs. Resetting scheduled learning retains
+  personal passage data, as it retains reflections; replacement imports replace it.
+- Four authored language examples are anchored to canonical word keys and tested against pinned morphology features.
+  Translation and tafsir remain available for context; tags alone are not sentence interpretation.
+- Deferred ideas remain deferred: course expansion based on blocking words, a general grammar course, generated exercises,
+  passage scheduling, streaks and memory-palace tooling. The owner's week of evaluation is a real-use activity.
+- Verification: production application build, TypeScript, 143 unit tests, six new browser checks across Chromium,
+  Mobile Chrome and WebKit, and 12 existing passage-study checks passed. The new browser checks include automated
+  accessibility. Isolated PostgreSQL checks passed; no live account service was changed or certified.

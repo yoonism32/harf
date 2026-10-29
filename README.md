@@ -127,6 +127,19 @@ Reader word inspection includes Corpus grammar and word parts, full root-family 
 
 The reader offers **Ayah mode** and **Reading mode** (Madinah QPC V2, 604 pages). Entering Reading mode opens the page containing the selected ayah; returning to Ayah mode opens the first ayah visible on the current page, including a continued ayah. Tapping a Mushaf word shows its ayah translation on the left and its meaning/analysis on the right on desktop; smaller screens combine these in a centered dialog. The translation panel can also switch between ayahs on the page. Page fonts load on demand; this does not make the complete Mushaf available offline. Surah headings and basmallah use Harf's Arabic font, while verse words use the supplied QPC page fonts.
 
-**Study this passage** opens listening-for-meaning practice from either reader mode. Listen before revealing Arabic or translation, inspect words after reveal, and optionally practise a sequence of up to ten ayahs one at a time. Return to reading preserves the mode and page. Self-assessments last only for the current ayah/visit and do not change FSRS progress. Course words offer **Study next** with normal daily limits; existing cards show their status without resetting their schedule. Outside-course words offer an ayah bookmark, not a word bookmark. Reflection notes are not part of this exercise.
+**Study this passage** opens listening-for-meaning practice from either reader mode. Listen before revealing Arabic or translation, inspect words after reveal, and optionally practise a sequence of up to ten ayahs one at a time. Return to reading preserves the mode and page. Explicitly save personal assessments and a range for revisiting from Today; these do not change FSRS progress. Course words offer **Study next** with normal daily limits; existing cards show their status without resetting their schedule. Outside-course words offer an ayah bookmark. After reveal, personal reflection, tafsir and contextual language examples are available.
 
 Both modes share audio controls: play/pause/resume, stop, a range within the selected surah, reciter, and 0.5–1.5× speed. Reading mode follows each newly playing ayah to its first page. Changing the selected ayah or reciter stops the current range. Word audio interrupts ayah playback and retains its fixed recording voice. Audio range and speed are visit-only choices; the reciter is saved in Settings. The reciter picker shows recording bitrate separately from the name.
+
+## Personal passage learning
+
+Passage practice offers an optional attempt at the meaning, reflection, tafsir and four contextual language examples.
+Save a range and current ayah for Today, or save personal feedback with a word/construction/context obstacle.
+Today lists difficult ayahs for manual revisit. The latest assessments for up to 200 ayahs are retained.
+These records are included in portable backups and remain when resetting scheduled learning; replacement imports replace them.
+
+Before deploying this feature with accounts, apply `supabase/migrations/20261028235500_passage_learning.sql` to the
+configured Supabase project. It adds the passage collections and `passageLearning` preference to the existing atomic
+sync protocol through `harf_sync_v3`. Until then, local saves remain available but these uploads cannot complete.
+The migration was tested in disposable PostgreSQL with synthetic accounts; live signed-in browser verification remains required.
+For a reproducible isolated check, run `psql -v ON_ERROR_STOP=1 -f scripts/test-passage-sync.sql` against an **empty disposable database**.

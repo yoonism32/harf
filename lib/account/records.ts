@@ -1,8 +1,9 @@
 import {passageCardSchema,passageReviewSchema} from "../practice/passage-model";
 import {z} from 'zod';
+import {passageLearningSchema} from '../learning/passage-learning';
 import {emptyData,cardSchema,reviewSchema,sessionSchema,noteSchema,bookmarkSchema,settingsSchema,type DataSnapshot} from '@/lib/data/schema';
 export const cloudStores=['meta','cards','reviews','sessions','notes','bookmarks','passageCards','passageReviews'] as const;
-export const cloudMeta=['settings','activeSessionId','priorityEntries','lastVerse'] as const;
+export const cloudMeta=['settings','activeSessionId','priorityEntries','lastVerse','passageLearning'] as const;
 const recordSchema=z.object({collection:z.enum(cloudStores),key:z.string().min(1).max(120).refine(k=>!['__proto__','constructor','prototype'].includes(k)),value:z.unknown()});
 export type CloudRecord=z.infer<typeof recordSchema>;
 export const responseSchema=z.object({version:z.number().int().nonnegative().safe(),conflict:z.boolean(),changes:z.array(recordSchema)});
@@ -31,7 +32,8 @@ export function applyRecords(base:RecordMap,changes:CloudRecord[]):RecordMap{
   if(collection==='meta'&&!(cloudMeta as readonly string[]).includes(key))throw Error('Unknown cloud preference');
   if(value===null){delete next[`${collection}/${key}`];continue;}
   if(collection==='meta'){
-   if(key==='settings')settingsSchema.parse(value);
+   if(key==='passageLearning')passageLearningSchema.parse(value);
+   else if(key==='settings')settingsSchema.parse(value);
    else if(key==='priorityEntries')z.array(z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/)).max(300).parse(value);
    else if(key==='lastVerse')z.string().regex(/^\d{1,3}:\d{1,3}$/).parse(value);
    else z.string().min(1).max(100).parse(value);

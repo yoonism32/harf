@@ -1,4 +1,5 @@
 import {passageCardSchema,passageReviewSchema} from "../practice/passage-model";
+import {passageLearningSchema} from '../learning/passage-learning';
 import { z } from "zod";
 import { openDB, deleteDB } from "idb";
 import { getDB, readData, writeData } from "./db";
@@ -97,6 +98,7 @@ export function validateBackup(value: unknown): Backup {
   }
   for (const bookmark of data.bookmarks)
     if (!validReference(bookmark.id)) throw Error("Invalid bookmark reference");
+  if (data.meta.passageLearning !== undefined) passageLearningSchema.parse(data.meta.passageLearning);
   if (data.meta.lastVerse && !validReference(data.meta.lastVerse))
     throw Error("Invalid reading position");
   const passageAttempts=data.passageReviews.map(e=>e.attemptId);
