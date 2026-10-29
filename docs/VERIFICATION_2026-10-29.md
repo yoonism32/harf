@@ -45,6 +45,13 @@ rank 20:109 first. The two `dh` variants also passed the production browser sear
 
 ## Policy and boundaries
 
+Afternoon release follow-up: TypeScript, 151 unit tests, data validation and size budgets passed again.
+The full production browser run passed 133 checks with two existing skips and three accessibility failures,
+all identifying the newly added inline Profile link in Today's footer. Both signed-in and guest links now have
+an explicit underline. The application rebuilt successfully and all three affected core-page accessibility
+checks passed on rerun (Chromium, Mobile Chrome, WebKit). This is combined evidence, not a claim that the
+entire browser suite was rerun after the one-line presentation fix.
+
 - Owner confirmed registration stays **closed for personal use**. Live signup is disabled, automatic email confirmation is enabled,
   and existing email/password sign-in works. No Auth setting was changed here.
 - The owner explicitly retained real password recovery as owner-only follow-up on 29 October. Email delivery and any new password entry require the owner. Mocked tests cover the flow but do not prove delivery.

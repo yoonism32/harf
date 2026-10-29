@@ -1,6 +1,6 @@
 # Harf — current roadmap
 
-Updated 29 October 2026 against local implementation through `a7998f6`. This is the current priority list.
+Updated 29 October 2026, including the follow-up fixes through `3a7d1bf`. This is the current priority list.
 See the [documentation index](README.md) for current guides versus historical plans.
 
 ## Current scope and implemented work
@@ -65,6 +65,13 @@ New language-pattern explanations are authored teaching notes anchored to pinned
 
 ## Latest executed verification
 
+The afternoon release check reran TypeScript, all 151 unit tests, generated-data validation and size budgets successfully.
+The full production browser run passed 133 checks with two existing skips; three accessibility checks caught the same
+Today footer link missing an underline. That presentation defect was corrected and the affected checks rerun against a rebuilt app.
+The follow-up includes stale-range protection, assessment removal, Today retries, on-demand grammar analysis and short
+plain-keyboard transliteration matching (`wa radhiya lahu qawla` → 20:109). See the verification record for exact results.
+
+The earlier complete release evidence remains:
 146 unit tests, TypeScript, production app build, 118 passing production browser checks (two existing skips),
 12 focused persistence browser checks, generated-data validation and size budgets passed. Dependency audit: zero vulnerabilities.
 Live database migration and signed-in browser upload/download checks passed. Details: [29 October verification](VERIFICATION_2026-10-29.md).

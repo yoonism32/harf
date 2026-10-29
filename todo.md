@@ -49,7 +49,12 @@ save/navigation protection, and backup validation are implemented. See the [lear
 
 ## Evidence and deferrals
 
-Latest verification: TypeScript, app build, 146 unit tests, 118 passing production browser checks (two existing skips),
+The subsequent usability batch adds saved-range conflict protection, assessment clearing, Today retries, lazy grammar
+loading and plain-keyboard transliteration search. Afternoon checks passed TypeScript, 151 unit tests, data validation
+and budgets. The full browser run exposed an inline Profile-link accessibility defect, corrected before publishing;
+see the verification record for the affected-check rerun and release status.
+
+Earlier release verification: TypeScript, app build, 146 unit tests, 118 passing production browser checks (two existing skips),
 12 focused persistence checks, generated-data validation, size budgets, zero-vulnerability audit and live SQL/browser sync checks passed.
 
 Streaks, daily checklists, course expansion, general grammar/generated exercises and passage scheduling remain deferred, not missing shipped features.
