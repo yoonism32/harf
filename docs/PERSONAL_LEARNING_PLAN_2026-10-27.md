@@ -17,13 +17,11 @@ Hear a selected Quran passage, follow its wording and meaning, consult its conte
    until actual blocking words have been observed.
 3. **Slice 3 — reflection beside the ayah: complete locally.** Both reader modes render an ayah reflection using
    a safe notes-store identity, retained unsaved drafts and revision-checked writes. It therefore participates in
-   existing backup/import and account-sync mechanisms without a new schema or RPC key. A real signed-in sync
-   round trip against the live service has not been performed. Backup replacement and the account protocol are
-   covered by automated tests, including a disposable PostgreSQL migration check.
+   existing backup/import and account-sync mechanisms without a new schema or RPC key. Real signed-in reflection upload/download was verified on 29 October, in addition to backup replacement and account-protocol tests. See [latest verification](VERIFICATION_2026-10-29.md).
 4. **Saved-passage maintenance: complete locally.** Due saved pairs have their own ordered queue and Today entry
    point; the comparison browser is no longer capped at 12; review attempts capture their starting revision;
    navigation cannot race a save; and unavailable source pairs remain visible with retained progress. Account
-   passage migration was applied to live Harf on 29 October; real signed-in browser verification is tracked separately.
+   passage migration was applied to live Harf on 29 October; real signed-in reflection/range upload-download checks subsequently passed.
 5. **Slice 4 — saved passage and difficult-ayah revisit: implemented.** Today resumes an explicitly saved
    same-surah range and current ayah. Saved assessments record the latest feedback and obstacle for up to 200 ayahs;
    Today offers difficult ayahs for manual revisit. No new scheduler or comprehension percentage.
@@ -98,7 +96,7 @@ pairs can be browsed, due pairs are ordered separately, Today links to them only
 their original revision while a save is in flight. Migration `20261029005835_passage_learning.sql` supplies the passage
 collections and preference allowlist. Disposable PostgreSQL checks cover two accounts, conflicts, reflection round trips,
 tombstones and access restrictions. The migration was subsequently applied live on 29 October and passed rolled-back synthetic account tests.
-A real signed-in browser round trip remains separate from the SQL protocol evidence.
+Real signed-in reflection/range upload-download checks subsequently passed. Physical second-device and screen-reader certification are not claimed.
 
 For any new persistent feature, verify failed saves, reload and backup round-trip as part of delivery; verify account sync where the feature promises it. Do not claim old test results certify today's dirty working tree.
 
@@ -127,7 +125,7 @@ Ship step 1 plus the existing-course “Study next” shortcut from step 2. Eval
   point. The comparison browser exposes all eligible source pairs, not only the first 12.
 - A recall attempt captures its card revision when it begins. The review UI prevents navigation during a save, and
   unavailable source pairs remain visible with their saved progress.
-- This is local persistence work only. The later migration is now in the repository and locally tested; live deployment and signed-in verification remain open.
+- This initially shipped as local persistence work. The later migration and signed-in reflection/range sync were deployed and verified on 29 October; see the current verification record.
 
 ## Slice 4 manual revisit implemented, 28 October
 

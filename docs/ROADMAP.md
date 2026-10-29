@@ -29,15 +29,18 @@ Similar-passage comparison has its own due queue and persistence.
 - Production size budgets passed and the dependency audit reported zero vulnerabilities. Live Auth's advisor reports leaked-password
   protection disabled; changing that setting remains a separate owner decision.
 
-## Remaining priorities
+## Current direction and next decisions
 
-1. **Publish the local implementation after owner approval.** Remote main was still at `6e5b165` when inspected on 29 October;
-   the PLP and reliability commits need publication before Render can serve them. Recheck the remote before pushing.
-2. **Real signed-in browser verification.** Live SQL checks passed, but the opened deployed browser is a guest.
-   Sign in and verify a two-device round trip for reflections, assessments, saved ranges and comparison cards after deployment.
-3. **Owner-assisted auth verification.** Check real signup/reset email delivery and callback/password completion. Never substitute mocks
-   or SQL protocol checks for actual email delivery. The user must enter any credentials themselves.
-4. **Manual accessibility verification.** Automated axe is covered by browser tests; a manual keyboard/screen-reader pass remains open.
+The active implementation phase is complete and published through `e950cbe`; live health confirmed that revision on Node `v26.12.1`.
+Real signed-in reflection and saved-range upload/download checks passed, including cloud-side changes returning to the reader/Today.
+Temporary verification data was restored or removed, with cleanup confirmed in cloud.
+
+Use the completed passage flow for real study before choosing another feature batch. Vocabulary supports passage-led understanding,
+with source inspection, reflection and deliberate revisit. Neither self-assessments nor vocabulary overlap are a comprehension score.
+
+Owner-only password recovery was explicitly deferred on 29 October. Manual screen-reader/accessibility-conformance review remains
+a recurring release check; a keyboard spot check and automated axe coverage do not replace it.
+See [the verification record](VERIFICATION_2026-10-29.md) and [the task list](../todo.md) for precise evidence and follow-up.
 
 Legacy-migration edge cases, mid-transaction failure injection and loaded-session offline use remain broader regression work,
 not a reason to reopen the completed learning plan. Add targeted checks when changing those paths.
@@ -60,13 +63,19 @@ Unused historical words/morphology/transliteration files are not active refresh 
 See [content sources](CONTENT_SOURCES.md) for the QUL refresh results and the Mutashabihat preview/download discrepancy.
 New language-pattern explanations are authored teaching notes anchored to pinned Corpus analyses, not a new external corpus.
 
-## Verification recorded from implementation
+## Latest executed verification
+
+146 unit tests, TypeScript, production app build, 118 passing production browser checks (two existing skips),
+12 focused persistence browser checks, generated-data validation and size budgets passed. Dependency audit: zero vulnerabilities.
+Live database migration and signed-in browser upload/download checks passed. Details: [29 October verification](VERIFICATION_2026-10-29.md).
+
+## Earlier implementation evidence (historical)
 
 - Through `a7998f6`: TypeScript, production app build, 143 unit tests, six new learning-plan browser checks and 12 existing passage-study checks passed.
 - Isolated PostgreSQL verified the migration, authenticated RPC, two synthetic accounts, conflicts, tombstones and access restrictions.
 - Earlier approval batch `6e5b165`: full release build passed; broader browser suite reported 103 passes and two skips.
   These results predate the final learning implementation.
-- No functional checks were rerun solely for this Markdown refresh. No live service was deployed or certified.
+- The earlier `40f95b4` docs-only refresh did not rerun functional checks or deploy services; the later executed verification above supersedes that snapshot.
 
 ## Suggested daily routine
 

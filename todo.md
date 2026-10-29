@@ -3,15 +3,23 @@
 Updated 29 October 2026. This is the concise action list; rationale and evidence live in [the roadmap](docs/ROADMAP.md).
 The five personal-learning slices are implemented; do not restart them from an old plan.
 
-## Active actions
+## Active implementation status
 
-- [ ] Publish the verified local commits after checks (owner approved on 29 October), then verify Render serves the new passage features.
-- [ ] Complete a real signed-in browser round trip for personal passage data after deployment. The owner has signed in.
-- [ ] Verify actual existing-account password recovery/callback completion with the owner when needed; signup is intentionally closed.
-- [ ] Complete manual keyboard/screen-reader release review. Automated checks do not replace it.
+The agreed reliability/deployment implementation is complete. The PLP is also complete as an implementation plan.
+See [executed verification](docs/VERIFICATION_2026-10-29.md) for evidence and exact boundaries.
+
+## Owner-only and recurring release checks
+
+- [ ] Real password-recovery email/callback completion: explicitly retained as owner-only follow-up on 29 October.
+- [ ] Complete manual screen-reader/accessibility-conformance review when assessing a release.
+- [ ] Review leaked-password protection in live Auth settings separately; it is disabled and was not changed here.
+
+These checks do not reopen the completed PLP or imply another feature batch.
 
 ## Completed in this follow-up
 
+- [x] Published implementation through `e950cbe` and confirmed that revision live on Node `v26.12.1`.
+- [x] Verified real signed-in reflection and saved-range upload/download; temporary data was restored/removed and cleanup confirmed in cloud.
 - [x] Applied the live passage migration; verified round trips, two-account isolation, conflicts and tombstones with rolled-back synthetic records.
 - [x] Added build/content startup protection and checked missing, mismatched and matching records.
 - [x] Added browser checks for competing reflection drafts, failed import atomicity, backup recovery and reset retention.
@@ -41,7 +49,7 @@ save/navigation protection, and backup validation are implemented. See the [lear
 
 ## Evidence and deferrals
 
-Implementation through `a7998f6` passed TypeScript, app build, 143 unit tests, 18 targeted browser checks and isolated SQL account checks.
-The docs refresh does not rerun or extend that certification. Live passage migration and signed-in verification remain open.
+Latest verification: TypeScript, app build, 146 unit tests, 118 passing production browser checks (two existing skips),
+12 focused persistence checks, generated-data validation, size budgets, zero-vulnerability audit and live SQL/browser sync checks passed.
 
 Streaks, daily checklists, course expansion, general grammar/generated exercises and passage scheduling remain deferred, not missing shipped features.

@@ -123,7 +123,7 @@ npm audit --audit-level=high
 
 Locally, Playwright starts/reuses a development server; CI runs browser checks against the production build. Chromium desktop/mobile and WebKit are configured. Passing automated accessibility checks does not certify full accessibility conformance.
 
-Implementation through `a7998f6` passed 143 unit tests, TypeScript, production app build, 18 targeted learning/passage browser checks and isolated PostgreSQL account checks. These results were recorded during implementation; this docs-only refresh did not rerun them. The remaining reliability and editorial work is listed in the [current roadmap](docs/ROADMAP.md) and [task list](todo.md).
+Implementation through `a7998f6` passed 143 unit tests, TypeScript, production app build, 18 targeted learning/passage browser checks and isolated PostgreSQL account checks. Those results are historical. The subsequent reliability phase passed 146 unit tests, 118 production browser checks (two skips), size budgets and a zero-vulnerability dependency audit; see [current verification](docs/VERIFICATION_2026-10-29.md). The remaining reliability and editorial work is listed in the [current roadmap](docs/ROADMAP.md) and [task list](todo.md).
 
 Read [AGENTS.md](AGENTS.md) for the current code map and architectural rules. [HARF_REDESIGN_PLAN.md](HARF_REDESIGN_PLAN.md) records the original design rationale; later restored features and the current personal-use scope supersede conflicting parts.
 
@@ -144,5 +144,5 @@ These records are included in portable backups and remain when resetting schedul
 
 Migration `supabase/migrations/20261029005835_passage_learning.sql` was applied to the live Harf project on 29 October. It adds the passage collections and `passageLearning` preference to the existing atomic
 sync protocol through `harf_sync_v3`. The live database now accepts these uploads.
-Local and live PostgreSQL checks passed for round trips, isolation, conflicts and deletions; synthetic live records were rolled back. Signed-in browser verification is tracked in the roadmap.
+Local and live PostgreSQL checks passed for round trips, isolation, conflicts and deletions; synthetic live records were rolled back. Real signed-in reflection/range upload-download checks passed on 29 October; test data was cleaned up. See [verification evidence](docs/VERIFICATION_2026-10-29.md). Real password recovery remains owner-only follow-up.
 For a reproducible isolated check, run `psql -v ON_ERROR_STOP=1 -f scripts/test-passage-sync.sql` against an **empty disposable database**.

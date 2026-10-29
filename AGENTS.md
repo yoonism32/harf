@@ -12,6 +12,7 @@ The September redesign prompt called for deliberate product and architecture dec
 
 Documentation roles:
 
+- `docs/VERIFICATION_2026-10-29.md`: latest executed production, persistence and live-sync verification.
 - `docs/README.md`: index of every project Markdown document, with current/historical status.
 - `docs/PERSONAL_LEARNING_PLAN_2026-10-27.md`: implemented five-slice learning plan and remaining live verification.
 - `docs/PLAN_2026-10-24_to_26.md`: dated restoration record; use its current addendum before old open items.
@@ -71,7 +72,7 @@ Use one stable browser profile and origin. `localhost`, a LAN IP, another port, 
 
 `/read/[surah]/[ayah]/study` offers listening for meaning, optional tab-retained attempts, reveal, word inspection, reflection, tafsir and four curated language examples. `meta.passageLearning` stores one explicitly saved range/current ayah and the latest assessments/obstacles for up to 200 ayahs; Today exposes manual revisit. These records do not alter vocabulary FSRS or activity metrics. Reflections use safe `ayah-<surah>-<ayah>` note IDs. Resetting scheduled progress retains notes, bookmarks and personal passage metadata; replacement imports replace them.
 
-The client calls `harf_sync_v3`; migration `20261029005835_passage_learning.sql` enables comparison collections and the personal passage meta key. It was applied to live Harf on 29 October; isolated and live PostgreSQL checks passed, including rolled-back synthetic account tests. Track real signed-in browser verification separately from SQL checks. Legacy fallback is permitted only for changes that do not require the new protocol.
+The client calls `harf_sync_v3`; migration `20261029005835_passage_learning.sql` enables comparison collections and the personal passage meta key. It was applied to live Harf on 29 October; isolated and live PostgreSQL checks passed, including rolled-back synthetic account tests. Real signed-in reflection/range upload-download checks also passed on 29 October; see `docs/VERIFICATION_2026-10-29.md` for the exact scope. Password recovery remains owner-only by explicit choice. Legacy fallback is permitted only for changes that do not require the new protocol.
 
 ## Learning flow and metrics
 

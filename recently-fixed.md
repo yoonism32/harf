@@ -15,6 +15,15 @@ Implemented in `6e5b165`, `c070db3` and `a7998f6`:
 - Recorded 143 unit tests, TypeScript, app build and 18 targeted browser checks passing through `a7998f6`.
   Live migration deployment and real signed-in verification remain open.
 
+## 29 October 2026 — active roadmap reliability and deployment
+
+- Added a successful-build content stamp and a production startup mismatch check, with subprocess regression tests.
+- Added real-browser competing-draft, import-failure, backup-recovery and reset-retention checks.
+- Applied the passage migration live; verified SQL isolation/conflicts/tombstones and real signed-in reflection/range upload-download.
+- Published the implementation and confirmed live Node `v26.12.1` and revision `e950cbe` through the enhanced health endpoint.
+- Latest recorded checks: 146 unit tests, 118 production browser passes/two skips, data validation, app build, budgets and zero-vulnerability audit.
+- Registration remains closed; actual recovery is owner-only by explicit choice. See [verification](docs/VERIFICATION_2026-10-29.md).
+
 ## 29 October 2026 — documentation reconciliation
 
 Reviewed all project Markdown guides, added a docs index, refreshed the active roadmap/backlog,
