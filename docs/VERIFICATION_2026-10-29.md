@@ -45,6 +45,11 @@ rank 20:109 first. The two `dh` variants also passed the production browser sear
 
 ## Policy and boundaries
 
+Legacy migration follow-up: six production browser checks passed across Chromium, Mobile Chrome and WebKit.
+Known vocabulary mappings retain scheduling and notes; ambiguous or malformed records remain archived; original
+localStorage keys remain intact; reload does not reimport altered old data. Settings now reads migration details
+from the legacy store where they are actually written. TypeScript and the application build passed.
+
 Afternoon release follow-up: TypeScript, 151 unit tests, data validation and size budgets passed again.
 The full production browser run passed 133 checks with two existing skips and three accessibility failures,
 all identifying the newly added inline Profile link in Today's footer. Both signed-in and guest links now have
