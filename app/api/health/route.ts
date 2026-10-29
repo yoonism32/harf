@@ -8,7 +8,7 @@ export const dynamic='force-dynamic';
 
 export function GET(){
  return NextResponse.json(
-  {status:'ok',service:'harf',timestamp:new Date().toISOString(),uptime:Math.floor(process.uptime())},
+  {status:'ok',service:'harf',timestamp:new Date().toISOString(),uptime:Math.floor(process.uptime()),runtime:process.version,revision:process.env.RENDER_GIT_COMMIT??null},
   {headers:{'Cache-Control':'no-store'}},
  );
 }
