@@ -18,24 +18,32 @@ and four contextual language examples. Optional meaning drafts stay in the tab. 
 participate in backup and account records. They do not change vocabulary scheduling or produce a comprehension score.
 Similar-passage comparison has its own due queue and persistence.
 
+## Completed reliability follow-up — 29 October
+
+- Applied `20261029005835_passage_learning.sql` to live Harf Supabase. Live transactional tests passed for reflection/passage
+  round trips, two-account isolation, stale-version conflicts, tombstones and access restrictions. Synthetic records were rolled back.
+- Production build now records its content version; `npm start` rejects missing/stale records with rebuild instructions.
+  The build also fails if content changes while compilation is running. Existing browser 404 recovery remains available.
+- Added real-browser two-tab reflection conflict, failed import atomicity, backup replacement/recovery and reset-retention checks.
+- Public health endpoint returned HTTP 200 with `status: ok` on 29 October; the scheduled deployed-health check also passed.
+- Production size budgets passed and the dependency audit reported zero vulnerabilities. Live Auth's advisor reports leaked-password
+  protection disabled; changing that setting remains a separate owner decision.
+
 ## Remaining priorities
 
-1. **Deploy and verify passage account sync.** Apply [the passage migration](../supabase/migrations/20261028235500_passage_learning.sql)
-   to the configured Supabase project, then check a real signed-in two-device round trip for reflections, assessments,
-   saved ranges and comparison cards. SQL protocol tests passed locally; deployment was not performed.
-2. **Build/content consistency.** Prevent or clearly diagnose a production build referencing content removed by regeneration.
-   Server readers now resolve the disk manifest at runtime, but browser bundles still embed a version; that partial fix
-   does not make every old client compatible. Stop the server before regenerating, then rebuild and restart.
-3. **Remaining persistence coverage.** Extend real-browser tests for competing tabs, legacy migration, interrupted/rejected imports,
-   reset/recovery and loaded-session offline use. Reload, reflection failure/retry, saved ranges and assessment persistence now have targeted coverage;
-   that does not complete every original acceptance scenario.
-4. **Live deployment and release checks.** Verify Render runtime/health, actual signup/reset email delivery and deployed callback/password flows.
-   Run relevant production browser, size-budget, dependency and manual keyboard/screen-reader checks before a new release.
-   Automated axe results do not constitute a manual accessibility review.
-5. **Names audio, if still wanted.** Choose a reviewed Quran occurrence per Name before adding audio. No Names recording map or synthetic voice is shipped.
-   Current reader/word audio works without downloading a QUL recitation library.
-6. **Large account uploads, if needed.** Current atomic sync is bounded to 1,000 changed records/about 2 MiB.
-   Larger imports/offline backlogs remain local with an error; staged uploads are future work.
+1. **Publish the local implementation after owner approval.** Remote main was still at `6e5b165` when inspected on 29 October;
+   the PLP and reliability commits need publication before Render can serve them. Recheck the remote before pushing.
+2. **Real signed-in browser verification.** Live SQL checks passed, but the opened deployed browser is a guest.
+   Sign in and verify a two-device round trip for reflections, assessments, saved ranges and comparison cards after deployment.
+3. **Owner-assisted auth verification.** Check real signup/reset email delivery and callback/password completion. Never substitute mocks
+   or SQL protocol checks for actual email delivery. The user must enter any credentials themselves.
+4. **Manual accessibility verification.** Automated axe is covered by browser tests; a manual keyboard/screen-reader pass remains open.
+
+Legacy-migration edge cases, mid-transaction failure injection and loaded-session offline use remain broader regression work,
+not a reason to reopen the completed learning plan. Add targeted checks when changing those paths.
+
+Names audio and staged large uploads are parked conditional ideas, not active tasks. Names audio requires reviewed Quran occurrences;
+large uploads should be revisited only if the 1,000-record/about-2-MiB bound blocks actual use.
 
 The [24–26 October record](PLAN_2026-10-24_to_26.md) also retains owner-only housekeeping:
 branch/worktree cleanup, share-link revocation and any request to purge old exposed commits. These were not performed or reverified in this docs update.

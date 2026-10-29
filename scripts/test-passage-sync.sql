@@ -10,7 +10,7 @@ create function auth.uid() returns uuid language sql as $$
 $$;
 insert into auth.users values ('00000000-0000-0000-0000-000000000001'),('00000000-0000-0000-0000-000000000002');
 \ir ../supabase/migrations/20261002192022_account_sync.sql
-\ir ../supabase/migrations/20261028235500_passage_learning.sql
+\ir ../supabase/migrations/20261029005835_passage_learning.sql
 \endif
 
 do $$

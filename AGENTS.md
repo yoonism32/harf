@@ -6,7 +6,7 @@ Reviewed against the working tree on 29 October 2026 (implementation through `a7
 
 Harf (حرف) helps an English-speaking learner who can read Arabic script recognise Quranic vocabulary through spaced recall and ayah context. Vocabulary familiarity is not Quran comprehension or a religious rank.
 
-The owner chose optional email login, `/profile`, and Supabase account sync on 2 October 2026. On 4 October, the owner chose email/password as the main sign-in method, with signup confirmation, password recovery, and password setup for existing email-link accounts. Guest study and portable backups remain. New accounts start fresh; existing accounts load their synced progress. Never import guest data automatically. Payments remain out of scope. See README for account configuration and sync limitations.
+The owner chose optional email login, `/profile`, and Supabase account sync on 2 October 2026. On 4 October, the owner chose email/password as the main sign-in method, with signup confirmation, password recovery, and password setup for existing email-link accounts. Guest study and portable backups remain. New accounts start fresh; existing accounts load their synced progress. Never import guest data automatically. On 29 October the owner confirmed registration stays closed for personal use; do not enable new signup or change confirmation policy. Payments remain out of scope. See README for account configuration and sync limitations.
 
 The September redesign prompt called for deliberate product and architecture decisions rather than incremental decoration. Its plan was subsequently implemented and amended: Practice, Insights, Daily Ayah, prayer times, and local tafsir were restored. Do not remove these because the original plan said to retire them.
 
@@ -71,7 +71,7 @@ Use one stable browser profile and origin. `localhost`, a LAN IP, another port, 
 
 `/read/[surah]/[ayah]/study` offers listening for meaning, optional tab-retained attempts, reveal, word inspection, reflection, tafsir and four curated language examples. `meta.passageLearning` stores one explicitly saved range/current ayah and the latest assessments/obstacles for up to 200 ayahs; Today exposes manual revisit. These records do not alter vocabulary FSRS or activity metrics. Reflections use safe `ayah-<surah>-<ayah>` note IDs. Resetting scheduled progress retains notes, bookmarks and personal passage metadata; replacement imports replace them.
 
-The client calls `harf_sync_v3`; migration `20261028235500_passage_learning.sql` enables comparison collections and the personal passage meta key. Its isolated PostgreSQL tests passed, but it has not been applied to the live service in this work. Never claim live passage sync verified until deployment and a real signed-in round trip. Legacy fallback is permitted only for changes that do not require the new protocol.
+The client calls `harf_sync_v3`; migration `20261029005835_passage_learning.sql` enables comparison collections and the personal passage meta key. It was applied to live Harf on 29 October; isolated and live PostgreSQL checks passed, including rolled-back synthetic account tests. Track real signed-in browser verification separately from SQL checks. Legacy fallback is permitted only for changes that do not require the new protocol.
 
 ## Learning flow and metrics
 
@@ -116,6 +116,8 @@ npm run check:budgets       # Requires generated content/application build
 npm audit --audit-level=high
 npm run build              # Regenerate + release validation + application build
 ```
+
+`npm run build:app` now records the successfully built content version in `.next/harf-content.json`. `npm start` checks it and refuses missing or stale records; content changes during a build also fail. Do not bypass this guard with a direct production start command.
 
 After changing compiler/content inputs, stop the server, regenerate content, and rebuild the app before `npm start`. Old builds embed an old version; compiler cleanup can remove that directory, producing ENOENT. Do not run content regeneration against a production process expecting the previous assets. For personal testing use `npm run build:app && npm start` when generated content is already current.
 

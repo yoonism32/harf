@@ -8,9 +8,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "npm run validate:release && npm run build:app",
-    "build:app": "next build --webpack",
+    "build:app": "node scripts/app-build.mjs build",
     "build:release": "npm run build",
-    "start": "next start",
+    "start": "node scripts/app-build.mjs check && next start",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

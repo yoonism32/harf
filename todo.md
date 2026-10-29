@@ -3,20 +3,27 @@
 Updated 29 October 2026. This is the concise action list; rationale and evidence live in [the roadmap](docs/ROADMAP.md).
 The five personal-learning slices are implemented; do not restart them from an old plan.
 
-## Next actions
+## Active actions
 
-- [ ] Apply [the passage sync migration](supabase/migrations/20261028235500_passage_learning.sql) to live Supabase.
-- [ ] Verify a real signed-in round trip for reflections, saved ranges, personal assessments and saved comparison cards;
-      include a second device/account, conflicts and deletions. The local SQL/protocol checks passed.
-- [ ] Verify deployed Render runtime/health and real signup confirmation, password recovery and callback behavior.
-- [ ] Fix or clearly diagnose stale production builds after generated-content rotation. Stop/regenerate/rebuild/restart remains the workaround.
-- [ ] Expand browser persistence coverage for competing tabs, legacy migration, import interruptions/atomicity,
-      reset/recovery and loaded-session offline use. New learning-flow coverage does not certify every scenario.
-- [ ] Before a release, run current production browser, size-budget, dependency and manual accessibility checks.
-- [ ] If Names audio is still wanted, choose and review exact Quran occurrences before adding a recording map.
-- [ ] Add staged account uploads only if the 1,000-record/about-2-MiB limit becomes a real need.
-- [ ] Owner-only housekeeping: recheck branches/worktrees before cleanup, confirm shared-link revocation,
-      and decide whether to request removal of old exposed commits. See the [dated work record](docs/PLAN_2026-10-24_to_26.md).
+- [ ] Publish the verified local commits after checks (owner approved on 29 October), then verify Render serves the new passage features.
+- [ ] Complete a real signed-in browser round trip for personal passage data after deployment. The owner has signed in.
+- [ ] Verify actual existing-account password recovery/callback completion with the owner when needed; signup is intentionally closed.
+- [ ] Complete manual keyboard/screen-reader release review. Automated checks do not replace it.
+
+## Completed in this follow-up
+
+- [x] Applied the live passage migration; verified round trips, two-account isolation, conflicts and tombstones with rolled-back synthetic records.
+- [x] Added build/content startup protection and checked missing, mismatched and matching records.
+- [x] Added browser checks for competing reflection drafts, failed import atomicity, backup recovery and reset retention.
+- [x] Confirmed public deployed health HTTP 200 and the scheduled health workflow.
+- [x] Passed production size budgets and dependency audit (zero vulnerabilities). Full production browser results are recorded in the roadmap.
+
+## Parked and recurring work
+
+Names audio and staged large uploads are conditional ideas, not active tasks. Broader legacy/offline regression coverage belongs
+with changes to those paths. Branch cleanup is housekeeping; old-share-link follow-up is separate security housekeeping.
+The owner confirmed registration remains closed. The live Auth advisor reports leaked-password protection disabled;
+decide separately whether to enable it (no auth setting was changed here).
 
 ## Content follow-up
 

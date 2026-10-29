@@ -22,7 +22,7 @@ npm ci
 npm run dev
 ```
 
-For personal testing with the production server, stop any running Harf server first:
+For personal testing with the production server, stop any running Harf server first. The build records its content version; startup refuses missing or mismatched records and tells you to rebuild:
 
 ```bash
 npm run build:app
@@ -57,7 +57,9 @@ Sign in at `/login` with an email and password. New users register at `/signup` 
 
 Existing email-link accounts keep their user ID and progress: on a device already signed in, open Profile → **Set or change password**. Otherwise use `/forgot-password` to request a recovery email and set a password for the existing account. Do not register a replacement account. `/account/password` requires an authenticated session; Supabase authorizes the update. Harf asks for matching passwords of 12–128 characters, and Supabase applies its configured password policy.
 
-In Supabase Authentication → URL Configuration, set the Site URL to `https://<your-domain>` and allow `https://<your-domain>/auth/callback` (for local use, `http://localhost:3000/auth/callback`). Keep email authentication and email confirmations enabled. Both signup confirmation and password recovery reuse this callback; no additional redirect URL is needed. Open verification/recovery links in the browser where you requested them. Recovery opens password setup instead of Profile. The root forwards callback codes and query errors when Supabase uses the Site URL fallback. Expired links offer sign-in and recovery rather than trying to exchange an invalid code.
+Current owner policy (29 October): registration stays closed for personal use. Live Supabase has new signup disabled and automatic email confirmation enabled; existing-account password sign-in remains enabled. Do not reopen registration or claim a signup-confirmation email was tested. Password recovery remains relevant for the existing account.
+
+In Supabase Authentication → URL Configuration, set the Site URL to `https://<your-domain>` and allow `https://<your-domain>/auth/callback` (for local use, `http://localhost:3000/auth/callback`). Keep email authentication enabled. If registration is deliberately reopened in a future task, decide and configure email confirmation at that time. Both signup confirmation and password recovery reuse this callback; no additional redirect URL is needed. Open verification/recovery links in the browser where you requested them. Recovery opens password setup instead of Profile. The root forwards callback codes and query errors when Supabase uses the Site URL fallback. Expired links offer sign-in and recovery rather than trying to exchange an invalid code.
 
 The default email sender restricts recipients and sending rate; configure your own SMTP before inviting other people. Password sign-in does not send email or consume that email quota. Confirmation and recovery still do. Browser tests intercept every Supabase request and do not send real emails or change real passwords.
 
@@ -81,7 +83,7 @@ A free Supabase project pauses after seven days without a database query, and a 
 
 ### Keeping the Render service awake
 
-A free Render web service stops after fifteen minutes without a request, so the app has to be asked for a response more often than that. `app/api/health/route.ts` answers `200 {"status":"ok",...}` from the app process, with no session and no Supabase call, so one URL serves both purposes: set it as Render's health-check path and point a frequent monitor at it. `.github/workflows/render-keepalive.yml` requests `<HARF_BASE_URL>/api/health` every ten minutes and fails on anything other than HTTP 200 with `"status":"ok"`; it resolves `HARF_BASE_URL` from a repository secret first, then a repository variable, then falls back to `https://harf-gkfk.onrender.com`. Run it once from the Actions tab after the first deploy.
+A free Render web service stops after fifteen minutes without a request, so the app has to be asked for a response more often than that. `app/api/health/route.ts` answers `200 {"status":"ok",...}` from the app process, with no session and no Supabase call, so one URL serves both purposes: set it as Render's health-check path and point a frequent monitor at it. `.github/workflows/render-keepalive.yml` requests `<HARF_BASE_URL>/api/health` every ten minutes and fails on anything other than HTTP 200 with `"status":"ok"`; it resolves `HARF_BASE_URL` from a repository secret first, then a repository variable, fails if neither is configured (there is no hardcoded fallback). Run it once from the Actions tab after the first deploy.
 
 Scheduled workflows run only from the default branch, are best-effort (a delayed run can let the service idle out, which makes the next request a slow cold start rather than a failure), and are disabled after sixty days without repository activity — re-enable from the Actions tab. If the deployed instance is an always-on plan it never idles out (ReadSync's reports three weeks of uninterrupted uptime), and the same job then works purely as a status check — slow the cadence rather than delete it. An always-on uptime monitor pointed at the same URL is the more reliable driver if ten minutes proves too loose. This job never touches Postgres; the three-day `harf_keepalive` job above still owns that.
 
@@ -140,8 +142,7 @@ Save a range and current ayah for Today, or save personal feedback with a word/c
 Today lists difficult ayahs for manual revisit. The latest assessments for up to 200 ayahs are retained.
 These records are included in portable backups and remain when resetting scheduled learning; replacement imports replace them.
 
-Before deploying this feature with accounts, apply `supabase/migrations/20261028235500_passage_learning.sql` to the
-configured Supabase project. It adds the passage collections and `passageLearning` preference to the existing atomic
-sync protocol through `harf_sync_v3`. Until then, local saves remain available but these uploads cannot complete.
-The migration was tested in disposable PostgreSQL with synthetic accounts; live signed-in browser verification remains required.
+Migration `supabase/migrations/20261029005835_passage_learning.sql` was applied to the live Harf project on 29 October. It adds the passage collections and `passageLearning` preference to the existing atomic
+sync protocol through `harf_sync_v3`. The live database now accepts these uploads.
+Local and live PostgreSQL checks passed for round trips, isolation, conflicts and deletions; synthetic live records were rolled back. Signed-in browser verification is tracked in the roadmap.
 For a reproducible isolated check, run `psql -v ON_ERROR_STOP=1 -f scripts/test-passage-sync.sql` against an **empty disposable database**.

@@ -18,7 +18,7 @@ async function mockAccount(context:BrowserContext) {
  await context.route('**/auth/v1/user',route=>route.fulfill({json:{user:session().user}}));
  let version=0;
  const records=new Map<string,{collection:string;key:string;value:unknown;version:number}>();
- // The deployed database has no passage-capable v3 RPC yet; clients must fall back to harf_sync.
+ // Deliberately model a legacy server without v3 to keep fallback coverage after the live migration.
  await context.route('**/rest/v1/rpc/harf_sync_v3',route=>route.fulfill({status:404,json:{code:'PGRST202',message:'Could not find the function public.harf_sync_v3'}}));
  await context.route('**/rest/v1/rpc/harf_sync',async route=>{
   const body=route.request().postDataJSON();

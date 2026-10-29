@@ -23,7 +23,7 @@ Hear a selected Quran passage, follow its wording and meaning, consult its conte
 4. **Saved-passage maintenance: complete locally.** Due saved pairs have their own ordered queue and Today entry
    point; the comparison browser is no longer capped at 12; review attempts capture their starting revision;
    navigation cannot race a save; and unavailable source pairs remain visible with retained progress. Account
-   passage sync has a tested migration in the repository; applying it to the live service remains a deployment step.
+   passage migration was applied to live Harf on 29 October; real signed-in browser verification is tracked separately.
 5. **Slice 4 — saved passage and difficult-ayah revisit: implemented.** Today resumes an explicitly saved
    same-surah range and current ayah. Saved assessments record the latest feedback and obstacle for up to 200 ayahs;
    Today offers difficult ayahs for manual revisit. No new scheduler or comprehension percentage.
@@ -95,10 +95,10 @@ Use difficulties collected during passage study to select a small, source-review
 
 The local saved-passage queue and persistence work described in the original proposal is now resolved: all eligible
 pairs can be browsed, due pairs are ordered separately, Today links to them only when due, and review attempts keep
-their original revision while a save is in flight. Migration `20261028235500_passage_learning.sql` supplies the passage
+their original revision while a save is in flight. Migration `20261029005835_passage_learning.sql` supplies the passage
 collections and preference allowlist. Disposable PostgreSQL checks cover two accounts, conflicts, reflection round trips,
-tombstones and access restrictions. Applying the migration and checking a real signed-in browser round trip on the live
-service remain deployment verification; local tests do not certify that service.
+tombstones and access restrictions. The migration was subsequently applied live on 29 October and passed rolled-back synthetic account tests.
+A real signed-in browser round trip remains separate from the SQL protocol evidence.
 
 For any new persistent feature, verify failed saves, reload and backup round-trip as part of delivery; verify account sync where the feature promises it. Do not claim old test results certify today's dirty working tree.
 

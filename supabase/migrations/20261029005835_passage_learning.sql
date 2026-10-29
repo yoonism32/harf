@@ -1,3 +1,4 @@
+-- Applied to Harf on 29 October 2026; filename matches the live migration history.
 -- Extend the existing atomic, account-scoped protocol for passage practice.
 alter table harf_private.records drop constraint records_collection_check;
 alter table harf_private.records add constraint records_collection_check

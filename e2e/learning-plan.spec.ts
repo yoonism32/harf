@@ -1,5 +1,6 @@
 import {test, expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import {text} from 'node:stream/consumers';
 
 test.beforeEach(async ({page}) => {
  await page.goto('/offline.html');
@@ -66,4 +67,75 @@ test('reflection save failures retain the draft and can be retried after reload'
  await expect(page.getByRole('region', {name:'Reflection on 1:6'}).getByRole('textbox')).toHaveValue('');
  await page.goto('/read/1/5');
  await expect(reflection.getByRole('textbox')).toHaveValue('What does this construction connect?');
+});
+
+test('competing reflection drafts cannot overwrite a newer save from another tab', async ({page, context}) => {
+ await page.goto('/read/1/5');
+ const reflection = page.getByRole('region', {name:'Reflection on 1:5'});
+ await reflection.getByRole('textbox').fill('Draft in the first tab');
+ const second = await context.newPage();
+ await second.goto('/read/1/5');
+ const other = second.getByRole('region', {name:'Reflection on 1:5'});
+ await other.getByRole('textbox').fill('Saved in the second tab');
+ await other.getByRole('button', {name:'Save reflection',exact:true}).click();
+ await expect(other.getByRole('status')).toHaveText('Reflection saved.');
+ await page.bringToFront();
+ await reflection.getByRole('button', {name:'Save reflection',exact:true}).click();
+ await expect(reflection.getByRole('alert')).toContainText('changed elsewhere');
+ await expect(reflection.getByRole('textbox')).toHaveValue('Draft in the first tab');
+ await expect(reflection.getByRole('alert')).toContainText('Saved in the second tab');
+ await reflection.getByRole('button', {name:'Discard draft and use saved reflection'}).click();
+ await expect(reflection.getByRole('textbox')).toHaveValue('Saved in the second tab');
+ await second.close();
+});
+
+test('backup replacement is atomic on failure and its previous snapshot restores personal writing', async ({page}) => {
+ await page.goto('/read/1/5');
+ const reflection = page.getByRole('region', {name:'Reflection on 1:5'});
+ await reflection.getByRole('textbox').fill('Original reflection in the backup');
+ await reflection.getByRole('button', {name:'Save reflection',exact:true}).click();
+ await expect(reflection.getByRole('status')).toHaveText('Reflection saved.');
+ await page.goto('/settings');
+ const downloaded = page.waitForEvent('download');
+ await page.getByRole('button', {name:'Export progress',exact:true}).click();
+ const download = await downloaded;
+ const contents = await text((await download.createReadStream())!);
+ const backup = {name:download.suggestedFilename(), mimeType:'application/json', buffer:Buffer.from(contents)};
+ await page.goto('/read/1/5');
+ await reflection.getByRole('textbox').fill('Newer reflection before replacement');
+ await reflection.getByRole('button', {name:'Save reflection',exact:true}).click();
+ await expect(reflection.getByRole('status')).toHaveText('Reflection saved.');
+ await page.goto('/settings');
+ await page.getByLabel('Import a Harf backup').setInputFiles({name:'invalid.json',mimeType:'application/json',buffer:Buffer.from('{}')});
+ await expect(page.getByRole('alert')).toBeVisible();
+ await expect(page.getByRole('dialog',{name:'Replace current progress?'})).toHaveCount(0);
+ await page.getByLabel('Import a Harf backup').setInputFiles(backup);
+ const confirmation = page.getByRole('dialog',{name:'Replace current progress?'});
+ await expect(confirmation).toBeVisible();
+ await page.evaluate(() => {
+  const original = IDBDatabase.prototype.transaction;
+  IDBDatabase.prototype.transaction = function (...args: Parameters<typeof original>) {
+   if (Array.isArray(args[0]) && args[0].includes('notes') && args[0].includes('recovery') && args[1] === 'readwrite') throw Error('Test import unavailable');
+   return original.apply(this,args);
+  };
+ });
+ await confirmation.getByRole('button',{name:'Replace current progress',exact:true}).click();
+ await expect(confirmation.getByRole('alert')).toContainText('Test import unavailable');
+ await page.reload(); await page.goto('/read/1/5');
+ await expect(reflection.getByRole('textbox')).toHaveValue('Newer reflection before replacement');
+ await page.goto('/settings');
+ await page.getByLabel('Import a Harf backup').setInputFiles(backup);
+ await confirmation.getByRole('button',{name:'Replace current progress',exact:true}).click();
+ await expect(page.getByRole('status')).toHaveText('Backup restored.');
+ await page.goto('/read/1/5');
+ await expect(reflection.getByRole('textbox')).toHaveValue('Original reflection in the backup');
+ await page.goto('/settings');
+ await page.getByRole('button',{name:'Restore previous snapshot',exact:true}).click();
+ await page.getByRole('dialog').getByRole('button',{name:'Restore snapshot',exact:true}).click();
+ await expect(page.getByRole('status')).toHaveText('Recovery action completed.');
+ await page.getByRole('button',{name:'Reset learning progress',exact:true}).click();
+ await page.getByRole('dialog').getByRole('button',{name:'Reset progress',exact:true}).click();
+ await expect(page.getByRole('status')).toHaveText('Recovery action completed.');
+ await page.goto('/read/1/5');
+ await expect(reflection.getByRole('textbox')).toHaveValue('Newer reflection before replacement');
 });
