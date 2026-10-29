@@ -61,3 +61,93 @@ p a,.status-message a{text-decoration:underline;text-underline-offset:3px}
 @media(max-width:1399px){.reader-audio-options{grid-template-columns:minmax(200px,1fr) 150px}.audio-range,.audio-loop{grid-row:2}}
 @media(max-width:599px){.reader-audio-options{grid-template-columns:minmax(0,1fr) 140px;gap:16px}.audio-range,.audio-loop{grid-column:1/-1;grid-row:auto}}
 @media(min-width:1600px){.mushaf-layout,.mushaf-nav{grid-template-columns:minmax(280px,1fr) auto minmax(260px,1fr);gap:28px}.mushaf-layout>.word-panel{padding:24px}.mushaf-layout>.translation-panel{min-height:420px}}
+/* Saved study: one derived row per ayah, plus the on-open thread detail. */
+.saved-thread{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding-block:16px;border-bottom:1px solid var(--line)}
+.saved-thread-main{display:flex;flex-direction:column;gap:8px;min-width:0}
+.saved-thread-actions{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0}
+.saved-signals{display:flex;gap:8px;flex-wrap:wrap}
+.saved-excerpt,.saved-assessment-summary{max-width:65ch;overflow-wrap:anywhere}
+.saved-detail-header{align-items:flex-start;gap:16px}
+.saved-detail h4{margin:0;font-size:16px;font-weight:600}
+.saved-reflection{white-space:pre-wrap;max-width:65ch;overflow-wrap:anywhere}
+.saved-assessments,.saved-entry-list{display:flex;flex-direction:column;gap:8px;margin:0;padding-inline-start:20px}
+.saved-practice{border-top:1px solid var(--line);padding-top:16px}.saved-practice p{overflow-wrap:anywhere}
+.saved-practice .button{align-self:flex-start}
+.saved-preparation{border-top:1px solid var(--line);padding-top:16px}.saved-preparation p{overflow-wrap:anywhere}
+.saved-preparation-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column}
+.saved-preparation-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-block:12px;border-bottom:1px solid var(--line)}
+.saved-preparation-choice{display:flex;align-items:flex-start;gap:12px;min-width:0;cursor:pointer}
+.saved-preparation-choice>span{min-width:0;overflow-wrap:anywhere}
+.saved-preparation-row .badge{flex-shrink:0;text-align:end}
+.saved-preparation .button{align-self:flex-start}
+@media(max-width:640px){.saved-thread{flex-direction:column;gap:12px}.saved-thread-actions{width:100%}.saved-thread-actions .button{flex:1}.saved-practice .button{width:100%}.saved-preparation-row{flex-direction:column;gap:8px}.saved-preparation-row .badge{text-align:start}.saved-preparation .button{width:100%}}
+/* Today prayer widget: one focal next-prayer card and a quiet current-prayer row. */
+.prayer-focus{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px;background:var(--selection);border:1px solid var(--primary);border-radius:12px}
+.prayer-focus-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.prayer-focus-name{font-size:20px;line-height:28px;font-weight:600}
+.prayer-focus-time{font-size:32px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--primary);white-space:nowrap}
+.prayer-list{list-style:none;padding:0;margin:0}
+.prayer-row{padding-block:12px}
+.prayer-row>span{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.prayer-current{padding-inline-start:12px;background:var(--selection);border-inline-start:3px solid var(--primary)}
+.prayer-current time{font-weight:600;color:var(--primary)}
+@media(max-width:479px){.prayer-focus{padding:16px}.prayer-focus-time{font-size:28px}}
+/* Wide desktop shell: use the screen instead of centering a phone-width column. */
+@media(min-width:1280px){.app-main{max-width:1440px}}
+@media(min-width:1024px){.app-main:has(.today-dashboard){padding-block-start:32px}}
+
+/* Today dashboard: pair the two short cards, then tighten the vertical rhythm. */
+.today-dashboard{gap:20px}
+.today-dashboard>.page-header{margin-bottom:0}
+.today-dashboard .sheet{padding:24px}
+.today-dashboard .today-columns{gap:24px}
+.today-dashboard .today-summary{padding-block:14px}
+.today-overview{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:20px;align-items:stretch}
+.today-overview>.sheet{height:100%}
+.today-overview>.sheet:first-child .button{margin-top:auto}
+.today-overview>.sheet:last-child>a:last-child{margin-top:auto}
+@media(max-width:1099px){.today-overview{grid-template-columns:1fr}}
+@media(max-width:767px){.today-dashboard{gap:16px}.today-overview{gap:16px}.today-dashboard .sheet{padding:20px}}
+/* Today queue explanation: the exact session order, with derived reasons and real review events. */
+.queue-explanation{border-top:1px solid var(--line);padding-top:8px}
+.queue-explanation>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:600;color:var(--primary)}
+.queue-explanation>summary::after{content:'+';font-size:18px;color:var(--muted)}
+.queue-explanation[open]>summary::after{content:'−'}
+.queue-explanation-body{display:flex;flex-direction:column;gap:12px;min-width:0}
+.queue-explanation-body>p{font-size:14px}
+.queue-explanation-list{list-style:none;padding:0;margin:0;min-width:0}
+.queue-explanation-row{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;padding-block:12px;border-top:1px solid var(--line);min-width:0}
+.queue-position{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--selection);color:var(--primary);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.queue-explanation-copy{display:flex;flex-direction:column;gap:6px;min-width:0}
+.queue-word{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px;min-width:0;overflow-wrap:anywhere}
+.queue-word span[lang=ar]{font-family:var(--font-amiri),serif;font-size:24px;line-height:1.8;unicode-bidi:isolate}
+.queue-reason,.queue-last-review{font-size:14px;line-height:20px;overflow-wrap:anywhere}
+.queue-last-review{color:var(--muted)}
+.queue-last-review time,.queue-history-list time{font-variant-numeric:tabular-nums}
+.queue-history>summary{font-size:14px;color:var(--muted);padding-block:6px;min-height:40px}
+.queue-history-list{list-style:none;padding:0;margin:4px 0 0;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.queue-explanation .badge{align-self:flex-start}
+@media(max-width:479px){.queue-explanation-row{grid-template-columns:24px minmax(0,1fr);gap:8px}.queue-position{width:24px;height:24px}.queue-word span[lang=ar]{font-size:22px}}
+/* Wide screens: use the width for the entry list and keep forms readable. */
+.learn-page .filters{max-width:980px}
+@media(min-width:1300px){.learn-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:48px}.learn-list>li{min-width:0}}
+/* Content report: a read-only semantic baseline over existing catalog and study records. */
+.content-report>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:600;font-size:20px;line-height:28px;color:var(--primary)}
+.content-report>summary::after{content:'+';font-size:18px;color:var(--muted)}
+.content-report[open]>summary::after{content:'−'}
+.content-report-body{padding-top:8px;min-width:0}
+.content-report-body h2{margin-top:0}
+.content-report .stats-grid strong{font-size:28px;line-height:36px;overflow-wrap:anywhere}
+.content-report .stats-grid small{display:block;margin-top:4px}
+.content-report-findings{list-style:none;padding:0;margin:0;display:flex;flex-direction:column}
+.content-report-finding{padding-block:14px;border-top:1px solid var(--line)}
+.content-report-finding:first-child{border-top:0;padding-top:0}
+.content-report-finding .badge{flex-shrink:0}
+.content-report-finding p{font-size:14px;line-height:20px;color:var(--muted);margin-top:6px;overflow-wrap:anywhere}
+.content-report-finding[data-severity=blocker]{border-inline-start:3px solid var(--danger);padding-inline-start:12px}
+.content-report-value{max-width:32rem;overflow-wrap:anywhere;font-size:14px;line-height:20px}
+.content-report-kind{text-transform:capitalize;white-space:nowrap}
+@media(max-width:479px){.content-report .stats-grid strong{font-size:24px;line-height:32px}}
+.settings-page{max-width:920px;margin-inline:auto}
+.today-overview>.sheet{padding:22px;gap:16px}
+@media(max-width:767px){.today-overview>.sheet{padding:20px}}
