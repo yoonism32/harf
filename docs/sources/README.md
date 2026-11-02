@@ -5,7 +5,6 @@ Reviewed 29 October 2026. This is a source-navigation guide, not a separate appr
 Harf retains provenance in the repository rather than repeated reading-page labels.
 
 - [Content provenance and editorial review](../CONTENT_SOURCES.md)
-- [Measured source audit](../SOURCE_AUDIT_2026-10-02.md)
 - [Pinned registry, attribution and permission records](../../data/sources.json)
 
 Quran text, English word glosses, transliteration, Hilali–Khan translation and morphology inputs are supplied through Quranic Universal Library (QUL), Tarteel AI. Quranic Arabic Corpus morphology retains its source notices in generated content. Quran.com exports supply source word positions for validated compiled recording paths on audio.qurancdn.com; raw `audio_url` numbering was corrected where nonspoken marks caused drift; full-ayah recordings use the selected EveryAyah reciter. Retained QuranWBW notes concern their original examples. See the registry for resource identifiers, retrieval details and individual permission evidence.

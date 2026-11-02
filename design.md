@@ -1,8 +1,7 @@
 # Design — Harf
 
 Reviewed 29 October 2026 against `app/globals.css`, the shared UI components and shell.
-This replaces the pre-rebuild dark/gold guide. Historical visual decisions remain available in Git history and
-[the September redesign specification](HARF_REDESIGN_PLAN.md); use current source for exact values.
+This replaces the pre-rebuild dark/gold guide. Historical visual decisions remain available in Git history; use current source for exact values.
 
 ## Direction
 
@@ -51,4 +50,3 @@ explain what reset retains. Keep sourced commentary visibly separate from person
 
 Automated axe checks ran in the recorded learning/passage browser tests through `a7998f6`.
 This documentation review is not a manual keyboard, screen-reader, visual or accessibility-conformance certification.
-See [the roadmap](docs/ROADMAP.md) for remaining verification.

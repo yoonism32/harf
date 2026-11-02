@@ -1,36 +1,19 @@
 # Harf documentation index
 
-Reviewed 29 October 2026. Start here to distinguish current work from old specifications.
+Guides for running, using and understanding Harf.
 
-## Current planning documents
-
-| Document | Use it for | Status |
-|---|---|---|
-| [Roadmap](ROADMAP.md) | Current priorities, implemented scope, daily routine and deferrals | Main roadmap |
-| [Task list](../todo.md) | Short actionable remaining-work checklist | Main backlog |
-| [Whole-project plan](project_plan.md) | Product/architecture audit, prioritized opportunities and expert addendum | Slices 1 (Saved study), 2 (Passage preparation), 3 (focused practice/return), 5 (explainable queue/history) and 6 (content baseline plus approved-baseline semantic diff) implemented; conditional exact-word interests proposed |
-| [Lighthouse follow-up](LIGHTHOUSE_PLAN_2026-10-29.md) | All amber/red findings, measured baseline and ordered performance investigation | Active |
-| [Personal learning plan](PERSONAL_LEARNING_PLAN_2026-10-27.md) | Five learning slices, acceptance boundaries and implementation evidence | Implemented; live migration and browser sync checks completed |
-| [24–26 October plan/progress](PLAN_2026-10-24_to_26.md) | Detailed restoration history, Names audio proposal and owner housekeeping | Dated record; current status addendum supersedes old open items |
-
-## Current guides and evidence
+## Guides
 
 | Document | Use it for |
 |---|---|
-| [Active-roadmap verification](VERIFICATION_2026-10-29.md) | Production, persistence and live database/browser evidence; owner-only verification boundaries |
 | [README](../README.md) | Running, using, configuring and deploying Harf |
-| [AGENTS](../AGENTS.md) | Current architecture and contributor rules |
-| [CLAUDE](../CLAUDE.md) | Imports AGENTS; framework instructions |
-| [Design guide](../design.md) | Current Paper/Night guidance; superseded visuals remain in Git history |
-| [Content sources](CONTENT_SOURCES.md) | Active provenance, QUL comparisons, owner approval and source caveats |
+| [Design guide](../design.md) | Current Paper/Night visual guidance; superseded visuals remain in Git history |
+| [Content sources](CONTENT_SOURCES.md) | Active provenance, QUL comparisons and source caveats |
 | [Source credits index](sources/README.md) | Short route to source records and notices |
-| [Source audit, 2 October](SOURCE_AUDIT_2026-10-02.md) | Historical measured comparisons and alignment rationale, with current corrections |
-| [Recently fixed](../recently-fixed.md) | Change history; newest entries first, older architecture clearly marked |
 
-## Historical specification
+## Project records
 
-[HARF_REDESIGN_PLAN.md](../HARF_REDESIGN_PLAN.md) explains the September rebuild's rationale and original acceptance requirements.
-It is not the current backlog. Its account/removal/route instructions were superseded; do not use them to remove restored features.
+The roadmap, task list, dated plans, verification records and change history are working notes kept in the maintainer's local copy; they are not part of the published repository. Content provenance for every dataset ships in [CONTENT_SOURCES.md](CONTENT_SOURCES.md) and `docs/sources/`.
 
 Generated `graphify-out/` reports and source-publisher Markdown under data/generated content are tool output or upstream artifacts,
 not hand-maintained product plans. Update the generator or source inputs instead of rewriting generated reports.

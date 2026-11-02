@@ -61,3 +61,19 @@ docs/agency-runs/
 # QPC V2 page fonts: 105 MB of re-downloadable pinned inputs (QUL resource 249),
 # byte-identical to the copies already shipped in public/content and pinned by fonts.json
 data/source/qul/mushaf-v2/fonts/
+
+# Personal working notes and agent tool state — kept locally, not published
+/AGENTS.md
+/CLAUDE.md
+/HARF_REDESIGN_PLAN.md
+/recently-fixed.md
+/todo.md
+/docs/ROADMAP.md
+/docs/project_plan.md
+/docs/PERSONAL_LEARNING_PLAN_*.md
+/docs/PLAN_*.md
+/docs/LIGHTHOUSE_PLAN_*.md
+/docs/VERIFICATION_*.md
+/docs/SOURCE_AUDIT_*.md
+/.hallmark/
+/.impeccable/
