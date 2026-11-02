@@ -20,7 +20,7 @@ saving a location uses Open-Meteo's geocoder. This is distinct from a downloaded
 
 The owner has selected the **original `data/99names.json`** for personal use. The compiler and Names screen now preserve its Arabic, Ar-Rahman/Ar-Raheem labels, meanings, roots and explanations. NumroQ is retained for historical comparison but is no longer an active compiler input. This selection does not claim an external publisher or independent editorial certification. Attribution completeness is not a requirement to use this selected collection in the personal app.
 
-The old/new tables below describe the earlier switch to NumroQ, not the restored current selection. Read the [measured source audit](SOURCE_AUDIT_2026-10-02.md) for range tests, missing grammar fields and discovered annotation gaps.
+The old/new tables below describe the earlier switch to NumroQ, not the restored current selection.
 
 ## Download verification — 28 October 2026
 
